@@ -5,7 +5,7 @@
 #include "Shape.h"
 int main()
 {
-	Window* window = new Window(1280, 720, new char[] {"Opengl Window"});
+	Window* window = new Window(1000, 1000, new char[] {"Opengl Window"});
 
 	float vertices[] = { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f };
 	 
@@ -28,7 +28,12 @@ int main()
 	Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
 
 	//Shape* shape = new Shape(shader, GLDrawType::GLSTREAM_DRAW, sizeof(vertices), vertices);
-	Shape* shape = Shape::CreateRectangle(shader, GLDrawType::GLSTATIC_DRAW,0.8f,0.5f);
+	//Shape* shape = Shape::CreateRectangle(shader, GLDrawType::GLSTATIC_DRAW,0.8f,0.5f);
+	//Shape* shape = Shape::CreateRegularConvexPolygon(shader, GLDrawType::GLSTATIC_DRAW, 5, 0.8f);
+	Shape* shape = Shape::CreateCircle(shader, GLDrawType::GLSTATIC_DRAW, 0.8f);
+
+	//Shape* shape = Shape::CreateGrid(shader, GLDrawType::GLSTATIC_DRAW,10,10);
+
 	// Game Engine Loop
 	while (!glfwWindowShouldClose(window->GetWindow()))
 	{

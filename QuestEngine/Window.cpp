@@ -60,8 +60,8 @@ int Window::InitialiseGLAD()
 
 int Window::CreateWindow()
 {
-	int width = 1280;
-	int height = 720;
+	int width = m_width;
+	int height = m_height;
 	const char* title = "First Opengl Window";
 	m_window = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (!m_window)

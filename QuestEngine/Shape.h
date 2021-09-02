@@ -3,35 +3,48 @@
 #include <glad/glad.h>
 #include "Shader.h"
 
-enum GLDrawType
+enum class GLDrawType
 {
 	GLSTREAM_DRAW = 0x88E0,
 	GLSTATIC_DRAW = 0x88E4,
 	GLDYNAMIC_DRAW = 0x88E8
 };
+
+enum class ShapeType
+{
+	TRIANGLE = 0x0004,
+	Line = 0x0001
+};
+
 class Shape
 {
 public :
-	Shape(Shader* shader, GLDrawType glDrawType, int verticesSizeof, float vertices[], int indicesSizeof, unsigned int indices[]);
+	Shape(Shader* shader, GLDrawType glDrawType, int verticesSizeof, float vertices[], int indicesSizeof, unsigned int indices[], ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
 	static Shape* CreateTriangle(Shader* shader, GLDrawType glDrawType,
 		float x1, float y1, float z1,
 		float x2, float y2, float z2,
-		float x3, float y3, float z3);
+		float x3, float y3, float z3, bool enableWireframe = false);
 
 	static Shape* CreateRectangle(Shader* shader, GLDrawType glDrawType,
-		float width, float height);
+		float width, float height, bool enableWireframe = false);
 
-	
+	static Shape* CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, int sideCount, float radius, bool enableWireframe = false);
+	static Shape* CreateCircle(Shader* shader, GLDrawType glDrawType, float radius, bool enableWireframe = false);
+	static Shape* CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCount, int heightTileCount, bool enableWireframe = false);
 	void Draw();
 
 private :
 	GLuint m_vbo;
 	GLuint m_ebo;
 	GLDrawType m_glDrawType;
+	ShapeType m_shapeType;
 	Shader* m_shader;
-	int triangleCount = 1;
+	bool m_enableWireframe = false;
+	int m_shapeTypeCount = 1;
 	void ConfigureVBO(int verticesSizeof,float vertices[]);
 	void ConfigureEBO(int indicesSizeof, unsigned int indices[]);
+
+	
 };
 
 #endif // !_SHAPE_H_
