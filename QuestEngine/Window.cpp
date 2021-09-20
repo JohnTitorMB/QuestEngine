@@ -25,6 +25,11 @@ Window::Window(int width, int height, char* title, int glMajorVersion, int glMin
 	InitialiseGLAD();
 }
 
+Window::~Window()
+{
+	delete m_title;
+}
+
 int Window::InitialiseGLFW()
 {
 	int result = glfwInit();
@@ -80,3 +85,4 @@ GLFWwindow* Window::GetWindow() const
 {
 	return m_window;
 }
+

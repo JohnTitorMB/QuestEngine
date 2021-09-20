@@ -27,10 +27,12 @@ int main()
 
 	Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
 
+	//Test all available Shape
+	Shape* shape = Shape::CreateTriangle(shader, GLDrawType::GLSTATIC_DRAW, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f);
 	//Shape* shape = new Shape(shader, GLDrawType::GLSTREAM_DRAW, sizeof(vertices), vertices);
 	//Shape* shape = Shape::CreateRectangle(shader, GLDrawType::GLSTATIC_DRAW,0.8f,0.5f);
 	//Shape* shape = Shape::CreateRegularConvexPolygon(shader, GLDrawType::GLSTATIC_DRAW, 5, 0.8f);
-	Shape* shape = Shape::CreateCircle(shader, GLDrawType::GLSTATIC_DRAW, 0.8f);
+	//Shape* shape = Shape::CreateCircle(shader, GLDrawType::GLSTATIC_DRAW, 0.8f);
 
 	//Shape* shape = Shape::CreateGrid(shader, GLDrawType::GLSTATIC_DRAW,10,10);
 

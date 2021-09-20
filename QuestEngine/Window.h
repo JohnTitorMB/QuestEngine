@@ -6,6 +6,7 @@ class Window
 {
 public :
 	Window(int width, int height, char* title);
+	~Window();
 	Window(int width, int height, char* title, int glMajorVersion, int glMinorVersion);
 	GLFWwindow* GetWindow() const;
 private:
@@ -14,7 +15,7 @@ private:
 
 	int m_width = 1280;
 	int m_height = 720;
-	char* m_title = new char [] {"New Window"};
+	char* m_title;
 
 	GLFWwindow* m_window;
 	int InitialiseGLFW();

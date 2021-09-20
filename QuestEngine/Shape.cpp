@@ -7,50 +7,63 @@
 #define  CIRCLESIDE 30
 
 
-Shape::Shape(Shader* shader, GLDrawType glDrawType, int verticesSizeof, float vertices[], int indicesSizeof, unsigned int indices[], ShapeType shapeType, bool enableWireframe)
+Shape::Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, float* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType, bool enableWireframe)
 {
 	m_shader = shader;
 	m_glDrawType = glDrawType;
 	m_shapeType = shapeType;
 	m_enableWireframe = enableWireframe;
-	ConfigureVBO(verticesSizeof,vertices);
-	ConfigureEBO(indicesSizeof, indices);
+	ConfigureVBO(sizeof(float) * verticesCount,vertices);
+	ConfigureEBO(sizeof(int) * indicesCount, indices);
 
-	std::cout << "Vertex Sahder Compilation Failed\n" << sizeof(unsigned int) << std::endl;
-	m_shapeTypeCount = (int)(indicesSizeof / sizeof(int));
+	m_shapeTypeCount = indicesCount;
+
+	m_vertices = vertices;
+	m_indices = indices;
+
+	m_verticesCount = verticesCount;
+	m_indicesCount = indicesCount;
 }
 
+Shape::~Shape()
+{
+	if (m_vertices)
+		delete [] m_vertices;
+
+	if (m_indices)
+		delete [] m_indices;
+}
 Shape* Shape::CreateTriangle(Shader* shader, GLDrawType glDrawType,
 	float x1, float y1, float z1,
 	float x2, float y2, float z2,
 	float x3, float y3, float z3, bool enableWireframe)
 {
-	float vertices[9] = { x1, y1, z1, x2, y2, z2, x3, y3, z3 };
-	unsigned int indices[3] = { 0,1,2 };
+	float* vertices = new float[] { x1, y1, z1, x2, y2, z2, x3, y3, z3 };
+	unsigned int* indices = new unsigned int[]{ 0,1,2 };
 
 
-	Shape* triangle = new Shape(shader, glDrawType, sizeof(vertices), vertices, sizeof(indices), indices, ShapeType::TRIANGLE,enableWireframe);
+	Shape* triangle = new Shape(shader, glDrawType, 9, vertices, 3, indices, ShapeType::TRIANGLE,enableWireframe);
 	return triangle;
 }
 
 Shape* Shape::CreateRectangle(Shader* shader, GLDrawType glDrawType,
 	float width, float height, bool enableWireframe)
 {
-	float vertices[12] =
+	float* vertices = new float[]
 	{ -width / 2.0f, -height / 2.0f, 0.0f, //bottom-Left
 	  width / 2.0f, -height / 2.0f, 0.0f, //bottom-right
 	  width / 2.0f, height / 2.0f, 0.0f, // top-right
 	  -width / 2.0f, height / 2.0f, 0.0f // top-left
 	};
 
-	unsigned int indices[6] =
+	unsigned int* indices = new unsigned int[]
 	{
 		0,2,1,
 		0,3,2
 	};
 
 
-	Shape* rectangle = new Shape(shader, glDrawType, sizeof(vertices), vertices, sizeof(indices), indices, ShapeType::TRIANGLE, enableWireframe);
+	Shape* rectangle = new Shape(shader, glDrawType, 12, vertices, 6, indices, ShapeType::TRIANGLE, enableWireframe);
 	return rectangle;
 }
 
@@ -69,7 +82,7 @@ Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, 
 	else
 		angle = M_PI / 2.0f;
 
-	//InitialiseVertices
+	//Initialise Vertices
 	for (int i = 0; i < sideCount; i++)
 	{
 		float x = cos(angle) * radius;
@@ -82,7 +95,7 @@ Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, 
 		vertices[i * 3 + 1] = y;
 		vertices[i * 3 + 2] = 0; // Z axis
 	}
-	//InitialiseTriangleIndex
+	//Initialise Triangle Index
 	for (int triangleIndex = 0; triangleIndex < (sideCount - 2); triangleIndex++)
 	{
 		// Exemple square : triangle 1 = 3 sommet  trianglme 2 = 3 sommet également
@@ -92,7 +105,7 @@ Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, 
 		indices[triangleIndex * 3 + 2] = triangleIndex + 2;		
 	}
 
-	Shape* polygon = new Shape(shader, glDrawType, verticesCount * sizeof(float), vertices, indicesCount * sizeof(int), indices, ShapeType::TRIANGLE, enableWireframe);
+	Shape* polygon = new Shape(shader, glDrawType, verticesCount, vertices, indicesCount, indices, ShapeType::TRIANGLE, enableWireframe);
 	return polygon;
 }
 
@@ -109,6 +122,7 @@ Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCou
 	int indicesCount = ((widthTileCount + 1) + (heightTileCount + 1)) * 2;
 	unsigned int* indices = new unsigned int[indicesCount];
 
+	//Configure vertical vertices and indices
 	float tileXSize = 2.0f / widthTileCount;
 	for (int x = 0; x < (widthTileCount + 1); x++)
 	{
@@ -126,6 +140,7 @@ Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCou
 		indices[vertexIndex+1] = vertexIndex+1;
 	}
 
+	//Configure horizontal vertices and indices
 	float tileYSize = 2.0f / heightTileCount;
 	for (int y = 0; y < (heightTileCount + 1); y++)
 	{
@@ -142,7 +157,7 @@ Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCou
 		indices[vertexIndex + 1] = vertexIndex + 1;
 	}
 
-	Shape* grid = new Shape(shader, glDrawType, verticesCount * sizeof(float), vertices, indicesCount * sizeof(int), indices,ShapeType::Line, enableWireframe);
+	Shape* grid = new Shape(shader, glDrawType, verticesCount, vertices, indicesCount, indices,ShapeType::Line, enableWireframe);
 	return grid;
 }
 

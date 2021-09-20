@@ -19,7 +19,8 @@ enum class ShapeType
 class Shape
 {
 public :
-	Shape(Shader* shader, GLDrawType glDrawType, int verticesSizeof, float vertices[], int indicesSizeof, unsigned int indices[], ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
+	Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, float* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
+	~Shape();
 	static Shape* CreateTriangle(Shader* shader, GLDrawType glDrawType,
 		float x1, float y1, float z1,
 		float x2, float y2, float z2,
@@ -39,6 +40,10 @@ private :
 	GLDrawType m_glDrawType;
 	ShapeType m_shapeType;
 	Shader* m_shader;
+	float* m_vertices = nullptr;
+	unsigned int* m_indices = nullptr;
+	int m_verticesCount;
+	int m_indicesCount;
 	bool m_enableWireframe = false;
 	int m_shapeTypeCount = 1;
 	void ConfigureVBO(int verticesSizeof,float vertices[]);
