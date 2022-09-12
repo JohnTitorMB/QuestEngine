@@ -8,6 +8,9 @@ struct Vector2D
 
 	Vector2D(float x, float y);
 
+	Vector2D operator+(const Vector2D& a) const;
+	Vector2D operator*(const float& a) const;
+
 };
 
 #endif
