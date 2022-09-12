@@ -12,7 +12,8 @@ struct Vector2D
 	Vector2D operator*(const float& value) const;
 	Vector2D operator-(const Vector2D& value) const;
 	Vector2D operator/(const float& value) const;
-
+	float Magnitude();
+	void Normalize();
 };
 
 #endif
