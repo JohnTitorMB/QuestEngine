@@ -1,10 +1,10 @@
 #ifndef _VECTOR2_H_
 #define _VECTOR2_H_
 
-struct Vector2
+struct Vector2D
 {
-	float x;
-	float y;
+	
+
 };
 
 #endif
