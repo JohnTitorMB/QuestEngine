@@ -1,5 +1,6 @@
 #ifndef _VECTOR2D_H_
 #define _VECTOR2D_H_
+#include <ostream>
 
 struct Vector2D
 {
@@ -7,13 +8,24 @@ struct Vector2D
 	float m_y;
 
 	Vector2D(float x, float y);
+	Vector2D(const Vector2D& value);
 
 	Vector2D operator+(const Vector2D& value) const;
 	Vector2D operator*(const float& value) const;
 	Vector2D operator-(const Vector2D& value) const;
 	Vector2D operator/(const float& value) const;
-	float Magnitude();
+	
+	float Magnitude() const;
 	void Normalize();
+	Vector2D Normalized() const;
+
+	Vector2D& operator+=(const Vector2D& value);
+	Vector2D& operator*=(float value);
+	Vector2D& operator-=(const Vector2D& value);
+	Vector2D& operator/=(float value);
+	bool operator==(const Vector2D& value)const;
+	bool operator!=(const Vector2D& value)const;
 };
+std::ostream& operator<<(std::ostream& os, const Vector2D& value);
 
 #endif
