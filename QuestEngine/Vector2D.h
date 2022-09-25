@@ -7,6 +7,7 @@ struct Vector2D
 	float m_x;
 	float m_y;
 
+	Vector2D();
 	Vector2D(float x, float y);
 	Vector2D(const Vector2D& value);
 
@@ -25,6 +26,9 @@ struct Vector2D
 	Vector2D& operator/=(float value);
 	bool operator==(const Vector2D& value)const;
 	bool operator!=(const Vector2D& value)const;
+
+private:
+	float m_z = 0;
 };
 std::ostream& operator<<(std::ostream& os, const Vector2D& value);
 

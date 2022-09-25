@@ -2,6 +2,7 @@
 #define _SHAPE_H_
 #include <glad/glad.h>
 #include "Shader.h"
+#include "Vector2D.h"
 
 enum class GLDrawType
 {
@@ -19,7 +20,7 @@ enum class ShapeType
 class Shape
 {
 public :
-	Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, float* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
+	Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, Vector2D* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
 	~Shape();
 	static Shape* CreateTriangle(Shader* shader, GLDrawType glDrawType,
 		float x1, float y1, float z1,
@@ -40,13 +41,13 @@ private :
 	GLDrawType m_glDrawType;
 	ShapeType m_shapeType;
 	Shader* m_shader;
-	float* m_vertices = nullptr;
+	Vector2D* m_vertices = nullptr;
 	unsigned int* m_indices = nullptr;
 	int m_verticesCount;
 	int m_indicesCount;
 	bool m_enableWireframe = false;
 	int m_shapeTypeCount = 1;
-	void ConfigureVBO(int verticesSizeof,float vertices[]);
+	void ConfigureVBO(int verticesSizeof, Vector2D* vertices);
 	void ConfigureEBO(int indicesSizeof, unsigned int indices[]);
 
 	

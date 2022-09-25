@@ -7,7 +7,7 @@
 #define  CIRCLESIDE 30
 
 
-Shape::Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, float* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType, bool enableWireframe)
+Shape::Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, Vector2D* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType, bool enableWireframe)
 {
 	m_shader = shader;
 	m_glDrawType = glDrawType;
@@ -38,7 +38,7 @@ Shape* Shape::CreateTriangle(Shader* shader, GLDrawType glDrawType,
 	float x2, float y2, float z2,
 	float x3, float y3, float z3, bool enableWireframe)
 {
-	float* vertices = new float[] { x1, y1, z1, x2, y2, z2, x3, y3, z3 };
+	Vector2D* vertices = new Vector2D[] {Vector2D (x1, y1), Vector2D(x2, y2), Vector2D(x3, y3) };
 	unsigned int* indices = new unsigned int[]{ 0,1,2 };
 
 
@@ -49,11 +49,11 @@ Shape* Shape::CreateTriangle(Shader* shader, GLDrawType glDrawType,
 Shape* Shape::CreateRectangle(Shader* shader, GLDrawType glDrawType,
 	float width, float height, bool enableWireframe)
 {
-	float* vertices = new float[]
-	{ -width / 2.0f, -height / 2.0f, 0.0f, //bottom-Left
-	  width / 2.0f, -height / 2.0f, 0.0f, //bottom-right
-	  width / 2.0f, height / 2.0f, 0.0f, // top-right
-	  -width / 2.0f, height / 2.0f, 0.0f // top-left
+	Vector2D* vertices = new Vector2D[]
+	{ Vector2D(- width / 2.0f, -height / 2.0f), //bottom-Left
+	  Vector2D(width / 2.0f, -height / 2.0f), //bottom-right
+	  Vector2D(width / 2.0f, height / 2.0f), // top-right
+	  Vector2D(-width / 2.0f, height / 2.0f) // top-left
 	};
 
 	unsigned int* indices = new unsigned int[]
@@ -70,8 +70,8 @@ Shape* Shape::CreateRectangle(Shader* shader, GLDrawType glDrawType,
 Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, int sideCount, float radius, bool enableWireframe)
 {
 	int verticesCount = sideCount * 3;
-	int indicesCount = (sideCount - 2) * 3;
-	float* vertices = new float[verticesCount];
+	int indicesCount = (sideCount - 2);
+	Vector2D* vertices = new Vector2D[verticesCount];
 	unsigned int* indices = new unsigned int[indicesCount];
 
 	bool isPair = (sideCount % 2) == 0;
@@ -91,9 +91,8 @@ Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, 
 		angle -= 2.0f * M_PI / sideCount;
 
 		// Exemple square : 1 = xyz  2 = xyz 3 = xyz 4 = xyz
-		vertices[i * 3] = x;
-		vertices[i * 3 + 1] = y;
-		vertices[i * 3 + 2] = 0; // Z axis
+		vertices[i].m_x;
+		vertices[i].m_y = y;
 	}
 	//Initialise Triangle Index
 	for (int triangleIndex = 0; triangleIndex < (sideCount - 2); triangleIndex++)
@@ -116,8 +115,8 @@ Shape* Shape::CreateCircle(Shader* shader, GLDrawType glDrawType, float radius, 
 
 Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCount, int heightTileCount, bool enableWireframe)
 {
-	int verticesCount = ((widthTileCount + 1) + (heightTileCount + 1)) * 2 * 3;
-	float* vertices = new float[verticesCount];
+	int verticesCount = ((widthTileCount + 1) + (heightTileCount + 1)) * 2;
+	Vector2D* vertices = new Vector2D[verticesCount];
 
 	int indicesCount = ((widthTileCount + 1) + (heightTileCount + 1)) * 2;
 	unsigned int* indices = new unsigned int[indicesCount];
@@ -127,13 +126,11 @@ Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCou
 	for (int x = 0; x < (widthTileCount + 1); x++)
 	{
 		int vertexIndex = x * 2;
-		vertices[vertexIndex * 3] = -1.0f + x * tileXSize;
-		vertices[vertexIndex * 3+1] = -1.0f;
-		vertices[vertexIndex * 3 + 2] = 0.0f;
+		vertices[vertexIndex].m_x = -1.0f + x * tileXSize;
+		vertices[vertexIndex].m_y = -1.0f;
 
-		vertices[(vertexIndex + 1) * 3] = -1.0f + x * tileXSize;
-		vertices[(vertexIndex + 1) * 3 + 1] = 1.0f;
-		vertices[(vertexIndex + 1) * 3 + 2] = 0.0f;
+		vertices[(vertexIndex + 1)].m_x = -1.0f + x * tileXSize;
+		vertices[(vertexIndex + 1)].m_y = 1.0f;
 
 
 		indices[vertexIndex] = vertexIndex;
@@ -145,13 +142,11 @@ Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCou
 	for (int y = 0; y < (heightTileCount + 1); y++)
 	{
 		int vertexIndex = (widthTileCount + 1.0f) * 2.0f + y * 2.0f;
-		vertices[vertexIndex * 3] = -1.0f;
-		vertices[vertexIndex * 3 + 1] = -1.0f + y * tileYSize;
-		vertices[vertexIndex * 3 + 2] = 0.0f;
+		vertices[vertexIndex].m_x = -1.0f;
+		vertices[vertexIndex].m_y = -1.0f + y * tileYSize;
 
-		vertices[(vertexIndex + 1) * 3] = 1.0f;
-		vertices[(vertexIndex + 1) * 3 + 1] = -1.0f + y * tileYSize ;
-		vertices[(vertexIndex + 1) * 3 + 2] = 0.0f;
+		vertices[(vertexIndex + 1)].m_x = 1.0f;
+		vertices[(vertexIndex + 1)].m_y = -1.0f + y * tileYSize ;
 
 		indices[vertexIndex] = vertexIndex;
 		indices[vertexIndex + 1] = vertexIndex + 1;
@@ -178,7 +173,7 @@ void Shape::Draw()
 
 }
 
-void Shape::ConfigureVBO(int verticesSizeof, float vertices[])
+void Shape::ConfigureVBO(int verticesSizeof, Vector2D* vertices)
 {
 	glGenBuffers(1, &m_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);

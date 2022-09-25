@@ -1,5 +1,12 @@
 #include "Vector2D.h"
 #include <math.h>
+
+Vector2D::Vector2D()
+{
+	m_x = 0.0f;
+	m_y = 0.0f;
+}
+
 Vector2D::Vector2D(float x, float y)
 {
 	m_x = x;
@@ -96,4 +103,3 @@ std::ostream& operator<<(std::ostream& os, const Vector2D& value)
 	os << "(X : " << value.m_x << ", Y : " << value.m_y << ")" << std::endl;
 	return os;
 }
-
