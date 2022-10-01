@@ -93,8 +93,6 @@ Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, 
 		// Exemple square : 1 = xyz  2 = xyz 3 = xyz 4 = xyz
 		vertices[i].m_x = x;
 		vertices[i].m_y = y;
-
-		std::cout << "V " << i << " " << vertices[i] << std::endl;
 	}
 	//Initialise Triangle Index
 	for (int triangleIndex = 0; triangleIndex < (sideCount - 2); triangleIndex++)
