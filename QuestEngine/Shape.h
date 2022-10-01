@@ -23,9 +23,9 @@ public :
 	Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, Vector2D* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
 	~Shape();
 	static Shape* CreateTriangle(Shader* shader, GLDrawType glDrawType,
-		float x1, float y1, float z1,
-		float x2, float y2, float z2,
-		float x3, float y3, float z3, bool enableWireframe = false);
+		float x1, float y1,
+		float x2, float y2,
+		float x3, float y3, bool enableWireframe = false);
 
 	static Shape* CreateRectangle(Shader* shader, GLDrawType glDrawType,
 		float width, float height, bool enableWireframe = false);

@@ -13,7 +13,7 @@ Shape::Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, Vector2D*
 	m_glDrawType = glDrawType;
 	m_shapeType = shapeType;
 	m_enableWireframe = enableWireframe;
-	ConfigureVBO(sizeof(float) * verticesCount,vertices);
+	ConfigureVBO(sizeof(Vector2D) * verticesCount,vertices);
 	ConfigureEBO(sizeof(int) * indicesCount, indices);
 
 	m_shapeTypeCount = indicesCount;
@@ -34,9 +34,9 @@ Shape::~Shape()
 		delete [] m_indices;
 }
 Shape* Shape::CreateTriangle(Shader* shader, GLDrawType glDrawType,
-	float x1, float y1, float z1,
-	float x2, float y2, float z2,
-	float x3, float y3, float z3, bool enableWireframe)
+	float x1, float y1,
+	float x2, float y2,
+	float x3, float y3, bool enableWireframe)
 {
 	Vector2D* vertices = new Vector2D[] {Vector2D (x1, y1), Vector2D(x2, y2), Vector2D(x3, y3) };
 	unsigned int* indices = new unsigned int[]{ 0,1,2 };
@@ -63,14 +63,14 @@ Shape* Shape::CreateRectangle(Shader* shader, GLDrawType glDrawType,
 	};
 
 
-	Shape* rectangle = new Shape(shader, glDrawType, 12, vertices, 6, indices, ShapeType::TRIANGLE, enableWireframe);
+	Shape* rectangle = new Shape(shader, glDrawType, 4, vertices, 6, indices, ShapeType::TRIANGLE, enableWireframe);
 	return rectangle;
 }
 
 Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, int sideCount, float radius, bool enableWireframe)
 {
-	int verticesCount = sideCount * 3;
-	int indicesCount = (sideCount - 2);
+	int verticesCount = sideCount;
+	int indicesCount = (sideCount - 2) * 3;
 	Vector2D* vertices = new Vector2D[verticesCount];
 	unsigned int* indices = new unsigned int[indicesCount];
 
@@ -91,8 +91,10 @@ Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, 
 		angle -= 2.0f * M_PI / sideCount;
 
 		// Exemple square : 1 = xyz  2 = xyz 3 = xyz 4 = xyz
-		vertices[i].m_x;
+		vertices[i].m_x = x;
 		vertices[i].m_y = y;
+
+		std::cout << "V " << i << " " << vertices[i] << std::endl;
 	}
 	//Initialise Triangle Index
 	for (int triangleIndex = 0; triangleIndex < (sideCount - 2); triangleIndex++)
