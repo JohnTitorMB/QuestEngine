@@ -157,7 +157,7 @@ Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, Vector2D positio
 	return grid;
 }
 
-void Shape::Draw()
+void Shape::Draw(Camera* camera, Window* window)
 {
 	if(m_enableWireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -166,6 +166,11 @@ void Shape::Draw()
 	glEnableVertexAttribArray(0);
 	m_shader->UseShader();
 	m_shader->SetUniformVector2D("shapePosition",m_position);
+	m_shader->SetUniformVector2D("cameraPosition", camera->GetPosition());
+	Vector2D size = camera->GetVerticalAndHorizontalSize(window->GetWidth(), window->GetHeight());
+	m_shader->SetUniformFloat("cameraHorizontalSize", size.m_x);
+	m_shader->SetUniformFloat("cameraVerticalSize", size.m_y);
+
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	//glDrawArrays(GL_TRIANGLES, 0, triangleCount);
@@ -190,7 +195,7 @@ void Shape::ConfigureEBO(int indicesSizeof, unsigned int indices[])
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSizeof, indices, (int)m_glDrawType);
 }
 
-void Shape::SetPosition(Vector2D& position)
+void Shape::SetPosition(const Vector2D& position)
 {
 	m_position = position;
 }

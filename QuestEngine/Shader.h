@@ -10,6 +10,7 @@ public :
 	Shader(const char* vertexShaderSource, const char* fragmentShaderSource);
 	void UseShader();
 	void SetUniformVector2D(std::string name, Vector2D value);
+	void SetUniformFloat(std::string name, float value);
 
 private:
 	int m_shaderProgram;

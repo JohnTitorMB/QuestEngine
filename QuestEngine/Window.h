@@ -4,12 +4,19 @@
 #include <GLFW/glfw3.h>
 class Window
 {
+	
 public :
 	Window(int width, int height, char* title);
 	~Window();
 	Window(int width, int height, char* title, int glMajorVersion, int glMinorVersion);
 	GLFWwindow* GetWindow() const;
+	float GetWidth()const;
+	float GetHeight()const;
+	void RefreshWidthAndHeight();
+
+	static void SetTheFrameBufferSize(GLFWwindow* window, int width, int height);
 private:
+	
 	int m_glMajorVersion = 3;
 	int m_glMinorVersion = 2;
 

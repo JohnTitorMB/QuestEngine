@@ -91,3 +91,9 @@ void Shader::SetUniformVector2D(std::string name, Vector2D value)
 	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
 	glUniform2f(location, value.m_x, value.m_y);
 }
+
+void Shader::SetUniformFloat(std::string name, float value)
+{
+	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
+	glUniform1f(location, value);
+}

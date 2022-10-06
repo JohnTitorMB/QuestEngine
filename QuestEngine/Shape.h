@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include "Shader.h"
 #include "Vector2D.h"
+#include "Camera.h"
+#include "Window.h"
 
 enum class GLDrawType
 {
@@ -33,8 +35,8 @@ public :
 	static Shape* CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, Vector2D position, int sideCount, float radius, bool enableWireframe = false);
 	static Shape* CreateCircle(Shader* shader, GLDrawType glDrawType, Vector2D position, float radius, bool enableWireframe = false);
 	static Shape* CreateGrid(Shader* shader, GLDrawType glDrawType, Vector2D position, int widthTileCount, int heightTileCount, bool enableWireframe = false);
-	void Draw();
-	void SetPosition(Vector2D& position);
+	void Draw(Camera* camera, Window* window);
+	void SetPosition(const Vector2D& position);
 	Vector2D GetPosition()const;
 
 private :

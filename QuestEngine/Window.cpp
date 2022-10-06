@@ -7,16 +7,25 @@ Window::Window(int width, int height, char* title)
 	m_height = height;
 	m_title = title;
 
+
 	InitialiseGLFW();
 	CreateWindow();
 	InitialiseGLAD();
+	
+	glfwSetWindowUserPointer(m_window, this);
+	//glfwSetFramebufferSizeCallback(m_window, SetTheFrameBufferSize); // works fine
+}
+
+void Window::SetTheFrameBufferSize(GLFWwindow* window, int width, int height)
+{
+	Window* win = (Window*)glfwGetWindowUserPointer(window);
+	win->RefreshWidthAndHeight();
+	glViewport(0, 0, width, height);
 }
 
 Window::Window(int width, int height, char* title, int glMajorVersion, int glMinorVersion)
 {
-	m_width = width;
-	m_height = height;
-	m_title = title;
+	
 	m_glMajorVersion = glMajorVersion;
 	m_glMinorVersion = glMinorVersion;
 
@@ -86,3 +95,17 @@ GLFWwindow* Window::GetWindow() const
 	return m_window;
 }
 
+float Window::GetWidth()const
+{
+	return m_width;
+}
+
+float Window::GetHeight()const
+{
+	return m_height;
+}
+
+void Window::RefreshWidthAndHeight()
+{
+	glfwGetWindowSize(m_window, &m_width, &m_height);
+}
