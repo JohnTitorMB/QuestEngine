@@ -7,12 +7,13 @@
 #define  CIRCLESIDE 30
 
 
-Shape::Shape(Shader* shader, GLDrawType glDrawType, int verticesCount, Vector2D* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType, bool enableWireframe)
+Shape::Shape(Shader* shader, GLDrawType glDrawType, Vector2D position, int verticesCount, Vector2D* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType, bool enableWireframe)
 {
 	m_shader = shader;
 	m_glDrawType = glDrawType;
 	m_shapeType = shapeType;
 	m_enableWireframe = enableWireframe;
+	m_position = position;
 	ConfigureVBO(sizeof(Vector2D) * verticesCount,vertices);
 	ConfigureEBO(sizeof(int) * indicesCount, indices);
 
@@ -33,7 +34,7 @@ Shape::~Shape()
 	if (m_indices)
 		delete [] m_indices;
 }
-Shape* Shape::CreateTriangle(Shader* shader, GLDrawType glDrawType,
+Shape* Shape::CreateTriangle(Shader* shader, GLDrawType glDrawType, Vector2D position,
 	float x1, float y1,
 	float x2, float y2,
 	float x3, float y3, bool enableWireframe)
@@ -42,11 +43,11 @@ Shape* Shape::CreateTriangle(Shader* shader, GLDrawType glDrawType,
 	unsigned int* indices = new unsigned int[]{ 0,1,2 };
 
 
-	Shape* triangle = new Shape(shader, glDrawType, 9, vertices, 3, indices, ShapeType::TRIANGLE,enableWireframe);
+	Shape* triangle = new Shape(shader, glDrawType, position, 9, vertices, 3, indices, ShapeType::TRIANGLE,enableWireframe);
 	return triangle;
 }
 
-Shape* Shape::CreateRectangle(Shader* shader, GLDrawType glDrawType,
+Shape* Shape::CreateRectangle(Shader* shader, GLDrawType glDrawType, Vector2D position,
 	float width, float height, bool enableWireframe)
 {
 	Vector2D* vertices = new Vector2D[]
@@ -63,11 +64,11 @@ Shape* Shape::CreateRectangle(Shader* shader, GLDrawType glDrawType,
 	};
 
 
-	Shape* rectangle = new Shape(shader, glDrawType, 4, vertices, 6, indices, ShapeType::TRIANGLE, enableWireframe);
+	Shape* rectangle = new Shape(shader, glDrawType, position, 4, vertices, 6, indices, ShapeType::TRIANGLE, enableWireframe);
 	return rectangle;
 }
 
-Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, int sideCount, float radius, bool enableWireframe)
+Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, Vector2D position, int sideCount, float radius, bool enableWireframe)
 {
 	int verticesCount = sideCount;
 	int indicesCount = (sideCount - 2) * 3;
@@ -104,16 +105,16 @@ Shape* Shape::CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, 
 		indices[triangleIndex * 3 + 2] = triangleIndex + 2;		
 	}
 
-	Shape* polygon = new Shape(shader, glDrawType, verticesCount, vertices, indicesCount, indices, ShapeType::TRIANGLE, enableWireframe);
+	Shape* polygon = new Shape(shader, glDrawType, position, verticesCount, vertices, indicesCount, indices, ShapeType::TRIANGLE, enableWireframe);
 	return polygon;
 }
 
-Shape* Shape::CreateCircle(Shader* shader, GLDrawType glDrawType, float radius, bool enableWireframe)
+Shape* Shape::CreateCircle(Shader* shader, GLDrawType glDrawType, Vector2D position, float radius, bool enableWireframe)
 {
-	return CreateRegularConvexPolygon(shader, glDrawType, CIRCLESIDE, radius, enableWireframe);
+	return CreateRegularConvexPolygon(shader, glDrawType, position, CIRCLESIDE, radius, enableWireframe);
 }
 
-Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCount, int heightTileCount, bool enableWireframe)
+Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, Vector2D position, int widthTileCount, int heightTileCount, bool enableWireframe)
 {
 	int verticesCount = ((widthTileCount + 1) + (heightTileCount + 1)) * 2;
 	Vector2D* vertices = new Vector2D[verticesCount];
@@ -152,7 +153,7 @@ Shape* Shape::CreateGrid(Shader* shader, GLDrawType glDrawType, int widthTileCou
 		indices[vertexIndex + 1] = vertexIndex + 1;
 	}
 
-	Shape* grid = new Shape(shader, glDrawType, verticesCount, vertices, indicesCount, indices,ShapeType::Line, enableWireframe);
+	Shape* grid = new Shape(shader, glDrawType, position, verticesCount, vertices, indicesCount, indices,ShapeType::Line, enableWireframe);
 	return grid;
 }
 
@@ -164,6 +165,8 @@ void Shape::Draw()
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	m_shader->UseShader();
+	m_shader->SetUniformVector2D("shapePosition",m_position);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	//glDrawArrays(GL_TRIANGLES, 0, triangleCount);
 	glDrawElements((int)m_shapeType, m_shapeTypeCount, GL_UNSIGNED_INT,0);
@@ -185,4 +188,14 @@ void Shape::ConfigureEBO(int indicesSizeof, unsigned int indices[])
 	glGenBuffers(1, &m_ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSizeof, indices, (int)m_glDrawType);
+}
+
+void Shape::SetPosition(Vector2D& position)
+{
+	m_position = position;
+}
+
+Vector2D Shape::GetPosition()const
+{
+	return m_position;
 }
