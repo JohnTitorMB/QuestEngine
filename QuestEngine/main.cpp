@@ -16,15 +16,15 @@ int main()
 		"uniform float cameraHorizontalSize;\n"		
 		"void main()\n"
 		"{\n"
-			/*Transform vertice from localSpace to worldSpace */
-			"vec2 verticeInWorldSpace = vec2(shapePosition.x + aPos.x, shapePosition.y + aPos.y);\n" 
-			/*Transform vertice from worldSpace to cameraSpace (viewSpace or eyeSpace) */
-			"vec2 verticeInCameraSpace = verticeInWorldSpace - cameraPosition;\n"
-			/*Transform vertice from cameraSpace to NDCSpace*/
-			"vec2 verticeInNDCSpace;\n"
-			"verticeInNDCSpace.x = verticeInCameraSpace.x*2.0/cameraHorizontalSize;\n"
-			"verticeInNDCSpace.y = verticeInCameraSpace.y*2.0/cameraVerticalSize;\n"
-			"gl_Position = vec4(verticeInNDCSpace.x, verticeInNDCSpace.y, aPos.z, 1.0);\n"
+			/*Transform vertice from localSpace into worldSpace */
+			"vec2 vertexInWorldSpace = vec2(shapePosition.x + aPos.x, shapePosition.y + aPos.y);\n" 
+			/*Transform vertice from worldSpace into cameraSpace (viewSpace or eyeSpace) */
+			"vec2 vertexInCameraSpace = vertexInWorldSpace - cameraPosition;\n"
+			/*Transform vertice from cameraSpace into NDCSpace*/
+			"vec2 vertexInNDCSpace;\n"
+			"vertexInNDCSpace.x = vertexInCameraSpace.x*2.0/cameraHorizontalSize;\n"
+			"vertexInNDCSpace.y = vertexInCameraSpace.y*2.0/cameraVerticalSize;\n"
+			"gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, aPos.z, 1.0);\n"
 		"}\0";
 
 
@@ -37,9 +37,6 @@ int main()
 	Vector2D cameraPosition = Vector2D(0.0f, 0.0f);
 	Vector2D shapePos = Vector2D(2.5f, 0.0f);
 	Vector2D shapePos2 = Vector2D(-2.5f, 0.0f);
-
-
-	
 
 	Camera* camera = new Camera(cameraPosition, 10, true);
 	Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
