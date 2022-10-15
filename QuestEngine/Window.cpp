@@ -13,7 +13,7 @@ Window::Window(int width, int height, char* title)
 	InitialiseGLAD();
 	
 	glfwSetWindowUserPointer(m_window, this);
-	//glfwSetFramebufferSizeCallback(m_window, SetTheFrameBufferSize); // works fine
+	glfwSetFramebufferSizeCallback(m_window, SetTheFrameBufferSize); // works fine
 }
 
 void Window::SetTheFrameBufferSize(GLFWwindow* window, int width, int height)

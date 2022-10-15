@@ -6,7 +6,7 @@
 #include "Camera.h"
 int main()
 {
-	Window* window = new Window(1000, 1000, new char[] {"Opengl Window"});
+	Window* window = new Window(1920, 1080, new char[] {"Opengl Window"});
 
 	const char* vertexShaderSource = "#version 330 core\n"
 		"layout (location = 0) in vec3 aPos;\n"
@@ -37,6 +37,9 @@ int main()
 	Vector2D cameraPosition = Vector2D(0.0f, 0.0f);
 	Vector2D shapePos = Vector2D(2.5f, 0.0f);
 	Vector2D shapePos2 = Vector2D(-2.5f, 0.0f);
+
+
+	
 
 	Camera* camera = new Camera(cameraPosition, 10, true);
 	Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
