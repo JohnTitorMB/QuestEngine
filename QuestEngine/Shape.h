@@ -5,7 +5,7 @@
 #include "Vector2D.h"
 #include "Camera.h"
 #include "Window.h"
-
+#include "Transform.h"
 enum class GLDrawType
 {
 	GLSTREAM_DRAW = 0x88E0,
@@ -22,23 +22,26 @@ enum class ShapeType
 class Shape
 {
 public :
-	Shape(Shader* shader, GLDrawType glDrawType, Vector2D position, int verticesCount, Vector2D* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
+	Shape(Shader* shader, GLDrawType glDrawType, Transform tranform, int verticesCount, Vector2D* vertices, int indicesCount, unsigned int* indices, ShapeType shapeType = ShapeType::TRIANGLE, bool enableWireframe = false);
 	~Shape();
-	static Shape* CreateTriangle(Shader* shader, GLDrawType glDrawType,Vector2D position,
+	static Shape* CreateTriangle(Shader* shader, GLDrawType glDrawType, Transform tranform,
 		float x1, float y1,
 		float x2, float y2,
 		float x3, float y3, bool enableWireframe = false);
 
-	static Shape* CreateRectangle(Shader* shader, GLDrawType glDrawType, Vector2D position,
+	static Shape* CreateRectangle(Shader* shader, GLDrawType glDrawType, Transform tranform,
 		float width, float height, bool enableWireframe = false);
 
-	static Shape* CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, Vector2D position, int sideCount, float radius, bool enableWireframe = false);
-	static Shape* CreateCircle(Shader* shader, GLDrawType glDrawType, Vector2D position, float radius, bool enableWireframe = false);
-	static Shape* CreateGrid(Shader* shader, GLDrawType glDrawType, Vector2D position, int widthTileCount, int heightTileCount, bool enableWireframe = false);
+	static Shape* CreateRegularConvexPolygon(Shader* shader, GLDrawType glDrawType, Transform tranform, int sideCount, float radius, bool enableWireframe = false);
+	static Shape* CreateCircle(Shader* shader, GLDrawType glDrawType, Transform tranform, float radius, bool enableWireframe = false);
+	static Shape* CreateGrid(Shader* shader, GLDrawType glDrawType, Transform tranform, int widthTileCount, int heightTileCount, bool enableWireframe = false);
 	void Draw(Camera* camera, Window* window);
 	void SetPosition(const Vector2D& position);
-	Vector2D GetPosition()const;
+	void SetScale(const Vector2D& Scale);
+	void SetAngle(const float angle);
 
+	Vector2D GetPosition()const;
+	void SetVertices(unsigned int index, const Vector2D& vec);
 private :
 	GLuint m_vbo;
 	GLuint m_ebo;
@@ -46,7 +49,7 @@ private :
 	ShapeType m_shapeType;
 	Shader* m_shader;
 	Vector2D* m_vertices = nullptr;
-	Vector2D m_position;
+	Transform m_transform;
 	unsigned int* m_indices = nullptr;
 	int m_verticesCount;
 	int m_indicesCount;

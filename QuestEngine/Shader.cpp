@@ -86,6 +86,13 @@ void Shader::ConfigureShaderProgram(int vertexShaderIndex, int fragementShaderIn
 	glDeleteShader(fragementShaderIndex);
 }
 
+void Shader::SetUniformVector4D(std::string name, float v0, float v1, float v2, float v3)
+{
+	UseShader();
+	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
+	glUniform4f(location, v0, v1, v2, v3);
+}
+
 void Shader::SetUniformVector2D(std::string name, Vector2D value)
 {
 	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
