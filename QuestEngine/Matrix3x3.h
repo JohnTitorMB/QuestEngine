@@ -1,6 +1,5 @@
 #ifndef _MATRIX3X3_H_
 #define _MATRIX3X3_H_
-#include "Vector2D.h"
 struct Matrix3x3
 {
 public:
