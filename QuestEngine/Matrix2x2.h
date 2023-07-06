@@ -12,6 +12,8 @@ public:
 			  float m10, float m11);
 
 	Matrix2x2(const Vector2D& a, const Vector2D& b);
+	Matrix2x2(const Matrix2x2& value);
+
 	float& operator ()(int i, int j);
 	const float& operator ()(int i, int j)const;
 

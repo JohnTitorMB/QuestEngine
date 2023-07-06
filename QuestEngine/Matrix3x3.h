@@ -10,6 +10,8 @@ public:
 	Matrix3x3(float m00, float m01, float m02,
 			  float m10, float m11, float m12,
 			  float m20, float m21, float m22);
+	
+	Matrix3x3(const Matrix3x3& value);
 
 	float& operator ()(int i, int j);
 	const float& operator ()(int i, int j)const;

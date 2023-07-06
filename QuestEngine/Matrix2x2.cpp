@@ -19,6 +19,14 @@ Matrix2x2::Matrix2x2(const Vector2D& a, const Vector2D& b)
 	m[1][0] = b.m_x; m[1][1] = b.m_y;
 }
 
+Matrix2x2::Matrix2x2(const Matrix2x2& value)
+{
+	m[0][0] = value.m[0][0];
+	m[0][1] = value.m[0][1];
+	m[1][0] = value.m[1][0];
+	m[1][1] = value.m[1][1];
+}
+
 float& Matrix2x2::operator ()(int i, int j)
 {
 	return m[i][j];
