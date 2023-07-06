@@ -223,7 +223,7 @@ bool Matrix3x3::operator!=(const Matrix3x3& value) const
 				return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix3x3& value)

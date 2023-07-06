@@ -163,7 +163,7 @@ bool Matrix2x2::operator!=(const Matrix2x2& value) const
 				return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix2x2& value)
