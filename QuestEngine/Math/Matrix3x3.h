@@ -3,7 +3,7 @@
 #include <ostream>
 #include <math.h>
 #include "Vector2D.h"
-
+#include <array>
 struct Matrix3x3
 {
 public:
@@ -39,6 +39,7 @@ public:
 	static Matrix3x3 RS(const float& angle, const Vector2D& scale);
 	static Matrix3x3 TR(const Vector2D& translate, const float& angle);
 	static Matrix3x3 TRS(const Vector2D& translate, const float& angle, const Vector2D& scale);
+	std::array<float, 9> GetAsArray() const;
 };
 Matrix3x3 operator +(const Matrix3x3& a, const Matrix3x3& b);
 Matrix3x3 operator -(const Matrix3x3& a, const Matrix3x3& b);

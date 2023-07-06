@@ -42,6 +42,11 @@ Vector2D Camera::GetPosition()const
 	return m_position;
 }
 
+float Camera::GetAngle()const
+{
+	return m_angle;
+}
+
 float Camera::GetSize()const
 {
 	return m_size;

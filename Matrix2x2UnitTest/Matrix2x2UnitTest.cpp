@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\QuestEngine\Matrix2x2.h"
+#include "..\QuestEngine\Math\Matrix2x2.h"
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Matrix2x2UnitTest
@@ -30,8 +30,8 @@ namespace Matrix2x2UnitTest
 
 			Matrix2x2 matrix = Matrix2x2(a,b);
 			Assert::AreEqual(a.m_x, matrix.m[0][0]);
-			Assert::AreEqual(a.m_y, matrix.m[0][1]);
-			Assert::AreEqual(b.m_x, matrix.m[1][0]);
+			Assert::AreEqual(b.m_x, matrix.m[0][1]);
+			Assert::AreEqual(a.m_y, matrix.m[1][0]);
 			Assert::AreEqual(b.m_y, matrix.m[1][1]);
 		}
 

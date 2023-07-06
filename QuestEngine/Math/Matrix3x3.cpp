@@ -293,3 +293,10 @@ Vector2D operator*(const Vector2D& b, const Matrix3x3& a)
 {
 	return Vector2D(b.m_x * a.m[0][0] + b.m_y * a.m[0][1] + 1.0f * a.m[0][2], b.m_x * a.m[1][0] + b.m_y * a.m[1][1] + 1.0f * a.m[1][2]);
 }
+
+std::array<float, 9> Matrix3x3::GetAsArray() const
+{
+	return { m[0][0], m[0][1], m[0][2],
+			m[1][0], m[1][1], m[1][2],
+			m[2][0], m[2][1], m[2][2] };
+}

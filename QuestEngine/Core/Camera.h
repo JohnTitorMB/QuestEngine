@@ -21,6 +21,7 @@ public:
 	Vector2D GetVerticalAndHorizontalSize(float width, float height)const;
 
 	Vector2D GetPosition()const;
+	float GetAngle()const;
 	float GetSize()const;
 	bool GetSizeType()const;
 	Matrix3x3 ViewMatrix()const;

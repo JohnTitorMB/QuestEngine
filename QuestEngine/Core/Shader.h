@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "../Math/Vector2D.h"
+#include "../Math/Matrix3x3.h"
 #include <string>
 class Shader
 {
@@ -12,6 +13,7 @@ public :
 	void SetUniformVector2D(std::string name, Vector2D value);
 	void SetUniformVector4D(std::string name, float v0, float v1, float v2, float v3 );
 	void SetUniformFloat(std::string name, float value);
+	void SetUniformMatrix3x3(std::string name, Matrix3x3 value);
 
 private:
 	int m_shaderProgram;

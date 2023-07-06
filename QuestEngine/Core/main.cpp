@@ -21,7 +21,7 @@ int main()
 
 	Vector2D cameraPosition = Vector2D(0.0f, 0.0f);
 	
-	Camera* camera = new Camera(cameraPosition,0, 10, false);
+	Camera* camera = new Camera(cameraPosition,10, 10, false);
 	Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
 	float time = 0;
 
@@ -118,7 +118,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);	
 		
 		vector2DShapeIdentity->Draw(camera, window);
-
+		camera->SetAngle(camera->GetAngle() + 0.1f);
 		float scale = TransformationUtilities::PingPong(time, 1.0f);
 		tranlationValue = TransformationUtilities::Translation(initialVectorTranslation, translateValue * scale);
 		vector2DShapeTranslation->SetValue(tranlationValue);

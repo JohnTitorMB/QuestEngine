@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "../QuestEngine/Vector2D.h";
+#include "../QuestEngine/Math/Vector2D.h";
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

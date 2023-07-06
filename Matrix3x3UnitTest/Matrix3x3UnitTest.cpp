@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\QuestEngine\Matrix3x3.h"
+#include "..\QuestEngine\Math\Matrix3x3.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
