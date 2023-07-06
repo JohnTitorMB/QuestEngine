@@ -16,10 +16,10 @@ public:
 	float& operator ()(int i, int j);
 	const float& operator ()(int i, int j)const;
 
-	Matrix3x3 operator +=(const Matrix3x3& b);
-	Matrix3x3 operator -=(const Matrix3x3& b);
-	Matrix3x3 operator *=(const float& s);
-	Matrix3x3 operator *=(const Matrix3x3& b);
+	Matrix3x3& operator +=(const Matrix3x3& b);
+	Matrix3x3& operator -=(const Matrix3x3& b);
+	Matrix3x3& operator *=(const float& s);
+	Matrix3x3& operator *=(const Matrix3x3& b);
 	bool operator==(const Matrix3x3& value)const;
 	bool operator!=(const Matrix3x3& value)const;
 

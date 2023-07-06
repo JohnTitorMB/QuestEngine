@@ -42,7 +42,7 @@ const float& Matrix3x3::operator ()(int i, int j)const
 	return m[i][j];
 }
 
-Matrix3x3 Matrix3x3::operator +=(const Matrix3x3& b)
+Matrix3x3& Matrix3x3::operator +=(const Matrix3x3& b)
 {
 	m[0][0] += b.m[0][0];
 	m[0][1] += b.m[0][1];
@@ -59,7 +59,7 @@ Matrix3x3 Matrix3x3::operator +=(const Matrix3x3& b)
 	return (*this);
 }
 
-Matrix3x3 Matrix3x3::operator -=(const Matrix3x3& b)
+Matrix3x3& Matrix3x3::operator -=(const Matrix3x3& b)
 {
 	m[0][0] -= b.m[0][0];
 	m[0][1] -= b.m[0][1];
@@ -76,7 +76,7 @@ Matrix3x3 Matrix3x3::operator -=(const Matrix3x3& b)
 	return (*this);
 }
 
-Matrix3x3 Matrix3x3::operator *=(const float& s)
+Matrix3x3& Matrix3x3::operator *=(const float& s)
 {
 	m[0][0] *= s;
 	m[0][1] *= s;
@@ -93,20 +93,23 @@ Matrix3x3 Matrix3x3::operator *=(const float& s)
 	return (*this);
 }
 
-Matrix3x3 Matrix3x3::operator *=(const Matrix3x3& b)
+Matrix3x3& Matrix3x3::operator *=(const Matrix3x3& b)
 {
-	m[0][0] = m[0][0] * b.m[0][0] + m[0][1] * b.m[1][0] + m[0][2] * b.m[2][0];
-	m[0][1] = m[0][0] * b.m[0][1] + m[0][1] * b.m[1][1] + m[0][2] * b.m[2][1];
-	m[0][2] = m[0][0] * b.m[0][2] + m[0][1] * b.m[1][2] + m[0][2] * b.m[2][2];
+	Matrix3x3 result;
 
-	m[1][0] = m[1][0] * b.m[0][0] + m[1][1] * b.m[1][0] + m[1][2] * b.m[2][0];
-	m[1][1] = m[1][0] * b.m[0][1] + m[1][1] * b.m[1][1] + m[1][2] * b.m[2][1];
-	m[1][2] = m[1][0] * b.m[0][2] + m[1][1] * b.m[1][2] + m[1][2] * b.m[2][2];
+	result.m[0][0] = m[0][0] * b.m[0][0] + m[0][1] * b.m[1][0] + m[0][2] * b.m[2][0];
+	result.m[0][1] = m[0][0] * b.m[0][1] + m[0][1] * b.m[1][1] + m[0][2] * b.m[2][1];
+	result.m[0][2] = m[0][0] * b.m[0][2] + m[0][1] * b.m[1][2] + m[0][2] * b.m[2][2];
 
-	m[2][0] = m[2][0] * b.m[0][0] + m[2][1] * b.m[1][0] + m[2][2] * b.m[2][0];
-	m[2][1] = m[2][0] * b.m[0][1] + m[2][1] * b.m[1][1] + m[2][2] * b.m[2][1];
-	m[2][2] = m[2][0] * b.m[0][2] + m[2][1] * b.m[1][2] + m[2][2] * b.m[2][2];
+	result.m[1][0] = m[1][0] * b.m[0][0] + m[1][1] * b.m[1][0] + m[1][2] * b.m[2][0];
+	result.m[1][1] = m[1][0] * b.m[0][1] + m[1][1] * b.m[1][1] + m[1][2] * b.m[2][1];
+	result.m[1][2] = m[1][0] * b.m[0][2] + m[1][1] * b.m[1][2] + m[1][2] * b.m[2][2];
 
+	result.m[2][0] = m[2][0] * b.m[0][0] + m[2][1] * b.m[1][0] + m[2][2] * b.m[2][0];
+	result.m[2][1] = m[2][0] * b.m[0][1] + m[2][1] * b.m[1][1] + m[2][2] * b.m[2][1];
+	result.m[2][2] = m[2][0] * b.m[0][2] + m[2][1] * b.m[1][2] + m[2][2] * b.m[2][2];
+
+	*this = result;
 	return (*this);
 }
 
