@@ -73,6 +73,8 @@ Matrix2x2& Matrix2x2::operator *=(const Matrix2x2& b)
 	m[0][1] = m[0][0] * b.m[0][1] + m[0][1] * b.m[1][1];
 	m[1][0] = m[1][0] * b.m[0][0] + m[1][1] * b.m[1][0];
 	m[1][1] = m[1][0] * b.m[0][1] + m[1][1] * b.m[1][1];
+
+	return (*this);
 }
 
 Matrix2x2 Matrix2x2::Transpose()const
