@@ -1,28 +1,10 @@
 #include "Vector2DShape.h"
-
+#include "FileSystem.h"
 Vector2DShape::Vector2DShape(Vector2D vec, Vector2D pos, float r, float g, float b, float a)
 {
-	const char* vertexShaderSource = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"uniform vec2 shapePosition;\n"
-		"uniform vec2 shapeScale;\n"
-		"uniform float shapeAngle;\n"
-		"uniform vec2 cameraPosition;\n"
-		"uniform float cameraVerticalSize;\n"
-		"uniform float cameraHorizontalSize;\n"
-		"void main()\n"
-		"{\n"
-		/*Transform vertice from localSpace into worldSpace */
-		"vec2 vertexInWorldSpace = vec2(shapePosition.x + aPos.x, shapePosition.y + aPos.y);\n"
-		/*Transform vertice from worldSpace into cameraSpace (viewSpace or eyeSpace) */
-		"vec2 vertexInCameraSpace = vertexInWorldSpace - cameraPosition;\n"
-		/*Transform vertice from cameraSpace into NDCSpace*/
-		"vec2 vertexInNDCSpace;\n"
-		"vertexInNDCSpace.x = vertexInCameraSpace.x*2.0/cameraHorizontalSize;\n"
-		"vertexInNDCSpace.y = vertexInCameraSpace.y*2.0/cameraVerticalSize;\n"
-		"gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, aPos.z, 1.0);\n"
-		"}\0";
-
+	const char* vsFilename = "Assets/DefaultVertexShader.vert";
+	std::string vertexShaderSourceString = FileSystem::get_file_contents(vsFilename);
+	const char* vertexShaderSource = vertexShaderSourceString.c_str();
 
 	const char* fragmentShaderSource = "#version 330 core\n"
 		"out vec4 FdfragColor;\n"

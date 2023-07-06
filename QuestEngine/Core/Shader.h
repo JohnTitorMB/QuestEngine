@@ -2,7 +2,7 @@
 #define _SHADER_H_
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Vector2D.h"
+#include "../Math/Vector2D.h"
 #include <string>
 class Shader
 {

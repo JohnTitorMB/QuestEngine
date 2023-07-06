@@ -4,47 +4,21 @@
 #include "Window.h"
 #include "Shape.h"
 #include "Camera.h"
-#include "TransformationUtilities.h"
-#include "Vector2DShape.h"
+#include "../Utilities/TransformationUtilities.h"
+#include "../Utilities/Vector2DShape.h"
+#include "../Utilities/FileSystem.h"
 int main()
 {
 	Window* window = new Window(1920, 1080, new char[] {"Opengl Window"});
+	
+	const char* vsFilename = "Assets/DefaultVertexShader.vert";	
+	std::string vertexShaderSourceString = FileSystem::get_file_contents(vsFilename);
+	const char* vertexShaderSource = vertexShaderSourceString.c_str();
+	
+	const char* fsFilename = "Assets/DefaultFragmentShader.frag";
+	std::string fragmentShaderSourceString = FileSystem::get_file_contents(fsFilename);
+	const char* fragmentShaderSource = fragmentShaderSourceString.c_str();
 
-	const char* vertexShaderSource = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"uniform vec2 shapePosition;\n"
-		"uniform vec2 cameraPosition;\n"
-		"uniform vec2 shapeScale;\n"
-		"uniform float shapeAngle;\n"
-		"uniform float cameraVerticalSize;\n"
-		"uniform float cameraHorizontalSize;\n"		
-		"void main()\n"
-		"{\n"
-			/*Transform vertice from localSpace into worldSpace */
-			/*Scale vertex */
-			"vec2 scaleVertex = vec2(aPos.x*shapeScale.x, aPos.y * shapeScale.y);\n"
-			/*Rotation vertex */
-			"vec2 rotateVertex = vec2(0.0f, 0.0f);\n"
-			"rotateVertex.x =  scaleVertex.x * cos(shapeAngle) - scaleVertex.y * sin(shapeAngle);\n"
-			"rotateVertex.y =  scaleVertex.y * cos(shapeAngle) + scaleVertex.x * sin(shapeAngle);\n"
-			/*Translate vertex */
-			"vec2 vertexInWorldSpace = vec2(shapePosition.x + rotateVertex.x, shapePosition.y + rotateVertex.y);\n" 
-			/*Transform vertice from worldSpace into cameraSpace (viewSpace or eyeSpace) */
-			"vec2 vertexInCameraSpace = vertexInWorldSpace - cameraPosition;\n"
-			/*Transform vertice from cameraSpace into NDCSpace*/
-			"vec2 vertexInNDCSpace;\n"
-			"vertexInNDCSpace.x = vertexInCameraSpace.x*2.0/cameraHorizontalSize;\n"
-			"vertexInNDCSpace.y = vertexInCameraSpace.y*2.0/cameraVerticalSize;\n"
-			"gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, aPos.z, 1.0);\n"
-		"}\0";
-
-
-	const char* fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FdfragColor;\n"
-		"void main()\n"
-		"{\n"
-		"	FdfragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f)\n;"
-		"}\0";
 	Vector2D cameraPosition = Vector2D(0.0f, 0.0f);
 	
 	Camera* camera = new Camera(cameraPosition,0, 10, false);

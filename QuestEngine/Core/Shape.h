@@ -2,7 +2,7 @@
 #define _SHAPE_H_
 #include <glad/glad.h>
 #include "Shader.h"
-#include "Vector2D.h"
+#include "../Math/Vector2D.h"
 #include "Camera.h"
 #include "Window.h"
 #include "Transform.h"

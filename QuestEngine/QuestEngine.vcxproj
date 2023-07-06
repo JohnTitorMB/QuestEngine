@@ -148,29 +148,35 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Library\Glad\src\glad.c" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Matrix2x2.cpp" />
-    <ClCompile Include="Matrix3x3.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Shape.cpp" />
-    <ClCompile Include="Transform.cpp" />
-    <ClCompile Include="TransformationUtilities.cpp" />
-    <ClCompile Include="Vector2D.cpp" />
-    <ClCompile Include="Vector2DShape.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Core\Camera.cpp" />
+    <ClCompile Include="Utilities\FileSystem.cpp" />
+    <ClCompile Include="Core\main.cpp" />
+    <ClCompile Include="Math\Matrix2x2.cpp" />
+    <ClCompile Include="Math\Matrix3x3.cpp" />
+    <ClCompile Include="Core\Shader.cpp" />
+    <ClCompile Include="Core\Shape.cpp" />
+    <ClCompile Include="Core\Transform.cpp" />
+    <ClCompile Include="Utilities\TransformationUtilities.cpp" />
+    <ClCompile Include="Math\Vector2D.cpp" />
+    <ClCompile Include="Utilities\Vector2DShape.cpp" />
+    <ClCompile Include="Core\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Matrix2x2.h" />
-    <ClInclude Include="Matrix3x3.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="Shape.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="TransformationUtilities.h" />
-    <ClInclude Include="Vector2D.h" />
-    <ClInclude Include="Vector2DShape.h" />
-    <ClInclude Include="Window.h" />
+    <ClInclude Include="Core\Camera.h" />
+    <ClInclude Include="Utilities\FileSystem.h" />
+    <ClInclude Include="Math\Matrix2x2.h" />
+    <ClInclude Include="Math\Matrix3x3.h" />
+    <ClInclude Include="Core\Shader.h" />
+    <ClInclude Include="Core\Shape.h" />
+    <ClInclude Include="Core\Transform.h" />
+    <ClInclude Include="Utilities\TransformationUtilities.h" />
+    <ClInclude Include="Math\Vector2D.h" />
+    <ClInclude Include="Utilities\Vector2DShape.h" />
+    <ClInclude Include="Core\Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\DefaultFragmentShader.frag" />
+    <None Include="Assets\DefaultVertexShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
