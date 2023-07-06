@@ -1,7 +1,7 @@
 #ifndef _TRANSFORM_H_
 #define  _TRANSFORM_H_
 #include "Vector2D.h"
-
+#include "Matrix3x3.h"
 struct Transform
 {
 public :
@@ -10,6 +10,8 @@ public :
 	Vector2D m_position;
 	Vector2D m_scale;
 	float m_angle;
+
+	Matrix3x3 TransformMatrix();
 };
 
 #endif // !_TRANSFORM_H_

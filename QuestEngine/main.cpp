@@ -47,7 +47,7 @@ int main()
 		"}\0";
 	Vector2D cameraPosition = Vector2D(0.0f, 0.0f);
 	
-	Camera* camera = new Camera(cameraPosition, 10, false);
+	Camera* camera = new Camera(cameraPosition,0, 10, false);
 	Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
 	float time = 0;
 
