@@ -337,5 +337,121 @@ namespace Matrix3x3UnitTest
 
 			Assert::IsTrue(matrix3 == expectedResult);
 		}
+
+		TEST_METHOD(TranslateUnitTest)
+		{
+			Vector2D translate = Vector2D(1.0f,2.0f);
+			Matrix3x3 translateMatrix = Matrix3x3::Translate(translate);
+			Vector2D vec = Vector2D(1.0f, 5.0f);
+			Vector2D translateVec = translateMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(2.0f, 7.0f);
+
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(translateVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(translateVec.m_y - expectedResult.m_y) < epsilon);
+		}
+
+		TEST_METHOD(RotateUnitTest)
+		{
+			float angle = 90.0f;
+			Matrix3x3 rotateMatrix = Matrix3x3::RotateZ(angle);
+			Vector2D vec = Vector2D(1.0f, 0.0f);
+			Vector2D rotateVec = rotateMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(0.0f, 1.0f);
+
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(rotateVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(rotateVec.m_y - expectedResult.m_y) < epsilon);
+		}
+
+		TEST_METHOD(ScaleUnitTest)
+		{
+			Vector2D scale = Vector2D(2.0f, 3.0f);
+			Matrix3x3 scaleMatrix = Matrix3x3::ScaleXY(scale);
+			Vector2D vec = Vector2D(5, 10);
+			Vector2D scaleVec = scaleMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(10.0f, 30.0f);
+
+
+			Assert::IsTrue(scaleVec == expectedResult);
+		}
+
+		TEST_METHOD(TSUnitTest)
+		{
+			Vector2D translate = Vector2D(1.0f, 2.0f);
+			Vector2D scale = Vector2D(2.0f, 2.0f);
+			Matrix3x3 TSMatrix = Matrix3x3::TS(translate, scale);
+			Vector2D vec = Vector2D(2, 5);
+			Vector2D TSVec = TSMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(5.0f, 12.0f);
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(TSVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(TSVec.m_y - expectedResult.m_y) < epsilon);
+		}
+
+		TEST_METHOD(RSUnitTest)
+		{
+			float angle = 90.0f;
+			Vector2D scale = Vector2D(2.0f, 2.0f);
+			Matrix3x3 RSMatrix = Matrix3x3::RS(angle, scale);
+			Vector2D vec = Vector2D(5, 5);
+			Vector2D RSVec = RSMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(-10.0f, 10.0f);
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(RSVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(RSVec.m_y - expectedResult.m_y) < epsilon);
+		}
+
+		TEST_METHOD(TRUnitTest)
+		{
+			Vector2D translate = Vector2D(3.0f, -5.0f);
+			float angle = 90.0f;
+			Matrix3x3 TRMatrix = Matrix3x3::TR(translate, angle);
+			Vector2D vec = Vector2D(10.0f, 0.0f);
+			Vector2D TRVec = TRMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(3.0f, 5.0f);
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(TRVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(TRVec.m_y - expectedResult.m_y) < epsilon);
+		}
+
+		TEST_METHOD(TRSUnitTest)
+		{
+			Vector2D translate = Vector2D(3.0f, -5.0f);
+			float angle = 90.0f;
+			Vector2D scale = Vector2D(2.0f, 2.0f);
+			Matrix3x3 TRSMatrix = Matrix3x3::TRS(translate, angle,scale);
+			Vector2D vec = Vector2D(10.0f, 10.0f);
+			Vector2D TRSVec = TRSMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(-17.0f, 15.0f);
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(TRSVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(TRSVec.m_y - expectedResult.m_y) < epsilon);
+		}
 	};
 }

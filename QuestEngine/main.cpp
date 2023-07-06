@@ -51,8 +51,6 @@ int main()
 	Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
 	float time = 0;
 
-
-
 	//Identity
 	Vector2D shapePos = Vector2D(0.0f, 1.0f);
 	Vector2D initialVector = Vector2D(-1.0, 0.0f);
@@ -144,9 +142,7 @@ int main()
 	{
 		glClearColor(0.6f, 0.6f, 0.6f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);	
-	
-	
-	
+		
 		vector2DShapeIdentity->Draw(camera, window);
 
 		float scale = TransformationUtilities::PingPong(time, 1.0f);
@@ -169,7 +165,6 @@ int main()
 		vector2DShapeHomothetie->Draw(camera, window);
 		vector2DHomothetyCenter->Draw(camera, window);
 
-
 		vector2DShape3->Draw(camera, window);
 		vector2DShapePointReflectionCenter->Draw(camera, window);
 		vector2DShapePointReflection->Draw(camera, window);
@@ -188,7 +183,6 @@ int main()
 		vector2DShapeRotation->SetValue(RotationValue);
 		vector2DShape6->Draw(camera, window);
 		vector2DShapeRotation->Draw(camera, window);
-
 
 		RotationCValue = TransformationUtilities::Rotation(initialRotationC,center, finalAngle);
 		vector2DShapeRotationC->SetValue(RotationCValue);

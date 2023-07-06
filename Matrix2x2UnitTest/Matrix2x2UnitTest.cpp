@@ -241,5 +241,53 @@ namespace Matrix2x2UnitTest
 
 			Assert::IsTrue(matrix3 == expectedResult);
 		}
+
+		TEST_METHOD(RotateUnitTest)
+		{
+			float angle = 90.0f;
+			Matrix2x2 rotateMatrix = Matrix2x2::Rotate(angle);
+			Vector2D vec = Vector2D(1.0f, 0.0f);
+			Vector2D rotateVec = rotateMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(0.0f, 1.0f);
+
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(rotateVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(rotateVec.m_y - expectedResult.m_y) < epsilon);
+		}
+
+		TEST_METHOD(ScaleUnitTest)
+		{
+			Vector2D scale = Vector2D(2.0f,3.0f);
+			Matrix2x2 scaleMatrix = Matrix2x2::Scale(scale);
+			Vector2D vec = Vector2D(5, 10);
+			Vector2D scaleVec = scaleMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(10.0f, 30.0f);
+
+
+			Assert::IsTrue(scaleVec == expectedResult);
+		}
+
+		TEST_METHOD(RSUnitTest)
+		{
+			float angle = 90.0f;
+			Vector2D scale = Vector2D(2.0f, 2.0f);
+			Matrix2x2 RSMatrix = Matrix2x2::RS(angle, scale);
+			Vector2D vec = Vector2D(5, 5);
+			Vector2D RSVec = RSMatrix * vec;
+
+			Vector2D expectedResult = Vector2D(-10.0f, 10.0f);
+
+			const float epsilon = 1e-5; // ajustez selon vos besoins
+
+			// Utiliser une comparaison epsilon pour les flottants
+			Assert::IsTrue(std::fabs(RSVec.m_x - expectedResult.m_x) < epsilon
+				&& std::fabs(RSVec.m_y - expectedResult.m_y) < epsilon);
+		}
+
 	};
 }

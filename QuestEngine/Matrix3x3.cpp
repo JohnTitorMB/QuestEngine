@@ -1,4 +1,5 @@
 #include "Matrix3x3.h"
+# define M_PI           3.14159265358979323846  /* pi */
 
 Matrix3x3::Matrix3x3()
 {
@@ -232,4 +233,63 @@ std::ostream& operator<<(std::ostream& os, const Matrix3x3& value)
 		<< "(m10 : " << value.m[1][0] << ", m11 : " << value.m[1][1] << ", m12 : " << value.m[1][2] << ")" << std::endl
 		<< "(m20 : " << value.m[2][0] << ", m21 : " << value.m[2][1] << ", m22 : " << value.m[2][2] << ")" << std::endl;
 	return os;
+}
+
+Matrix3x3 Matrix3x3::Identity()
+{
+	return Matrix3x3(1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f);
+}
+
+Matrix3x3 Matrix3x3::Translate(const Vector2D& translate)
+{
+	return Matrix3x3(1.0f, 0.0f, translate.m_x,
+					 0.0f, 1.0f, translate.m_y,
+					 0.0f, 0.0f, 1.0f);
+}
+
+Matrix3x3 Matrix3x3::RotateZ(const float& angle)
+{
+	float angleInRadiant = angle * M_PI / 180.0f;
+	return Matrix3x3(cosf(angleInRadiant), -sinf(angleInRadiant), 0.0f,
+					 sinf(angleInRadiant), cosf(angleInRadiant), 0.0f,
+					 0.0f,0.0f,1.0f);
+}
+
+Matrix3x3 Matrix3x3::ScaleXY(const Vector2D& scale)
+{
+	return Matrix3x3(scale.m_x, 0.0f, 0.0f,
+		0.0f, scale.m_y, 0.0f,
+		0.0f, 0.0f, 1.0f);
+}
+
+Matrix3x3 Matrix3x3::TS(const Vector2D& translate, const Vector2D& scale)
+{
+	return Translate(translate) * ScaleXY(scale);
+}
+
+Matrix3x3 Matrix3x3::RS(const float& angle, const Vector2D& scale)
+{
+	return RotateZ(angle) * ScaleXY(scale);
+}
+
+Matrix3x3 Matrix3x3::TR(const Vector2D& translate, const float& angle)
+{
+	return Translate(translate) * RotateZ(angle);
+}
+
+Matrix3x3 Matrix3x3::TRS(const Vector2D& translate, const float& angle, const Vector2D& scale)
+{
+	return Translate(translate) * RotateZ(angle) * ScaleXY(scale);
+}
+
+Vector2D operator*(const Matrix3x3& a, const Vector2D& b)
+{
+	return Vector2D(a.m[0][0] * b.m_x + a.m[0][1] * b.m_y + a.m[0][2] * 1.0f, a.m[1][0] * b.m_x + a.m[1][1] * b.m_y + a.m[1][2] * 1.0f);
+}
+
+Vector2D operator*(const Vector2D& b, const Matrix3x3& a)
+{
+	return Vector2D(b.m_x * a.m[0][0] + b.m_y * a.m[0][1] + 1.0f * a.m[0][2], b.m_x * a.m[1][0] + b.m_y * a.m[1][1] + 1.0f * a.m[1][2]);
 }

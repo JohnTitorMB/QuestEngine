@@ -1,4 +1,5 @@
 #include "Matrix2x2.h"
+# define M_PI           3.14159265358979323846  /* pi */
 
 Matrix2x2::Matrix2x2()
 {
@@ -171,4 +172,38 @@ std::ostream& operator<<(std::ostream& os, const Matrix2x2& value)
 	os << "(m00 : " << value.m[0][0] << ", m01 : " << value.m[0][1] << ")" << std::endl
 		<< "(m10 : " << value.m[1][0] << ", m11 : " << value.m[1][1] << ")" << std::endl;
 	return os;
+}
+
+Matrix2x2 Matrix2x2::Identity()
+{
+	return Matrix2x2(1.0f, 0.0f,
+		0.0f, 1.0f);
+}
+
+Matrix2x2 Matrix2x2::Rotate(const float& angle)
+{
+	float angleInRadiant = angle * M_PI / 180.0f;
+		return Matrix2x2(cosf(angleInRadiant), -sinf(angleInRadiant),
+						 sinf(angleInRadiant), cosf(angleInRadiant));
+}
+
+Matrix2x2 Matrix2x2::Scale(const Vector2D& scale)
+{
+	return Matrix2x2(scale.m_x,0.0f,
+					 0.0f, scale.m_y);
+}
+
+Matrix2x2 Matrix2x2::RS(const float& angle, const Vector2D& scale)
+{
+	return Rotate(angle) * Scale(scale);
+}
+
+Vector2D operator*(const Matrix2x2& a, const Vector2D& b)
+{
+	return Vector2D(a.m[0][0] * b.m_x + a.m[0][1] * b.m_y, a.m[1][0] * b.m_x + a.m[1][1] * b.m_y);
+}
+
+Vector2D operator*(const Vector2D& b, const Matrix2x2& a)
+{
+	return Vector2D(b.m_x* a.m[0][0] + b.m_y * a.m[0][1], b.m_x * a.m[1][0] + b.m_y * a.m[1][1]);
 }
