@@ -154,8 +154,8 @@ bool Matrix2x2::operator!=(const Matrix2x2& value) const
 	{
 		for (int j = 0; j < 2; j++)
 		{
-			if (m[i][j] == value.m[i][j])
-				return false;
+			if (m[i][j] != value.m[i][j])
+				return true;
 		}
 	}
 	return true;

@@ -216,8 +216,8 @@ bool Matrix3x3::operator!=(const Matrix3x3& value) const
 	{
 		for (int j = 0; j < 3; j++)
 		{
-			if (m[i][j] == value.m[i][j])
-				return false;
+			if (m[i][j] != value.m[i][j])
+				return true;
 		}
 	}
 	return true;
