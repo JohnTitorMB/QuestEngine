@@ -180,3 +180,37 @@ Matrix3x3 operator *(const Matrix3x3& a, const Matrix3x3& b)
 					 a.m[2][0] * b.m[0][1] + a.m[2][1] * b.m[1][1] + a.m[2][2] * b.m[2][1],
 					 a.m[2][0] * b.m[0][2] + a.m[2][1] * b.m[1][2] + a.m[2][2] * b.m[2][2]);
 }
+
+bool Matrix3x3::operator==(const Matrix3x3& value) const
+{
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			if (m[i][j] != value.m[i][j])
+				return false;
+		}
+	}
+	return true;
+}
+
+bool Matrix3x3::operator!=(const Matrix3x3& value) const
+{
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			if (m[i][j] == value.m[i][j])
+				return false;
+		}
+	}
+	return true;
+}
+
+std::ostream& operator<<(std::ostream& os, const Matrix3x3& value)
+{
+	os << "(m00 : " << value.m[0][0] << ", m01 : " << value.m[0][1] << ", m02 : " << value.m[0][2] << ")" << std::endl
+		<< "(m10 : " << value.m[1][0] << ", m11 : " << value.m[1][1] << ", m12 : " << value.m[1][2] << ")" << std::endl
+		<< "(m20 : " << value.m[2][0] << ", m21 : " << value.m[2][1] << ", m22 : " << value.m[2][2] << ")" << std::endl;
+	return os;
+}

@@ -124,3 +124,36 @@ Matrix2x2 operator *(const Matrix2x2& a, const Matrix2x2& b)
 					 a.m[1][0] * b.m[0][0] + a.m[1][1] * b.m[1][0],			// Element 10
 					 a.m[1][0] * b.m[0][1] + a.m[1][1] * b.m[1][1]);		// Element 11
 }
+
+bool Matrix2x2::operator==(const Matrix2x2& value) const
+{
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			if (m[i][j] != value.m[i][j])
+				return false;
+		}
+	}
+	return true;
+}
+
+bool Matrix2x2::operator!=(const Matrix2x2& value) const
+{
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			if (m[i][j] == value.m[i][j])
+				return false;
+		}
+	}
+	return true;
+}
+
+std::ostream& operator<<(std::ostream& os, const Matrix2x2& value)
+{
+	os << "(m00 : " << value.m[0][0] << ", m01 : " << value.m[0][1] << ")" << std::endl
+		<< "(m10 : " << value.m[1][0] << ", m11 : " << value.m[1][1] << ")" << std::endl;
+	return os;
+}
