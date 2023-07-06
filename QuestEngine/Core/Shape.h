@@ -43,6 +43,7 @@ public :
 	Vector2D GetPosition()const;
 	void SetVertices(unsigned int index, const Vector2D& vec);
 private :
+	GLuint m_vao;
 	GLuint m_vbo;
 	GLuint m_ebo;
 	GLDrawType m_glDrawType;
@@ -55,6 +56,10 @@ private :
 	int m_indicesCount;
 	bool m_enableWireframe = false;
 	int m_shapeTypeCount = 1;
+	void GenereVBO();
+	void GenereEBO();
+	void ConfigureVAO();
+	void SetupVertexAttribs();
 	void ConfigureVBO(int verticesSizeof, Vector2D* vertices);
 	void ConfigureEBO(int indicesSizeof, unsigned int indices[]);
 

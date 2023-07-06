@@ -14,7 +14,14 @@ Shape::Shape(Shader* shader, GLDrawType glDrawType, Transform tranform, int vert
 	m_shapeType = shapeType;
 	m_enableWireframe = enableWireframe;
 	m_transform = tranform;
+	
+	ConfigureVAO();
+
+	GenereVBO();
 	ConfigureVBO(sizeof(Vector2D) * verticesCount,vertices);
+	SetupVertexAttribs();
+
+	GenereEBO();
 	ConfigureEBO(sizeof(int) * indicesCount, indices);
 
 	m_shapeTypeCount = indicesCount;
@@ -161,9 +168,7 @@ void Shape::Draw(Camera* camera, Window* window)
 {
 	if(m_enableWireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+
 	m_shader->UseShader();
 
 	m_shader->SetUniformMatrix3x3("model", m_transform.TransformMatrix());
@@ -179,8 +184,13 @@ void Shape::Draw(Camera* camera, Window* window)
 	m_shader->SetUniformFloat("cameraVerticalSize", size.m_y);
 	*/
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-	//glDrawArrays(GL_TRIANGLES, 0, triangleCount);
+	/*
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	*/
+
+	glBindVertexArray(m_vao);
 	glDrawElements((int)m_shapeType, m_shapeTypeCount, GL_UNSIGNED_INT,0);
 
 	if(m_enableWireframe)
@@ -188,16 +198,37 @@ void Shape::Draw(Camera* camera, Window* window)
 
 }
 
-void Shape::ConfigureVBO(int verticesSizeof, Vector2D* vertices)
+void Shape::ConfigureVAO()
+{
+	glGenVertexArrays(1, &m_vao);
+}
+
+void Shape::SetupVertexAttribs()
+{
+	glBindVertexArray(m_vao);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+}
+
+void Shape::GenereVBO()
 {
 	glGenBuffers(1, &m_vbo);
+}
+
+void Shape::GenereEBO()
+{
+	glGenBuffers(1, &m_ebo);
+}
+void Shape::ConfigureVBO(int verticesSizeof, Vector2D* vertices)
+{
+	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferData(GL_ARRAY_BUFFER, verticesSizeof, vertices, (int)m_glDrawType);
 }
 
 void Shape::ConfigureEBO(int indicesSizeof, unsigned int indices[])
 {
-	glGenBuffers(1, &m_ebo);
+	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSizeof, indices, (int)m_glDrawType);
 }
