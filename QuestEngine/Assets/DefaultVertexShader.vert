@@ -6,9 +6,9 @@ uniform mat3 toNDCSpace;
 	
 void main()
 {
-	/*Transform vertice from localSpace into NDCSpace*/
-	vec3 vertexInlocalSpace = vec3(aPos.x,aPos.y,1.0f);
-	vec3 vertexInNDCSpace = toNDCSpace * view * model * vertexInlocalSpace;
+	  // Transform vertex from local space to NDC space
+    vec3 vertexInLocalSpace = vec3(aPos.x, aPos.y, 1.0);
+    vec3 vertexInNDCSpace = (vec4(vertexInLocalSpace, 1.0) * mat4(model) * mat4(view) * mat4(toNDCSpace)).xyz;
 
-	gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, aPos.z, 1.0);
+    gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, aPos.z, 1.0);
 }

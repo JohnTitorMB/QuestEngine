@@ -109,5 +109,5 @@ void Shader::SetUniformMatrix3x3(std::string name, Matrix3x3 matrix)
 {
 	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
 
-	glUniformMatrix3fv(location, 1, GL_TRUE, matrix.GetAsArray().data());
+	glUniformMatrix3fv(location, 1, GL_FALSE, matrix.GetAsArray().data());
 }
