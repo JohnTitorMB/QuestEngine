@@ -174,21 +174,6 @@ void Shape::Draw(Camera* camera, Window* window)
 	m_shader->SetUniformMatrix3x3("model", m_transform.TransformMatrix());
 	m_shader->SetUniformMatrix3x3("view", camera->ViewMatrix());
 	m_shader->SetUniformMatrix3x3("toNDCSpace", camera->ToNDCSpaceMatrix(window->GetWidth(), window->GetHeight()));
-	/*
-	m_shader->SetUniformVector2D("shapePosition",m_transform.m_position);
-	m_shader->SetUniformVector2D("shapeScale", m_transform.m_scale);
-	m_shader->SetUniformFloat("shapeAngle", m_transform.m_angle * M_PI / 180);
-	m_shader->SetUniformVector2D("cameraPosition", camera->GetPosition());
-	Vector2D size = camera->GetVerticalAndHorizontalSize(window->GetWidth(), window->GetHeight());
-	m_shader->SetUniformFloat("cameraHorizontalSize", size.m_x);
-	m_shader->SetUniformFloat("cameraVerticalSize", size.m_y);
-	*/
-
-	/*
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	*/
 
 	glBindVertexArray(m_vao);
 	glDrawElements((int)m_shapeType, m_shapeTypeCount, GL_UNSIGNED_INT,0);
