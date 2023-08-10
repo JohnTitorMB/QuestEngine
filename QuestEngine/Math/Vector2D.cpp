@@ -86,20 +86,24 @@ Vector2D& Vector2D::operator/=(float value)
 
 bool Vector2D::operator==(const Vector2D& value) const
 {
-	return (m_x == value.m_x && m_y == value.m_y);
+	return (abs(m_x - value.m_x) < FLT_EPSILON && abs(m_y - value.m_y) < FLT_EPSILON);
 }
 
 bool Vector2D::operator!=(const Vector2D& value) const
 {
-	return (m_x != value.m_x || m_y != value.m_y);
+	return (abs(m_x - value.m_x) > FLT_EPSILON || abs(m_y - value.m_y) > FLT_EPSILON);
 }
-
-
 
 Vector2D Vector2D::Normalized() const
 {
 	return (*this) / Magnitude();
 }
+
+float Vector2D::DotProduct(const Vector2D& a, const Vector2D& b)
+{
+	return a.m_x * b.m_x + a.m_y * b.m_y;
+}
+
 std::ostream& operator<<(std::ostream& os, const Vector2D& value)
 {
 	os << "(X : " << value.m_x << ", Y : " << value.m_y << ")" << std::endl;

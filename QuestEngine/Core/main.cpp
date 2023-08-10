@@ -7,10 +7,11 @@
 #include "../Utilities/TransformationUtilities.h"
 #include "../Utilities/Vector2DShape.h"
 #include "../Utilities/FileSystem.h"
+
 int main()
 {
 	Window* window = new Window(1920, 1080, new char[] {"Opengl Window"});
-	
+
 	const char* vsFilename = "Assets/DefaultVertexShader.vert";	
 	std::string vertexShaderSourceString = FileSystem::get_file_contents(vsFilename);
 	const char* vertexShaderSource = vertexShaderSourceString.c_str();

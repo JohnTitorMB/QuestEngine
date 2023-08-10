@@ -19,6 +19,7 @@ struct Vector2D
 	float Magnitude() const;
 	void Normalize();
 	Vector2D Normalized() const;
+	static float DotProduct(const Vector2D& a, const Vector2D& b);
 
 	Vector2D& operator+=(const Vector2D& value);
 	Vector2D& operator*=(float value);
