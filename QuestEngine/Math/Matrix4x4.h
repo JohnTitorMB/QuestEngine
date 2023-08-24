@@ -47,6 +47,11 @@ public:
 	static Matrix4x4 RS(const Vector3D& angles, const Vector3D& scale);
 	static Matrix4x4 TR(const Vector3D& translate, const Vector3D& angles);
 	static Matrix4x4 TRS(const Vector3D& translate, const Vector3D& angles, const Vector3D& scale);
+	static Matrix4x4 Orthographic(float left, float right, float bottom, float top, float near, float far);
+	static Matrix4x4 Perspective(float left, float right, float bottom, float top, float near, float far);
+	static Matrix4x4 Perspective(float fov, float aspect, float near, float far);
+
+
 	std::array<float, 16> GetAsArray() const;
 };
 Matrix4x4 operator +(const Matrix4x4& a, const Matrix4x4& b);

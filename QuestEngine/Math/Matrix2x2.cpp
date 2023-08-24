@@ -182,9 +182,9 @@ Matrix2x2 Matrix2x2::Identity()
 
 Matrix2x2 Matrix2x2::Rotate(const float& angle)
 {
-	float angleInRadiant = angle * M_PI / 180.0f;
-		return Matrix2x2(cosf(angleInRadiant), -sinf(angleInRadiant),
-						 sinf(angleInRadiant), cosf(angleInRadiant));
+	float angleInRadian = angle * M_PI / 180.0f;
+		return Matrix2x2(cosf(angleInRadian), -sinf(angleInRadian),
+						 sinf(angleInRadian), cosf(angleInRadian));
 }
 
 Matrix2x2 Matrix2x2::Scale(const Vector2D& scale)

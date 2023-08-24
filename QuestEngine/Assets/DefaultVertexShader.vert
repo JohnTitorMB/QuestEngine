@@ -1,14 +1,14 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
-uniform mat3 model;
-uniform mat3 view;
-uniform mat3 toNDCSpace;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 	
 void main()
 {
 	  // Transform vertex from local space to NDC space
-    vec3 vertexInLocalSpace = vec3(aPos.x, aPos.y, 1.0);
-    vec3 vertexInNDCSpace =vertexInLocalSpace * model * view * toNDCSpace;
+    vec4 vertexInLocalSpace = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    vec4 vertexInNDCSpace =vertexInLocalSpace * model * view * projection;
 
-    gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, aPos.z, 1.0);
+    gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, vertexInNDCSpace.z, vertexInNDCSpace.w);
 }

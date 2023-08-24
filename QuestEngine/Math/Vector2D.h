@@ -27,9 +27,6 @@ struct Vector2D
 	Vector2D& operator/=(float value);
 	bool operator==(const Vector2D& value)const;
 	bool operator!=(const Vector2D& value)const;
-
-private:
-	float m_z = 0;
 };
 std::ostream& operator<<(std::ostream& os, const Vector2D& value);
 

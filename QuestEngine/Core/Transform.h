@@ -1,17 +1,17 @@
 #ifndef _TRANSFORM_H_
 #define  _TRANSFORM_H_
-#include "../Math/Vector2D.h"
-#include "../Math/Matrix3x3.h"
+#include "../Math/Vector3D.h"
+#include "../Math/Matrix4x4.h"
 struct Transform
 {
 public :
 	Transform();
-	Transform(Vector2D position, Vector2D scale, float angle);
-	Vector2D m_position;
-	Vector2D m_scale;
-	float m_angle;
+	Transform(Vector3D position, Vector3D scale, Vector3D angles);
+	Vector3D m_position;
+	Vector3D m_scale;
+	Vector3D m_angles;
 
-	Matrix3x3 TransformMatrix();
+	Matrix4x4 TransformMatrix()const;
 };
 
 #endif // !_TRANSFORM_H_

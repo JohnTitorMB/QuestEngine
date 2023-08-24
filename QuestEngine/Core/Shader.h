@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "../Math/Vector2D.h"
 #include "../Math/Matrix3x3.h"
+#include "../Math/Matrix4x4.h"
 #include <string>
 class Shader
 {
@@ -14,6 +15,7 @@ public :
 	void SetUniformVector4D(std::string name, float v0, float v1, float v2, float v3 );
 	void SetUniformFloat(std::string name, float value);
 	void SetUniformMatrix3x3(std::string name, Matrix3x3 value);
+	void SetUniformMatrix4x4(std::string name, Matrix4x4 value);
 
 private:
 	int m_shaderProgram;

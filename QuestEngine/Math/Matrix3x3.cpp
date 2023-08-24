@@ -251,9 +251,9 @@ Matrix3x3 Matrix3x3::Translate(const Vector2D& translate)
 
 Matrix3x3 Matrix3x3::RotateZ(const float& angle)
 {
-	float angleInRadiant = angle * M_PI / 180.0f;
-	return Matrix3x3(cosf(angleInRadiant), -sinf(angleInRadiant), 0.0f,
-					 sinf(angleInRadiant), cosf(angleInRadiant), 0.0f,
+	float angleInRadian = angle * M_PI / 180.0f;
+	return Matrix3x3(cosf(angleInRadian), -sinf(angleInRadian), 0.0f,
+					 sinf(angleInRadian), cosf(angleInRadian), 0.0f,
 					 0.0f,0.0f,1.0f);
 }
 

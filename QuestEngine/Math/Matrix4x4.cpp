@@ -373,26 +373,26 @@ Matrix4x4 Matrix4x4::Translate(const Vector3D& translate)
 
 Matrix4x4 Matrix4x4::RotateX(const float& angle)
 {
-	float angleInRadiant = angle * M_PI / 180.0f;
+	float angleInRadian = angle * M_PI / 180.0f;
 	return Matrix4x4(1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, cosf(angleInRadiant), -sinf(angleInRadiant), 0.0f,
-		0.0f, sinf(angleInRadiant), cosf(angleInRadiant), 0.0f,
+		0.0f, cosf(angleInRadian), -sinf(angleInRadian), 0.0f,
+		0.0f, sinf(angleInRadian), cosf(angleInRadian), 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 Matrix4x4 Matrix4x4::RotateY(const float& angle)
 {
-	float angleInRadiant = angle * M_PI / 180.0f;
-	return Matrix4x4(cosf(angleInRadiant), 0.0f, sinf(angleInRadiant), 0.0f,
+	float angleInRadian = angle * M_PI / 180.0f;
+	return Matrix4x4(cosf(angleInRadian), 0.0f, sinf(angleInRadian), 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
-		-sinf(angleInRadiant), 0.0f, cosf(angleInRadiant), 0.0f,
+		-sinf(angleInRadian), 0.0f, cosf(angleInRadian), 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f);
 }
 Matrix4x4 Matrix4x4::RotateZ(const float& angle)
 {
-	float angleInRadiant = angle * M_PI / 180.0f;
-	return Matrix4x4(cosf(angleInRadiant), -sinf(angleInRadiant), 0.0f,0.0f,
-					 sinf(angleInRadiant), cosf(angleInRadiant), 0.0f,0.0f,
+	float angleInRadian = angle * M_PI / 180.0f;
+	return Matrix4x4(cosf(angleInRadian), -sinf(angleInRadian), 0.0f,0.0f,
+					 sinf(angleInRadian), cosf(angleInRadian), 0.0f,0.0f,
 					 0.0f, 0.0f,1.0f, 0.0f,
 					 0.0f, 0.0f, 0.0f, 1.0f);
 }
@@ -464,8 +464,38 @@ Vector4D operator*(const Matrix4x4& a, const Vector4D& b)
 std::array<float, 16> Matrix4x4::GetAsArray() const
 {
 	return { m[0][0], m[0][1], m[0][2], m[0][3],
-			 m[1][0], m[1][1], m[1][2], m[0][3],
-			 m[2][0], m[2][1], m[2][2], m[0][3],
-			 m[3][0], m[3][1], m[3][2], m[0][3],
+			 m[1][0], m[1][1], m[1][2], m[1][3],
+			 m[2][0], m[2][1], m[2][2], m[2][3],
+			 m[3][0], m[3][1], m[3][2], m[3][3],
 	};
+}
+
+Matrix4x4 Matrix4x4::Orthographic(float left, float right, float bottom, float top, float near, float far)
+{
+	Matrix4x4 ortho = Matrix4x4(2.0f / (right - left), 0, 0, -(right + left) / (right - left),
+								0, 2.0f / (top - bottom), 0, -(top + bottom) / (top - bottom),
+								0, 0, -2.0f / (far - near), 2.0f*near / (far - near) +1.0f,
+								0,0,0,1);
+
+	return ortho;
+}
+
+Matrix4x4 Matrix4x4::Perspective(float left, float right, float bottom, float top, float near, float far)
+{
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, -(far+near) / (far - near), -2.0f * far * near / (far - near),
+		0, 0, -1, 0);
+
+	return perspective;
+}
+
+Matrix4x4 Matrix4x4::Perspective(float fov, float aspect, float near, float far)
+{
+	Matrix4x4 perspective = Matrix4x4(1.0f / (aspect * tanf(fov / 2.0f)), 0, 0, 0,
+		0, 1.0f / (tanf(fov / 2.0f)), 0, 0,
+		0, 0, -(far + near) / (far - near), -(2.0f * far * near) / (far - near),
+		0, 0, -1, 0);
+	return perspective;
+
 }
