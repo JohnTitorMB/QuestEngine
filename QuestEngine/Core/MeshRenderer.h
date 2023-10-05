@@ -5,6 +5,7 @@
 #include "Transform.h"
 #include "Shader.h"
 #include "Mesh.h"
+#include "Texture.h"
 enum class PolygonMode
 {
 	Fill = GL_FILL,
@@ -20,11 +21,12 @@ private:
 	Shader* m_shader;
 	Transform m_transform;
 	Mesh* m_mesh;
+	Texture* m_texture;
 	bool m_drawPartialMesh = false;
 	int m_partialMeshElementCount = 0;
 	int m_partialMeshStartIndex = 0;
 public:
-	MeshRenderer(Mesh* mesh, Transform transform, Shader* shader);
+	MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Texture* texture);
 	void Draw(Camera* camera, Window* window)const;
 	void SetDrawPartialMesh(bool drawPartialMesh);
 	void SetPartialMeshElementCount(int partialMeshElementCount);

@@ -1,10 +1,11 @@
 #include "MeshRenderer.h"
 #include <iostream>
-MeshRenderer::MeshRenderer(Mesh* mesh, Transform transform, Shader* shader)
+MeshRenderer::MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Texture* texture)
 {
 	m_mesh = mesh;
 	m_transform = transform;
 	m_shader = shader;
+	m_texture = texture;
 }
 
 void MeshRenderer::Draw(Camera* camera, Window* window)const
@@ -18,6 +19,8 @@ void MeshRenderer::Draw(Camera* camera, Window* window)const
 	m_shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
 	
 	m_mesh->UseMesh();
+	m_texture->UseTexture();
+	
 
 	if(m_drawPartialMesh)
 		glDrawElements((int)m_mesh->m_shapeType, m_partialMeshElementCount, GL_UNSIGNED_INT, (void*)(m_partialMeshStartIndex * sizeof(unsigned int)));

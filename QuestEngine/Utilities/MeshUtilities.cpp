@@ -3,7 +3,7 @@
 
 Mesh* MeshUtilities::CreateCube(float size)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = new Mesh(false);
 	float halfSize = size / 2.0f;
 	std::vector<Vector3D> vertices;
 
@@ -37,6 +37,16 @@ Mesh* MeshUtilities::CreateCube(float size)
 	vertices.push_back(Vector3D(halfSize, -halfSize, halfSize));
 	vertices.push_back(Vector3D(halfSize, -halfSize, -halfSize));
 	
+	std::vector<Vector2D> uvs;
+
+	for (int i = 0; i < 6; i++)
+	{
+		uvs.push_back(Vector2D(0, 0));
+		uvs.push_back(Vector2D(1, 0));
+		uvs.push_back(Vector2D(1, 1));
+		uvs.push_back(Vector2D(0, 1));
+	}
+
 	std::vector<unsigned int> indices;
 	indices.push_back(0);
 	indices.push_back(1);
@@ -81,7 +91,7 @@ Mesh* MeshUtilities::CreateCube(float size)
 	indices.push_back(23);
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
-
+	mesh->SetUvs(uvs);
 	return mesh;
 }
 

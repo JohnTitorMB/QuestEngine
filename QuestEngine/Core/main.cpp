@@ -28,21 +28,24 @@ int main()
 	Mesh* mesh = MeshUtilities::CreateCube(1.0f);
 
 	Transform transform = Transform(Vector3D(0, 0, 5.0f), Vector3D(1.0f, 1.0f, 1.0f), Vector3D(0.0f, 0.0f, 0.0f));
-	MeshRenderer* meshRenderer = new MeshRenderer(mesh, transform, shader);
+	Texture* m_texture = new Texture("Assets/Texture.png");
+	MeshRenderer* meshRenderer = new MeshRenderer(mesh, transform, shader, m_texture);
 	float time = 0;
 	Vector3D cameraRelativePosition = Vector3D(0.0f,0.0f,-5.0f);
 	float cameraAngle = 0;
 	float speed = 0.5f;
+
+	glEnable(GL_DEPTH_TEST);
+
 	// Game Engine Loop
 	while (!glfwWindowShouldClose(window->GetWindow()))
 	{
 		glClearColor(0.6f, 0.6f, 0.6f,1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);	
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 		transform.m_position = Vector3D(0, 0, 5.0f);
 		transform.m_angles = Vector3D(0, -cameraAngle, 0.0f);
 		meshRenderer->SetTransform(transform);
 		meshRenderer->Draw(camera, window);
-
 
 		Vector3D cameraPosition = transform.m_position + cameraRelativePosition * Matrix4x4::RotateY(cameraAngle);
 		camera->SetPosition(cameraPosition);
@@ -63,6 +66,9 @@ int main()
 
 	delete meshRenderer;
 	meshRenderer = nullptr;
+
+	delete m_texture;
+	m_texture = nullptr;
 
 	delete camera;
 	camera = nullptr;

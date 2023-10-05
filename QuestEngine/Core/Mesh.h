@@ -2,6 +2,7 @@
 #define _MESH_H_
 #include <vector>
 #include "../Math/Vector3D.h"
+#include "../Math/Vector2D.h"
 #include <glad/glad.h>
 enum class GLDrawType
 {
@@ -16,30 +17,45 @@ enum class ShapeType
 	Line = 0x0001
 };
 
+struct VertexAttribute
+{
+public:
+	Vector3D m_position;
+	Vector2D m_uv; 
+};
 class Mesh
 {
 public:
 
 	GLDrawType m_glDrawType = GLDrawType::GLDYNAMIC_DRAW;
 	ShapeType m_shapeType = ShapeType::TRIANGLE;
-	Mesh();
+	Mesh(bool useOneVbo = true);
+	~Mesh();
 	void SetVertices(std::vector<Vector3D> vertices);
+	void SetUvs(std::vector<Vector2D> uvs);
 	void SetIndices(std::vector<unsigned int> indices);
 	std::vector<Vector3D> GetVertices()const;
+	std::vector<Vector2D> GetUvs()const;
 	std::vector<unsigned int> GetIndices()const;
 	void UseMesh();
 private:
 	std::vector<Vector3D> m_vertices;
 	std::vector<unsigned int> m_indices;
+	std::vector<Vector2D> m_uvs;
 	GLuint m_vao;
-	GLuint m_vbo;
+	std::vector<GLuint> m_vbos;
 	GLuint m_ebo;
-	void GenerateVBO();
+	bool m_useOneVbo = true;
+	GLuint GenerateVBO();
+	void GenerateVBOs(int vboCount);
 	void GenerateEBO();
 	void GenerateVAO();
-	void SetupVertexAttribs(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
-	void ConfigureVBO();
+	void SetupVertexAttribs(GLuint index, int vboIndex, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
+	void ConfigureVerticesBuffer();
+	void ConfigureUvsBuffer();
+	void ConfigureVertexAttributesBuffer();
 	void ConfigureEBO();
+	std::vector<VertexAttribute> CombineVertexBuffer();
 
 };
 
