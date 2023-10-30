@@ -192,7 +192,20 @@
     <None Include="Assets\DefaultVertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Assets\CubeTextureFace.png" />
+    <Image Include="Assets\CylinderTexture16x8.png" />
+    <Image Include="Assets\SphereTexture.png" />
     <Image Include="Assets\Texture.png" />
+    <Image Include="Assets\Tile.png" />
+    <Image Include="Assets\Tile10.png" />
+    <Image Include="Assets\Tile2.png" />
+    <Image Include="Assets\Tile3.png" />
+    <Image Include="Assets\Tile4.png" />
+    <Image Include="Assets\Tile5.png" />
+    <Image Include="Assets\Tile6.png" />
+    <Image Include="Assets\Tile7.png" />
+    <Image Include="Assets\Tile8.png" />
+    <Image Include="Assets\Tile9.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

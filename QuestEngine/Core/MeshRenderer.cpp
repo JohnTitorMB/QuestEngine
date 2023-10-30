@@ -1,11 +1,13 @@
 #include "MeshRenderer.h"
 #include <iostream>
-MeshRenderer::MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Texture* texture)
+MeshRenderer::MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Texture* texture, Vector2D textureTilling, Vector2D textureOffset)
 {
 	m_mesh = mesh;
 	m_transform = transform;
 	m_shader = shader;
 	m_texture = texture;
+	m_textureTilling = textureTilling;
+	m_textureOffset = textureOffset;
 }
 
 void MeshRenderer::Draw(Camera* camera, Window* window)const
@@ -17,7 +19,8 @@ void MeshRenderer::Draw(Camera* camera, Window* window)const
 	m_shader->SetUniformMatrix4x4("model", m_transform.TransformMatrix());
 	m_shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
 	m_shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
-	
+	m_shader->SetUniformVector2D("textureTilling", m_textureTilling);
+	m_shader->SetUniformVector2D("textureOffset", m_textureOffset);
 	m_mesh->UseMesh();
 	m_texture->UseTexture();
 	

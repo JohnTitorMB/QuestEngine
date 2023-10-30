@@ -2,9 +2,10 @@
 in vec2 uv;
 out vec4 FdfragColor;
 uniform sampler2D text;
+
+uniform vec2 textureTilling = vec2(1,1);
+uniform vec2 textureOffset = vec2(0,0);
 void main()
 {
-//	FdfragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
-	FdfragColor = texture(text, uv);
+	FdfragColor = texture(text, uv * textureTilling + textureOffset);
 };

@@ -25,8 +25,10 @@ private:
 	bool m_drawPartialMesh = false;
 	int m_partialMeshElementCount = 0;
 	int m_partialMeshStartIndex = 0;
+	Vector2D m_textureTilling = Vector2D(1, 1);
+	Vector2D m_textureOffset = Vector2D(0, 0);
 public:
-	MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Texture* texture);
+	MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Texture* texture, Vector2D textureTilling = Vector2D(1,1), Vector2D textureOffset = Vector2D(0, 0));
 	void Draw(Camera* camera, Window* window)const;
 	void SetDrawPartialMesh(bool drawPartialMesh);
 	void SetPartialMeshElementCount(int partialMeshElementCount);
