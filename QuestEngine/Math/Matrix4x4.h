@@ -4,6 +4,7 @@
 #include <math.h>
 #include "Vector3D.h"
 #include "Vector4D.h"
+#include "Quaternion.h"
 #include <array>
 struct Matrix4x4
 {
@@ -41,12 +42,13 @@ public:
 	static Matrix4x4 RotateY(const float& angle);
 	static Matrix4x4 RotateZ(const float& angle);
 	static Matrix4x4 Rotate(const Vector3D& angles);
+	static Matrix4x4 Rotate(const Quaternion& q);
 	static Matrix4x4 ScaleXYZ(const Vector3D& scale);
 
 	static Matrix4x4 TS(const Vector3D& translate, const Vector3D& scale);
-	static Matrix4x4 RS(const Vector3D& angles, const Vector3D& scale);
-	static Matrix4x4 TR(const Vector3D& translate, const Vector3D& angles);
-	static Matrix4x4 TRS(const Vector3D& translate, const Vector3D& angles, const Vector3D& scale);
+	static Matrix4x4 RS(const Quaternion& rotation, const Vector3D& scale);
+	static Matrix4x4 TR(const Vector3D& translate, const Quaternion& v);
+	static Matrix4x4 TRS(const Vector3D& translate, const Quaternion& rotation, const Vector3D& scale);
 	static Matrix4x4 Orthographic(float left, float right, float bottom, float top, float near, float far);
 	static Matrix4x4 Perspective(float left, float right, float bottom, float top, float near, float far);
 	static Matrix4x4 Perspective(float fov, float aspect, float near, float far);

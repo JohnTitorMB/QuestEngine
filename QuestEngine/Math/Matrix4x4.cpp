@@ -402,6 +402,26 @@ Matrix4x4 Matrix4x4::Rotate(const Vector3D& angles)
 	return RotateZ(angles.m_z) * RotateY(angles.m_y) * RotateX(angles.m_x);
 }
 
+Matrix4x4 Matrix4x4::Rotate(const Quaternion& q)
+{
+	float m00 = 1.0f - 2.0f * q.m_y * q.m_y - 2.0f * q.m_z * q.m_z;
+	float m01 = 2.0f * (q.m_x * q.m_y - q.m_w * q.m_z);
+	float m02 = 2.0f * (q.m_x * q.m_z + q.m_w * q.m_y);
+
+	float m10 = 2.0f * (q.m_x * q.m_y + q.m_w * q.m_z);
+	float m11 = 1.0f - 2.0f * q.m_x * q.m_x - 2.0f * q.m_z * q.m_z;
+	float m12 = 2.0f * (q.m_y * q.m_z - q.m_w * q.m_x);
+
+	float m20 = 2.0f * (q.m_x * q.m_z - q.m_w * q.m_y);
+	float m21 = 2.0f * (q.m_y * q.m_z + q.m_w * q.m_x);
+	float m22 = 1.0f - 2.0f * q.m_x * q.m_x - 2.0f * q.m_y * q.m_y;
+
+	return Matrix4x4(m00, m01, m02, 0,
+		m10, m11, m12, 0,
+		m20, m21, m22, 0,
+		0, 0, 0, 1);
+}
+
 Matrix4x4 Matrix4x4::ScaleXYZ(const Vector3D& scale)
 {
 	return Matrix4x4(scale.m_x, 0.0f, 0.0f,0.0f,
@@ -415,19 +435,19 @@ Matrix4x4 Matrix4x4::TS(const Vector3D& translate, const Vector3D& scale)
 	return Translate(translate) * ScaleXYZ(scale);
 }
 
-Matrix4x4 Matrix4x4::RS(const Vector3D& angle, const Vector3D& scale)
+Matrix4x4 Matrix4x4::RS(const Quaternion& rotation, const Vector3D& scale)
 {
-	return Rotate(angle) * ScaleXYZ(scale);
+	return Rotate(rotation) * ScaleXYZ(scale);
 }
 
-Matrix4x4 Matrix4x4::TR(const Vector3D& translate, const Vector3D& angles)
+Matrix4x4 Matrix4x4::TR(const Vector3D& translate, const Quaternion& rotation)
 {
-	return Translate(translate) * Rotate(angles);
+	return Translate(translate) * Rotate(rotation);
 }
 
-Matrix4x4 Matrix4x4::TRS(const Vector3D& translate, const Vector3D& angles, const Vector3D& scale)
+Matrix4x4 Matrix4x4::TRS(const Vector3D& translate, const Quaternion& rotation, const Vector3D& scale)
 {
-	return Translate(translate) * Rotate(angles) * ScaleXYZ(scale);
+	return Translate(translate) * Rotate(rotation) * ScaleXYZ(scale);
 }
 
 Vector3D operator*(const Matrix4x4& a, const Vector3D& b)
@@ -499,3 +519,4 @@ Matrix4x4 Matrix4x4::Perspective(float fov, float aspect, float near, float far)
 	return perspective;
 
 }
+

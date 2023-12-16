@@ -4,6 +4,10 @@
 
 struct Vector3D
 {
+	static const Vector3D Right;
+	static const Vector3D Up;
+	static const Vector3D Forward;
+
 	float m_x;
 	float m_y;
 	float m_z;
@@ -18,6 +22,7 @@ struct Vector3D
 	Vector3D operator/(const float& value) const;
 
 	float Magnitude() const;
+	float MagnitudeSquared() const;
 	void Normalize();
 	Vector3D Normalized() const;
 
@@ -30,7 +35,9 @@ struct Vector3D
 
 	static Vector3D CrossProduct(const Vector3D& a, const Vector3D& b);
 	static float DotProduct(const Vector3D& a, const Vector3D& b);
-
+	static Vector3D Orthogonal(const Vector3D& v);
+	static Vector3D Lerp(const Vector3D& v, const Vector3D& v2, float t);
+	static Vector3D Slerp(const Vector3D& v, const Vector3D& v2, float t, bool longPath);
 };
 std::ostream& operator<<(std::ostream& os, const Vector3D& value);
 

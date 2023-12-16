@@ -1,5 +1,11 @@
 #include "Vector3D.h"
 #include <math.h>
+#include "Mathf.h"
+#include "Quaternion.h"
+
+const Vector3D Vector3D::Right = Vector3D(1,0,0);
+const Vector3D Vector3D::Up = Vector3D(0, 1, 0);
+const Vector3D Vector3D::Forward = Vector3D(0, 0, 1);
 
 Vector3D::Vector3D()
 {
@@ -48,12 +54,39 @@ float Vector3D::Magnitude() const
 	return sqrtf(m_x * m_x + m_y * m_y + m_z * m_z);
 }
 
+float Vector3D::MagnitudeSquared() const
+{
+	return m_x * m_x + m_y * m_y + m_z * m_z;
+}
+
 void Vector3D::Normalize()
 {
 	float magnitude = Magnitude();
 	m_x /= magnitude;
 	m_y /= magnitude;
 	m_z /= magnitude;
+}
+
+Vector3D Vector3D::Orthogonal(const Vector3D& v)
+{
+	Vector3D orthogonal;
+
+	if (abs(v.m_x) < abs(v.m_y) && abs(v.m_x) < abs(v.m_z))
+	{
+		orthogonal = Vector3D(0, -v.m_z, v.m_y);
+	}
+	else if (abs(v.m_y) < abs(v.m_z))
+	{
+		orthogonal = Vector3D(-v.m_z, 0, v.m_x);
+	}
+	else
+	{
+		orthogonal = Vector3D(-v.m_y, v.m_x, 0);
+	}
+
+	// Normaliser le vecteur orthogonal
+	orthogonal = orthogonal.Normalized();
+	return orthogonal;
 }
 
 Vector3D& Vector3D::operator+=(const Vector3D& value)
@@ -119,6 +152,29 @@ float Vector3D::DotProduct(const Vector3D& a, const Vector3D& b)
 Vector3D Vector3D::CrossProduct(const Vector3D& a, const Vector3D& b)
 {
 	return Vector3D(a.m_y * b.m_z - b.m_y * a.m_z, a.m_z * b.m_x - b.m_z * a.m_x, a.m_x * b.m_y - b.m_x * a.m_y);
+}
+
+Vector3D Vector3D::Lerp(const Vector3D& v, const Vector3D& v2, float t)
+{
+	return v + (v2 - v) * t;
+}
+
+Vector3D Vector3D::Slerp(const Vector3D& v, const Vector3D& v2, float t, bool longPath)
+{
+	float vMagnitudeSquared = v.MagnitudeSquared();
+	float v2MagnitudeSquared = v2.MagnitudeSquared();
+	float magnitudeSquared = vMagnitudeSquared + (v2MagnitudeSquared - vMagnitudeSquared) * t;
+
+	Vector3D vNorm = v.Normalized();
+	Quaternion q = Quaternion::SetGoToRotation(vNorm, v2.Normalized());
+	Vector3D Axis = q.GetAxis();
+	float angle = q.GetAngle();
+	angle = longPath ? -360 + angle : angle;
+
+	Vector3D slerpDirection = vNorm * sqrt(magnitudeSquared);
+	Quaternion rotateQuat = Quaternion::AxisAngle(Axis, angle * t);
+	
+	return rotateQuat * slerpDirection;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector3D& value)

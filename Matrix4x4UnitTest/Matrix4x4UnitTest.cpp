@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\QuestEngine\Math\Matrix4x4.h"
-
+#include "..\QuestEngine\Math\Quaternion.h"
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Matrix4x4UnitTest
@@ -490,6 +490,19 @@ namespace Matrix4x4UnitTest
 			Assert::IsTrue(rotateVec == expectedResult);
 		}
 
+		TEST_METHOD(RotateByQuaternionUnitTest)
+		{
+			Vector3D angle = Vector3D(25.0f, 63.0f, 34.0f);
+			Matrix4x4 rotateMatrix = Matrix4x4::Rotate(angle);
+			Quaternion q = Quaternion(angle, Quaternion::EulerAngleMode::XYZ);
+			Matrix4x4 qMat = Matrix4x4::Rotate(q);
+			Vector3D vec = Vector3D(0.0f, 1.0f, 0.0f);
+			Vector3D rotateVec = qMat * vec;
+			Vector3D rotateVec2 = q * vec;
+		
+			Assert::IsTrue(rotateVec == rotateVec2);
+		}
+
 		TEST_METHOD(ScaleUnitTest)
 		{
 			Vector3D scale = Vector3D(2.0f, 3.0f, 4.0f);
@@ -522,8 +535,9 @@ namespace Matrix4x4UnitTest
 		TEST_METHOD(RSUnitTest)
 		{
 			Vector3D angle = Vector3D(90.0f, 270.0f, 180.0f);
+			Quaternion rotation = Quaternion::FromEulerAngle(angle);
 			Vector3D scale = Vector3D(2.0f, 2.0f,2.0f);
-			Matrix4x4 RSMatrix = Matrix4x4::RS(angle, scale);
+			Matrix4x4 RSMatrix = Matrix4x4::RS(rotation, scale);
 			Vector3D vec = Vector3D(0.0f, 1.0f,0.0f);
 			Vector3D RSVec = RSMatrix * vec;
 
@@ -539,7 +553,8 @@ namespace Matrix4x4UnitTest
 		{
 			Vector3D translate = Vector3D(3.0f, -5.0f, 3.0f);
 			Vector3D angle = Vector3D(90.0f, 270.0f, 180.0f);
-			Matrix4x4 TRMatrix = Matrix4x4::TR(translate, angle);
+			Quaternion rotation = Quaternion::FromEulerAngle(angle);
+			Matrix4x4 TRMatrix = Matrix4x4::TR(translate, rotation);
 			Vector3D vec = Vector3D(0.0f, 1.0f, 0.0f);
 			Vector3D TRVec = TRMatrix * vec;
 
@@ -556,7 +571,8 @@ namespace Matrix4x4UnitTest
 			Vector3D translate = Vector3D(3.0f, -5.0f, 3.0f);
 			Vector3D angle = Vector3D(90.0f, 270.0f, 180.0f);
 			Vector3D scale = Vector3D(2.0f, 2.0f, 2.0f);
-			Matrix4x4 TRSMatrix = Matrix4x4::TRS(translate, angle, scale);
+			Quaternion rotation = Quaternion::FromEulerAngle(angle);
+			Matrix4x4 TRSMatrix = Matrix4x4::TRS(translate, rotation, scale);
 			Vector3D vec = Vector3D(0.0f, 1.0f, 0.0f);
 			Vector3D TRSVec = TRSMatrix * vec;
 

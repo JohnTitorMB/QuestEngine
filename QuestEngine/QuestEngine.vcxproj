@@ -151,10 +151,12 @@
     <ClCompile Include="..\Library\Glad\src\glad.c" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
+    <ClCompile Include="Math\Mathf.cpp" />
     <ClCompile Include="Math\Matrix4x4.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\MeshRenderer.cpp" />
     <ClCompile Include="Core\Texture.cpp" />
+    <ClCompile Include="Math\Quaternion.cpp" />
     <ClCompile Include="Utilities\MeshUtilities.cpp" />
     <ClCompile Include="Utilities\FileSystem.cpp" />
     <ClCompile Include="Core\main.cpp" />
@@ -171,10 +173,12 @@
   <ItemGroup>
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Library\stb_image.h" />
+    <ClInclude Include="Math\Mathf.h" />
     <ClInclude Include="Math\Matrix4x4.h" />
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\MeshRenderer.h" />
     <ClInclude Include="Core\Texture.h" />
+    <ClInclude Include="Math\Quaternion.h" />
     <ClInclude Include="Utilities\MeshUtilities.h" />
     <ClInclude Include="Utilities\FileSystem.h" />
     <ClInclude Include="Math\Matrix2x2.h" />
