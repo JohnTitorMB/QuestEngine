@@ -1,11 +1,13 @@
 #ifndef _MESH_RENDERER_H_
 #define _MESH_RENDERER_H_
 #include "Camera.h"
+#include "Light.h"
 #include "Window.h"
 #include "Transform.h"
 #include "Shader.h"
 #include "Mesh.h"
 #include "Texture.h"
+#include "Material.h"
 enum class PolygonMode
 {
 	Fill = GL_FILL,
@@ -27,9 +29,10 @@ private:
 	int m_partialMeshStartIndex = 0;
 	Vector2D m_textureTilling = Vector2D(1, 1);
 	Vector2D m_textureOffset = Vector2D(0, 0);
+	Material* m_material;
 public:
-	MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Texture* texture, Vector2D textureTilling = Vector2D(1,1), Vector2D textureOffset = Vector2D(0, 0));
-	void Draw(Camera* camera, Window* window)const;
+	MeshRenderer(Mesh* mesh, Transform transform, Shader* shader, Material* material, Texture* texture, Vector2D textureTilling = Vector2D(1,1), Vector2D textureOffset = Vector2D(0, 0));
+	void Draw(Camera* camera, std::vector<Light*>lights, Window* window)const;
 	void SetDrawPartialMesh(bool drawPartialMesh);
 	void SetPartialMeshElementCount(int partialMeshElementCount);
 	void SetPartialMeshStartIndex(int partialMeshStartIndex);

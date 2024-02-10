@@ -34,7 +34,10 @@ class Texture
 public:
 	Texture(std::string filePath);
 	~Texture();
-	void UseTexture();
+
+	void Bind(int textureIndex);
+	void Unbind(int textureIndex);
+
 	void SetWrapHorizontalParameter(Wrap wrapHorizontalParameter);
 	void SetVerticalParameter(Wrap wrapVerticalParameter);
 	Wrap GetHorizontalParameter()const;

@@ -149,14 +149,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Library\Glad\src\glad.c" />
+    <ClCompile Include="Core\Color.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
+    <ClCompile Include="Core\DirectionalLight.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
+    <ClCompile Include="Core\Light.cpp" />
+    <ClCompile Include="Core\Material.cpp" />
+    <ClCompile Include="Core\LightingSettings.cpp" />
     <ClCompile Include="Math\Mathf.cpp" />
     <ClCompile Include="Math\Matrix4x4.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\MeshRenderer.cpp" />
     <ClCompile Include="Core\Texture.cpp" />
     <ClCompile Include="Math\Quaternion.cpp" />
+    <ClCompile Include="Core\SpotLight.cpp" />
+    <ClCompile Include="Core\PointLight.cpp" />
     <ClCompile Include="Utilities\MeshUtilities.cpp" />
     <ClCompile Include="Utilities\FileSystem.cpp" />
     <ClCompile Include="Core\main.cpp" />
@@ -171,14 +178,21 @@
     <ClCompile Include="Math\Vector4D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Color.h" />
     <ClInclude Include="Core\Camera.h" />
+    <ClInclude Include="Core\DirectionalLight.h" />
     <ClInclude Include="Library\stb_image.h" />
+    <ClInclude Include="Core\Light.h" />
+    <ClInclude Include="Core\Material.h" />
+    <ClInclude Include="Core\LightingSettings.h" />
     <ClInclude Include="Math\Mathf.h" />
     <ClInclude Include="Math\Matrix4x4.h" />
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\MeshRenderer.h" />
     <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Math\Quaternion.h" />
+    <ClInclude Include="Core\SpotLight.h" />
+    <ClInclude Include="Core\PointLight.h" />
     <ClInclude Include="Utilities\MeshUtilities.h" />
     <ClInclude Include="Utilities\FileSystem.h" />
     <ClInclude Include="Math\Matrix2x2.h" />
@@ -192,13 +206,19 @@
     <ClInclude Include="Math\Vector4D.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\BlinnPhongShader.frag" />
+    <None Include="Assets\BlinnPhongShader.vert" />
     <None Include="Assets\DefaultFragmentShader.frag" />
     <None Include="Assets\DefaultVertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\CubeTextureFace.png" />
+    <Image Include="Assets\CubeTextureSpecular.png" />
     <Image Include="Assets\CylinderTexture16x8.png" />
+    <Image Include="Assets\DirectionalLightTexture.png" />
+    <Image Include="Assets\PointLightTexture.png" />
     <Image Include="Assets\SphereTexture.png" />
+    <Image Include="Assets\SpotLightTexture.png" />
     <Image Include="Assets\Texture.png" />
     <Image Include="Assets\Tile.png" />
     <Image Include="Assets\Tile10.png" />

@@ -67,8 +67,16 @@ void Texture::SetMipmapTexture(int level, std::string filePath)
 
 }
 
-void Texture::UseTexture()
+void Texture::Bind(int textureIndex)
 {
+	glActiveTexture(GL_TEXTURE0 + textureIndex);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+}
+
+
+void Texture::Unbind(int textureIndex)
+{
+	glActiveTexture(GL_TEXTURE0 + textureIndex);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 }
 

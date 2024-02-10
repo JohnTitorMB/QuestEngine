@@ -1,6 +1,6 @@
 #include "MeshUtilities.h"
 # define M_PI           3.14159265358979323846  /* pi */
-
+#include <iostream>
 Mesh* MeshUtilities::CreateCube(float size)
 {
 	Mesh* mesh = new Mesh(false);
@@ -92,6 +92,9 @@ Mesh* MeshUtilities::CreateCube(float size)
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
 	mesh->SetUvs(uvs);
+
+	std::cout << "Genere Cube Normal : " << std::endl;
+	mesh->ComputeNormals();
 	return mesh;
 }
 
@@ -142,6 +145,9 @@ Mesh* MeshUtilities::CreateUVSphere(float radius, int segments, int rings)
 	mesh->SetVertices(vertices);
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
+
+	std::cout << "Genere UVSphere Normal : " << std::endl;
+	mesh->ComputeNormals();
 	return mesh;
 }
 
@@ -175,6 +181,9 @@ Mesh* MeshUtilities::CreatePlane(float size)
 	mesh->SetVertices(vertices);
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
+
+	std::cout << "Genere plane Normal : " << std::endl;
+	mesh->ComputeNormals();
 	return mesh;
 }
 
@@ -273,6 +282,9 @@ Mesh* MeshUtilities::CreateCylinder(float radius, int segments, float height)
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
 
+	std::cout << "Genere cylindre Normal : " << std::endl;
+	mesh->ComputeNormals();
+
 	return mesh;
 }
 
@@ -370,6 +382,9 @@ Mesh* MeshUtilities::CreateCone(float radius1, float radius2, int segments, floa
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
 
+	std::cout << "Genere cone Normal : " << std::endl;
+	mesh->ComputeNormals();
+
 	return mesh;
 }
 
@@ -464,6 +479,9 @@ Mesh* MeshUtilities::CreateCustomUVCylinder(float radius, int segments, float he
 
 	mesh->SetUvs(uvs);
 
+	std::cout << "Genere CustomUVCylinder Normal : " << std::endl;
+	mesh->ComputeNormals();
+
 	return mesh;
 
 }
@@ -513,6 +531,8 @@ Mesh* MeshUtilities::CreateCustomConeUV(float radius1, float radius2, int segmen
 
 	mesh->SetUvs(uvs);
 
+	std::cout << "Genere CustomConeUV Normal : " << std::endl;
+	mesh->ComputeNormals();
 	return mesh;
 }
 
@@ -538,6 +558,10 @@ Mesh* MeshUtilities::CreateRectangle(float width, float height)
 
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
+
+	std::cout << "Genere Rectangle Normal : " << std::endl;
+	mesh->ComputeNormals();
+
 	return mesh;
 }
 
@@ -564,6 +588,9 @@ Mesh* MeshUtilities::CreateRegularConvexPolygon(int sideCount, float radius)
 
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
+	std::cout << "Genere RegularConvexPolygon Normal : " << std::endl;
+	mesh->ComputeNormals();
+
 	return mesh;
 }
 

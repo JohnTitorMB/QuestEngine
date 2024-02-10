@@ -469,7 +469,7 @@ Vector4D operator*(const Vector4D& b, const Matrix4x4& a)
 	return Vector4D(a.m[0][0] * b.m_x + a.m[0][1] * b.m_y + a.m[0][2] * b.m_z + a.m[0][3] * b.m_w,
 					a.m[1][0] * b.m_x + a.m[1][1] * b.m_y + a.m[1][2] * b.m_z + a.m[1][3] * b.m_w,
 					a.m[2][0] * b.m_x + a.m[2][1] * b.m_y + a.m[2][2] * b.m_z + a.m[2][3] * b.m_w,
-					a.m[2][0] * b.m_x + a.m[3][1] * b.m_y + a.m[3][2] * b.m_z + a.m[3][3] * b.m_w);
+					a.m[3][0] * b.m_x + a.m[3][1] * b.m_y + a.m[3][2] * b.m_z + a.m[3][3] * b.m_w);
 }
 
 Vector4D operator*(const Matrix4x4& a, const Vector4D& b)
@@ -477,7 +477,7 @@ Vector4D operator*(const Matrix4x4& a, const Vector4D& b)
 	return Vector4D(a.m[0][0] * b.m_x + a.m[0][1] * b.m_y + a.m[0][2] * b.m_z + a.m[0][3] * b.m_w,
 		a.m[1][0] * b.m_x + a.m[1][1] * b.m_y + a.m[1][2] * b.m_z + a.m[1][3] * b.m_w,
 		a.m[2][0] * b.m_x + a.m[2][1] * b.m_y + a.m[2][2] * b.m_z + a.m[2][3] * b.m_w,
-		a.m[2][0] * b.m_x + a.m[3][1] * b.m_y + a.m[3][2] * b.m_z + a.m[3][3] * b.m_w);
+		a.m[3][0] * b.m_x + a.m[3][1] * b.m_y + a.m[3][2] * b.m_z + a.m[3][3] * b.m_w);
 }
 
 
@@ -520,3 +520,12 @@ Matrix4x4 Matrix4x4::Perspective(float fov, float aspect, float near, float far)
 
 }
 
+
+Matrix4x4::operator Matrix3x3() const
+{
+	return Matrix3x3(
+		m[0][0], m[0][1], m[0][2],
+		m[1][0], m[1][1], m[1][2],
+		m[2][0], m[2][1], m[2][2]
+	);
+}

@@ -6,6 +6,7 @@
 #include "Vector4D.h"
 #include "Quaternion.h"
 #include <array>
+#include "Matrix3x3.h"
 struct Matrix4x4
 {
 public:
@@ -31,6 +32,8 @@ public:
 	Matrix4x4& operator *=(const Matrix4x4& b);
 	bool operator==(const Matrix4x4& value)const;
 	bool operator!=(const Matrix4x4& value)const;
+	operator Matrix3x3() const;
+
 
 	Matrix4x4 Transpose()const;
 	Matrix4x4 Inverse()const;

@@ -78,6 +78,27 @@
     <ClCompile Include="Math\Mathf.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Light.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Material.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Color.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\DirectionalLight.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\SpotLight.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PointLight.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LightingSettings.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Window.h">
@@ -137,10 +158,33 @@
     <ClInclude Include="Math\Mathf.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Light.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Material.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Color.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DirectionalLight.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\SpotLight.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PointLight.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LightingSettings.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\DefaultFragmentShader.frag" />
     <None Include="Assets\DefaultVertexShader.vert" />
+    <None Include="Assets\BlinnPhongShader.frag" />
+    <None Include="Assets\BlinnPhongShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Texture.png">
@@ -183,6 +227,18 @@
       <Filter>Fichiers de ressources</Filter>
     </Image>
     <Image Include="Assets\Tile10.png">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="Assets\CubeTextureSpecular.png">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="Assets\SpotLightTexture.png">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="Assets\DirectionalLightTexture.png">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="Assets\PointLightTexture.png">
       <Filter>Fichiers de ressources</Filter>
     </Image>
   </ItemGroup>
