@@ -2,11 +2,14 @@
 #define _DIRECTIONALLIGHT_H_
 #include "Light.h"
 
-class DirectionalLight : public Light
+class DirectionalLightComponent : public LightComponent
 {
 
 public:
+	DirectionalLightComponent();
+	~DirectionalLightComponent();
 	Vector3D m_direction;
-	DirectionalLight();
+
 };
 #endif
+

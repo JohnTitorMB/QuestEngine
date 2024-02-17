@@ -2,6 +2,7 @@
 #define _TEXTURE_H_
 #include <string>
 #include <glad/glad.h>
+#include "Assets.h"
 
 enum class Wrap
 {
@@ -28,10 +29,10 @@ enum class MagnificationFilter
 	Bilinear = GL_LINEAR,
 };
 
-class Texture
+class Texture : public Assets
 {
-
 public:
+
 	Texture(std::string filePath);
 	~Texture();
 
@@ -46,7 +47,6 @@ public:
 	void SetMinification(MinificationFilter minificationFilter);
 	void SetMagnification(MagnificationFilter magnificationFilter);
 	void SetMipmapTexture(int level, std::string filePath);
-
 
 	MinificationFilter SetMinification()const;
 	MagnificationFilter SetMagnification()const;

@@ -2,39 +2,30 @@
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
-#include "LightingSettings.h"
+#include "../LightingSettings.h"
 #include <iostream>
 #include <sstream>
+#include "../../Game/DirectionalLightController.h"
+
 # define M_PI           3.14159265358979323846f  /* pi */
 
-MeshRenderer::MeshRenderer(Mesh* mesh, Transform transform, Shader* shader,	Material* material, Texture* texture, Vector2D textureTilling, Vector2D textureOffset)
+void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)const
 {
-	m_mesh = mesh;
-	m_transform = transform;
-	m_shader = shader;
-	m_material = material;
-	m_texture = texture;
-	m_textureTilling = textureTilling;
-	m_textureOffset = textureOffset;
+	if (m_mesh == nullptr|| m_shader == nullptr || m_material == nullptr)
+		return;
 
-}
-
-void MeshRenderer::Draw(Camera* camera, std::vector<Light*>lights, Window* window)const
-{
 	glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
 
 	m_shader->UseShader();
 
-	m_shader->SetUniformMatrix4x4("model", m_transform.TransformMatrix());
+	Matrix4x4 modelMatrix = m_transformComponent != nullptr ? m_transformComponent->TransformMatrix() : Matrix4x4::Identity();
+	m_shader->SetUniformMatrix4x4("model", modelMatrix);
 	m_shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
 	m_shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
 
-	Matrix3x3 normalMatrix = (Matrix3x3)(m_transform.TransformMatrix()).Inverse().Transpose();
+	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
 	m_shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
 	m_shader->SetUniformVector3D("uViewPos", camera->GetPosition());
-
-	m_shader->SetUniformVector2D("textureTilling", m_textureTilling);
-	m_shader->SetUniformVector2D("textureOffset", m_textureOffset);
 
 	m_shader->SetUniformColor("material.ambientColor", m_material->m_ambientColor);
 	m_shader->SetUniformColor("material.diffuseColor", m_material->m_diffuseColor);
@@ -64,11 +55,12 @@ void MeshRenderer::Draw(Camera* camera, std::vector<Light*>lights, Window* windo
 	int directionalLightCounter = 0;
 	int spotLightCounter = 0;
 	int pointLightCounter = 0;
-	for (int i = 0; i < lights.size(); i++)
+	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
-		if (lights[i]->m_lightType == Light::LightType::Directional)
+		LightComponent* light = *it;
+		if (light->m_lightType == LightComponent::LightType::Directional)
 		{
-			DirectionalLight* directionalLight = dynamic_cast<DirectionalLight*>(lights[i]);
+			DirectionalLightComponent* directionalLight = dynamic_cast<DirectionalLightComponent*>(light);
 			m_shader->SetUniformColor("directionalLight.ambientColor", directionalLight->m_ambiantColor);
 			m_shader->SetUniformColor("directionalLight.diffuseColor", directionalLight->m_diffuseColor);
 			m_shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
@@ -76,9 +68,9 @@ void MeshRenderer::Draw(Camera* camera, std::vector<Light*>lights, Window* windo
 			m_shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
 			directionalLightCounter++;
 		}
-		else if (lights[i]->m_lightType == Light::LightType::Point)
+		else if (light->m_lightType == LightComponent::LightType::Point)
 		{
-			PointLight* pointLight = dynamic_cast<PointLight*>(lights[i]);
+			PointLightComponent* pointLight = dynamic_cast<PointLightComponent*>(light);
 			std::string ambiant = (std::ostringstream() << "pointLights[" << pointLightCounter << "].ambientColor").str();
 			std::string diffuse = (std::ostringstream() << "pointLights[" << pointLightCounter << "].diffuseColor").str();
 			std::string specular = (std::ostringstream() << "pointLights[" << pointLightCounter << "].specularColor").str();
@@ -101,9 +93,9 @@ void MeshRenderer::Draw(Camera* camera, std::vector<Light*>lights, Window* windo
 			m_shader->SetUniformFloat(intensity, pointLight->m_intensity);
 			pointLightCounter++;
 		}
-		else if (lights[i]->m_lightType == Light::LightType::Spot)
+		else if (light->m_lightType == LightComponent::LightType::Spot)
 		{
-			SpotLight* spotLight = dynamic_cast<SpotLight*>(lights[i]);
+			SpotLightComponent* spotLight = dynamic_cast<SpotLightComponent*>(light);
 			std::string ambiant = (std::ostringstream() << "spotLights[" << spotLightCounter << "].ambientColor").str();
 			std::string diffuse = (std::ostringstream() << "spotLights[" << spotLightCounter << "].diffuseColor").str();
 			std::string specular = (std::ostringstream() << "spotLights[" << spotLightCounter << "].specularColor").str();
@@ -153,73 +145,82 @@ void MeshRenderer::Draw(Camera* camera, std::vector<Light*>lights, Window* windo
 	}
 }
 
-void MeshRenderer::SetDrawPartialMesh(bool drawPartialMesh)
+void MeshRendererComponent::SetDrawPartialMesh(bool drawPartialMesh)
 {
 	m_drawPartialMesh = drawPartialMesh;
 }
-void MeshRenderer::SetPartialMeshElementCount(int partialMeshElementCount)
+void MeshRendererComponent::SetPartialMeshElementCount(int partialMeshElementCount)
 {
 	m_partialMeshElementCount = partialMeshElementCount;
 }
 
-void MeshRenderer::SetPartialMeshStartIndex(int partialMeshStartIndex)
+void MeshRendererComponent::SetPartialMeshStartIndex(int partialMeshStartIndex)
 {
 	m_partialMeshStartIndex = partialMeshStartIndex;
 }
 
-void MeshRenderer::SetMesh(Mesh* mesh)
+void MeshRendererComponent::SetMesh(Mesh* mesh)
 {
 	m_mesh = mesh;
 }
 
-void MeshRenderer::SetShader(Shader* shader)
+void MeshRendererComponent::SetShader(Shader* shader)
 {
 	m_shader = shader;
 }
 
-void MeshRenderer::SetPolygonMode(PolygonMode polygonMode)
+void MeshRendererComponent::SetMaterial(Material* material)
+{
+	m_material = material;
+}
+
+void MeshRendererComponent::SetPolygonMode(PolygonMode polygonMode)
 {
 	m_polygonMode = polygonMode;
 }
 
-void MeshRenderer::SetTransform(Transform transform)
+void MeshRendererComponent::SetTransformComponent(TransformComponent* transformComponent)
 {
-	m_transform = transform;
+	m_transformComponent = transformComponent;
 }
 
 
-bool MeshRenderer::GetDrawPartialMesh()const
+bool MeshRendererComponent::GetDrawPartialMesh()const
 {
 	return m_drawPartialMesh;
 }
 
-int MeshRenderer::GetPartialMeshElementCount()const
+int MeshRendererComponent::GetPartialMeshElementCount()const
 {
 	return m_partialMeshElementCount;
 }
 
-int MeshRenderer::GetPartialMeshStartIndex()const
+int MeshRendererComponent::GetPartialMeshStartIndex()const
 {
 	return m_partialMeshStartIndex;
 }
 
-const Mesh* MeshRenderer::GetMesh()const
+const Mesh* MeshRendererComponent::GetMesh()const
 {
 	return m_mesh;
 }
 
-const Shader* MeshRenderer::GetShader()const
+const Shader* MeshRendererComponent::GetShader()const
 {
 	return m_shader;
 }
 
-PolygonMode MeshRenderer::GetPolygonMode()const
+PolygonMode MeshRendererComponent::GetPolygonMode()const
 {
 	return m_polygonMode;
 }
 
-Transform MeshRenderer::GetTransform()const 
+TransformComponent* MeshRendererComponent::GetTransformComponent()const
 {
-	return m_transform;
+	return m_transformComponent;
 }
 
+const Material* MeshRendererComponent::GetMaterial(Material* material)const
+{
+	return m_material;
+}

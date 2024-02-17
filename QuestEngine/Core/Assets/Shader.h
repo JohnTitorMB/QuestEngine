@@ -2,15 +2,17 @@
 #define _SHADER_H_
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../Math/Vector2D.h"
-#include "../Math/Matrix3x3.h"
-#include "../Math/Matrix4x4.h"
-#include "Color.h"
+#include "../../Math/Vector2D.h"
+#include "../../Math/Matrix3x3.h"
+#include "../../Math/Matrix4x4.h"
+#include "../Color.h"
 #include <string>
-class Shader
+#include "Assets.h"
+
+class Shader : public Assets
 {
 public :
-	Shader(const char* vertexShaderSource, const char* fragmentShaderSource);
+	Shader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
 	void UseShader();
 	void SetUniformVector2D(std::string name, Vector2D value);
 	void SetUniformVector3D(std::string name, Vector3D value);

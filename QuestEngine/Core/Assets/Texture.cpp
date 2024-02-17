@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "../Library/stb_image.h"
+#include "../../Library/stb_image.h"
 #include <iostream>
 #define GL_MIRROR_CLAMP_TO_EDGE_EXT 0x8743
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
@@ -15,6 +15,7 @@ Texture::Texture(std::string filePath)
 
 Texture::~Texture()
 {
+	glDeleteTextures(1, &m_textureID);
 }
 
 unsigned char* Texture::LoadTexture(std::string filePath)

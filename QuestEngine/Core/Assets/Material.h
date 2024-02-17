@@ -1,13 +1,14 @@
 #ifndef _MATERIAL_H_
 #define _MATERIAL_H_
 #include "Texture.h"
-#include "Color.h"
-class Material
+#include "../Color.h"
+#include "Assets.h"
+class Material : public Assets
 {
 public:
 	Material();
 	Material(Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess = 32);
-	
+
 	Color m_ambientColor;
 	Color m_diffuseColor;
 	Color m_specularColor;

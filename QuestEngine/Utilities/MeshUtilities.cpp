@@ -1,9 +1,12 @@
 #include "MeshUtilities.h"
 # define M_PI           3.14159265358979323846  /* pi */
 #include <iostream>
-Mesh* MeshUtilities::CreateCube(float size)
+#include "../Core/AssetsManager.h"
+#include "../Core/Assets/Mesh.h"
+
+Mesh* MeshUtilities::CreateCube(const std::string& assetName,float size)
 {
-	Mesh* mesh = new Mesh(false);
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 	float halfSize = size / 2.0f;
 	std::vector<Vector3D> vertices;
 
@@ -93,14 +96,13 @@ Mesh* MeshUtilities::CreateCube(float size)
 	mesh->SetIndices(indices);
 	mesh->SetUvs(uvs);
 
-	std::cout << "Genere Cube Normal : " << std::endl;
 	mesh->ComputeNormals();
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateUVSphere(float radius, int segments, int rings)
+Mesh* MeshUtilities::CreateUVSphere(const std::string& assetName, float radius, int segments, int rings)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 
 	std::vector<Vector3D> vertices;
 	std::vector<Vector2D> uvs;
@@ -146,14 +148,13 @@ Mesh* MeshUtilities::CreateUVSphere(float radius, int segments, int rings)
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
 
-	std::cout << "Genere UVSphere Normal : " << std::endl;
 	mesh->ComputeNormals();
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreatePlane(float size)
+Mesh* MeshUtilities::CreatePlane(const std::string& assetName, float size)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 	float halSize = size / 2.0f;
 
 	std::vector<Vector3D> vertices =
@@ -187,9 +188,9 @@ Mesh* MeshUtilities::CreatePlane(float size)
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateCylinder(float radius, int segments, float height)
+Mesh* MeshUtilities::CreateCylinder(const std::string& assetName, float radius, int segments, float height)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 
 	std::vector<Vector3D> vertices;
 	std::vector<Vector2D> uvs;
@@ -288,9 +289,9 @@ Mesh* MeshUtilities::CreateCylinder(float radius, int segments, float height)
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateCone(float radius1, float radius2, int segments, float height)
+Mesh* MeshUtilities::CreateCone(const std::string& assetName, float radius1, float radius2, int segments, float height)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 
 	std::vector<Vector3D> vertices;
 	std::vector<Vector2D> uvs;
@@ -388,9 +389,9 @@ Mesh* MeshUtilities::CreateCone(float radius1, float radius2, int segments, floa
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateCustomCubeUV(float size, CubeUVInfo cubeUVInfo)
+Mesh* MeshUtilities::CreateCustomCubeUV(const std::string& assetName, float size, CubeUVInfo cubeUVInfo)
 {
-	Mesh* mesh = CreateCube(size);
+	Mesh* mesh = CreateCube(assetName, size);
 	std::vector<Vector2D> uvs;
 	float halfFaceUvSize = cubeUVInfo.uvFaceSize / 2.0f;
 
@@ -435,10 +436,10 @@ Mesh* MeshUtilities::CreateCustomCubeUV(float size, CubeUVInfo cubeUVInfo)
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateCustomUVCylinder(float radius, int segments, float height, Vector2D bodyUVPosition,
+Mesh* MeshUtilities::CreateCustomUVCylinder(const std::string& assetName, float radius, int segments, float height, Vector2D bodyUVPosition,
 	Vector2D bodyUVSize, Vector2D circle1UVPosition, Vector2D circle2UVPosition, float circleUVRadius)
 {
-	Mesh* mesh = CreateCylinder(radius, segments, height);
+	Mesh* mesh = CreateCylinder(assetName, radius, segments, height);
 	std::vector<Vector2D> uvs;
 
 
@@ -486,10 +487,10 @@ Mesh* MeshUtilities::CreateCustomUVCylinder(float radius, int segments, float he
 
 }
 
-Mesh* MeshUtilities::CreateCustomConeUV(float radius1, float radius2, int segments, float height, Vector2D bodyUVPosition,
+Mesh* MeshUtilities::CreateCustomConeUV(const std::string& assetName, float radius1, float radius2, int segments, float height, Vector2D bodyUVPosition,
 	Vector2D bodyUVSize, Vector2D circle1UVPosition, Vector2D circle2UVPosition, float circle1UVRadius, float circle2UVRadius)
 {
-	Mesh* mesh = CreateCone(radius1, radius2, segments, height);
+	Mesh* mesh = CreateCone(assetName, radius1, radius2, segments, height);
 	std::vector<Vector2D> uvs;
 
 
@@ -536,9 +537,9 @@ Mesh* MeshUtilities::CreateCustomConeUV(float radius1, float radius2, int segmen
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateRectangle(float width, float height)
+Mesh* MeshUtilities::CreateRectangle(const std::string& assetName, float width, float height)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 	float halfWidth = width / 2.0f;
 	float halfHeight = height / 2.0f;
 
@@ -565,9 +566,9 @@ Mesh* MeshUtilities::CreateRectangle(float width, float height)
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateRegularConvexPolygon(int sideCount, float radius)
+Mesh* MeshUtilities::CreateRegularConvexPolygon(const std::string& assetName, int sideCount, float radius)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 	std::vector<Vector3D> vertices;
 	float angle = 2.0f * M_PI / sideCount;
 
@@ -594,15 +595,15 @@ Mesh* MeshUtilities::CreateRegularConvexPolygon(int sideCount, float radius)
 	return mesh;
 }
 
-Mesh* MeshUtilities::CreateCircle(float radius)
+Mesh* MeshUtilities::CreateCircle(const std::string& assetName, float radius)
 {
 	const int CIRCLESIDE = 40; // Or any other value that provides enough detail for a circle
-	return MeshUtilities::CreateRegularConvexPolygon(CIRCLESIDE, radius);
+	return MeshUtilities::CreateRegularConvexPolygon(assetName, CIRCLESIDE, radius);
 }
 
-Mesh* MeshUtilities::CreateGrid(int widthTileCount, int heightTileCount)
+Mesh* MeshUtilities::CreateGrid(const std::string& assetName,  int widthTileCount, int heightTileCount)
 {
-	Mesh* mesh = new Mesh();
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
 	std::vector<Vector3D> vertices;
 	std::vector<unsigned int> indices;
 	float widthStep = 2.0f / widthTileCount;

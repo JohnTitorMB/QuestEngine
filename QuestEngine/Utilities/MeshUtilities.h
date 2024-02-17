@@ -1,6 +1,6 @@
 #ifndef _MESH_UTILITIES_H_
 #define _MESH_UTILITIES_H_
-#include "../Core/Mesh.h"
+#include "../Core/Assets/Mesh.h"
 class MeshUtilities
 {
 
@@ -17,23 +17,23 @@ public:
 		float uvFaceSize = 0.25f;
 	};
 
-	static Mesh* CreateCube(float size);
-	static Mesh* CreatePlane(float size);
-	static Mesh* CreateUVSphere(float radius, int segments, int rings);
-	static Mesh* CreateCylinder(float radius, int segments, float height);
-	static Mesh* CreateCone(float radius, float radius2, int segments, float height);
+	static Mesh* CreateCube(const std::string& assetName, float size);
+	static Mesh* CreatePlane(const std::string& assetName, float size);
+	static Mesh* CreateUVSphere(const std::string& assetName, float radius, int segments, int rings);
+	static Mesh* CreateCylinder(const std::string& assetName, float radius, int segments, float height);
+	static Mesh* CreateCone(const std::string& assetName, float radius, float radius2, int segments, float height);
 
-	static Mesh* CreateCustomCubeUV(float size, CubeUVInfo cubeUVInfo);
-	static Mesh* CreateCustomUVCylinder(float radius, int segments, float height, Vector2D bodyUVPosition,
+	static Mesh* CreateCustomCubeUV(const std::string& assetName, float size, CubeUVInfo cubeUVInfo);
+	static Mesh* CreateCustomUVCylinder(const std::string& assetName, float radius, int segments, float height, Vector2D bodyUVPosition,
 		Vector2D bodyUVSize, Vector2D circle1UVPosition, Vector2D circle2UVPosition,
 		float circleUVRadius);
-	static Mesh* CreateCustomConeUV(float radius1, float radius2, int segments, float height, Vector2D bodyUVPosition,
+	static Mesh* CreateCustomConeUV(const std::string& assetName, float radius1, float radius2, int segments, float height, Vector2D bodyUVPosition,
 		Vector2D bodyUVSize, Vector2D circle1UVPosition, Vector2D circle2UVPosition, float circle1UVRadius, float circle2UVRadius);
 
-	static Mesh* CreateRectangle(float width, float height);
-	static Mesh* CreateRegularConvexPolygon(int sideCount, float radius);
-	static Mesh* CreateCircle(float radius);
-	static Mesh* CreateGrid(int widthTileCount, int heightTileCount);
+	static Mesh* CreateRectangle(const std::string& assetName, float width, float height);
+	static Mesh* CreateRegularConvexPolygon(const std::string& assetName, int sideCount, float radius);
+	static Mesh* CreateCircle(const std::string& assetName, float radius);
+	static Mesh* CreateGrid(const std::string& assetName, int widthTileCount, int heightTileCount);
 };
 
 #endif // !_MESH_UTILITIES_H_

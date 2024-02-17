@@ -1,6 +1,6 @@
 #include "Light.h"
 
-Light::Light()
+LightComponent::LightComponent()
 {
 	m_ambiantColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
 	m_diffuseColor = Color(1, 1, 1, 1);

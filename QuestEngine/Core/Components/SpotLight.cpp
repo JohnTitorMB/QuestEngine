@@ -1,6 +1,6 @@
 #include "SpotLight.h"
 
-SpotLight::SpotLight() :Light()
+SpotLightComponent::SpotLightComponent() :LightComponent()
 {
 	m_lightType = LightType::Spot;
 	m_linearValue = 1.0f;

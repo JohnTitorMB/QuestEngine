@@ -15,7 +15,12 @@ struct Quaternion
 		Vector3D m_secondAxis;
 		Vector3D m_thirdAxis;
 
-		EulerAxesAngles() {}
+		EulerAxesAngles() 
+		{
+			m_angle1 = 0.0f;
+			m_angle2 = 0.0f;
+			m_angle3 = 0.0f;
+		}
 
 		EulerAxesAngles(float angle1, float angle2, float angle3, Vector3D firstAxis, Vector3D secondAxis, Vector3D thirdAxis)
 		{

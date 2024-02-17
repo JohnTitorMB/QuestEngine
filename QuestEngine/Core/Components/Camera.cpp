@@ -2,7 +2,7 @@
 #include <iostream>
 # define M_PI           3.14159265358979323846  /* pi */
 
-Camera::Camera(Vector3D position, Vector3D angles, float size, bool isPerspective, bool isHorizontal)
+CameraComponent::CameraComponent(Vector3D position, Vector3D angles, float size, bool isPerspective, bool isHorizontal)
 {
 	m_position = position;
 	m_angles = angles;
@@ -11,7 +11,8 @@ Camera::Camera(Vector3D position, Vector3D angles, float size, bool isPerspectiv
 	m_isPerspective = isPerspective;
 }
 
-Vector2D Camera::GetVerticalAndHorizontalSize(float width, float height)const
+
+Vector2D CameraComponent::GetVerticalAndHorizontalSize(float width, float height)const
 {
 	if (m_isHorizontal)
 		return Vector2D(m_size, m_size * height / width);
@@ -19,80 +20,88 @@ Vector2D Camera::GetVerticalAndHorizontalSize(float width, float height)const
 		return Vector2D(m_size * width / height, m_size);
 }
 
-void Camera::SetPosition(const Vector3D& position)
+void CameraComponent::SetPosition(const Vector3D& position)
 {
 	m_position = position;
 }
 
-void Camera::SetAngle(const Vector3D& angles)
+void CameraComponent::SetAngle(const Vector3D& angles)
 {
 	m_angles = angles;
 }
 
+void CameraComponent::SetProjectionMode(EProjectionMode _projectionMode)
+{
+	if (_projectionMode == EProjectionMode::PERSPECTIVE)
+		m_isPerspective = true;
+	else
+		m_isPerspective = false;
+}
 
-void Camera::SetSizeType(bool isHorizontal)
+
+void CameraComponent::SetSizeType(bool isHorizontal)
 {
 	m_isHorizontal = isHorizontal;
 }
 
-void Camera::SetSize(float size)
+void CameraComponent::SetSize(float size)
 {
 	m_size = size;
 }
-void Camera::SetNear(float near)
+void CameraComponent::SetNear(float near)
 {
 	m_near = near;
 }
 
-void Camera::SetFar(float far)
+void CameraComponent::SetFar(float far)
 {
 	m_far = far;
 }
 
-void Camera::SetFov(float fov)
+void CameraComponent::SetFov(float fov)
 {
 	float fovInRadian = fov * M_PI / 180.0f;
 
 	m_size = 2.0f * m_near * tan(fovInRadian / 2.0f);
 }
 
-Vector3D Camera::GetPosition()const
+Vector3D CameraComponent::GetPosition()const
 {
 	return m_position;
 }
 
-Vector3D  Camera::GetAngles()const
+Vector3D  CameraComponent::GetAngles()const
 {
 	return m_angles;
 }
 
-float Camera::GetSize()const
+float CameraComponent::GetSize()const
 {
 	return m_size;
 }
 
-bool Camera::GetSizeType()const
+bool CameraComponent::GetSizeType()const
 {
 	return m_isHorizontal;
 }
 
-float Camera::GetNear()const
+float CameraComponent::GetNear()const
 {
 	return m_near;
 }
 
 
-float Camera::GetFar()const
+float CameraComponent::GetFar()const
 {
 	return m_far;
 }
 
-Matrix4x4 Camera::ViewMatrix()const
+Matrix4x4 CameraComponent::ViewMatrix()const
 {
 	return Matrix4x4::ScaleXYZ(Vector3D(1.0f, 1.0f,-1.0f)) * Matrix4x4::Rotate(m_angles).Inverse() * Matrix4x4::Translate(m_position).Inverse();
 }
 
-Matrix4x4 Camera::ProjectionMatrix(float windowWidth, float windowHeight)const
+Matrix4x4 CameraComponent::ProjectionMatrix(float windowWidth, float windowHeight)const
 {
 	Vector2D size = GetVerticalAndHorizontalSize(windowWidth, windowHeight);
 

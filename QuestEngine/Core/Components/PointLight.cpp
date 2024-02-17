@@ -1,6 +1,6 @@
 #include "PointLight.h"
 
-PointLight::PointLight() :Light()
+PointLightComponent::PointLightComponent() :LightComponent()
 {
 	m_lightType = LightType::Point;
 	m_linearValue = 1.0f;

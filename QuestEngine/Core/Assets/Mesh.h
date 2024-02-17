@@ -1,9 +1,12 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 #include <vector>
-#include "../Math/Vector3D.h"
-#include "../Math/Vector2D.h"
+#include "../../Math/Vector3D.h"
+#include "../../Math/Vector2D.h"
 #include <glad/glad.h>
+
+#include "Assets.h"
+
 enum class GLDrawType
 {
 	GLSTREAM_DRAW = 0x88E0,
@@ -24,13 +27,14 @@ public:
 	Vector2D m_uv; 
 	Vector3D m_normal; 
 };
-class Mesh
+class Mesh : public Assets
 {
 public:
 
 	GLDrawType m_glDrawType = GLDrawType::GLDYNAMIC_DRAW;
 	ShapeType m_shapeType = ShapeType::TRIANGLE;
 	Mesh(bool useOneVbo = true);
+
 	~Mesh();
 	void SetVertices(std::vector<Vector3D> vertices);
 	void SetUvs(std::vector<Vector2D> uvs);

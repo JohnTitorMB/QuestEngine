@@ -1,11 +1,14 @@
 #include "Shader.h"
 #include <glad/glad.h>
 #include <iostream>
-
-Shader::Shader(const char* vertexShaderSource, const char* fragmentShaderSource)
+#include "../../Utilities/FileSystem.h"
+Shader::Shader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
-	int vertexShaderIndex = ConfigureVertexShader(vertexShaderSource);
-	int fragementShaderIndex = ConfigureFragmentShader(fragmentShaderSource);
+	std::string vertexShaderSource = FileSystem::get_file_contents(vertexShaderFilePath);
+	std::string fragmentShaderSource = FileSystem::get_file_contents(fragmentShaderFilePath);
+
+	int vertexShaderIndex = ConfigureVertexShader(vertexShaderSource.c_str());
+	int fragementShaderIndex = ConfigureFragmentShader(fragmentShaderSource.c_str());
 	ConfigureShaderProgram(vertexShaderIndex, fragementShaderIndex);
 }
 

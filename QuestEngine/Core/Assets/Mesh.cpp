@@ -89,7 +89,7 @@ void Mesh::GenerateVBOs(int vboCount)
 {
 	for (int i = 0; i < vboCount; i++)
 	{
-		m_vbos.push_back(GenerateVBO());
+		m_vbos.push_back(GenerateVBO()); 
 	}
 }
 void Mesh::GenerateEBO()
@@ -209,7 +209,6 @@ void Mesh::ComputeNormals()
 				m_normals[vertexIndice1] = normal;
 				m_normals[vertexIndice2] = normal;
 
-				std::cout << "Normal : " << normal << std::endl;
 			}	
 		}
 
