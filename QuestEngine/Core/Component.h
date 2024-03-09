@@ -10,10 +10,10 @@ public:
 	Component();
 	virtual void Update() {};
 	virtual void Start() {};
+	Entity* GetOwnEntity();
 
 protected:
 	
-	Entity* GetOwnEntity();
 private : 
 	Entity* m_ownEntity = nullptr;
 	void SetOwnEntity(Entity* ownEntity);

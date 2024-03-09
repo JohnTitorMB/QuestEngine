@@ -13,11 +13,11 @@ public :
 		PERSPECTIVE,
 		ORTHOGRAPHIC,
 	};
-	CameraComponent(Vector3D position, Vector3D angles, float size, bool isPerspective = true, bool isHorizontal = true);
+	CameraComponent(Vector3D position, Quaternion rotation, float size, bool isPerspective = true, bool isHorizontal = true);
 	CameraComponent() {};
 private :
 	Vector3D m_position;
-	Vector3D m_angles;
+	Quaternion m_rotation;
 	float m_size = 5.0f;
 	bool m_isHorizontal = false;
 	bool m_isPerspective = true;
@@ -30,7 +30,7 @@ public:
 	void SetProjectionMode(EProjectionMode _projectionMode);
 	
 	void SetPosition(const Vector3D& position);
-	void SetAngle(const Vector3D& angles);
+	void SetRotation(const Quaternion& rotation);
 	void SetSize(float size);
 	void SetSizeType(bool isHorizontal);
 	void SetNear(float near);
@@ -38,7 +38,7 @@ public:
 	void SetFov(float fov);
 	Vector2D GetVerticalAndHorizontalSize(float width, float height)const;
 	Vector3D GetPosition()const;
-	Vector3D GetAngles()const;
+	Quaternion GetRotation()const;
 	float GetNear()const;
 	float GetFar()const;
 	float GetSize()const;

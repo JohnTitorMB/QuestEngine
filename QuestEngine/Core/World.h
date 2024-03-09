@@ -10,7 +10,6 @@ class Entity;
 class World
 {
 	std::set<Entity*> m_entities;
-	std::set<CameraComponent*> m_cameras;
 	std::set<LightComponent*> m_lights;
 	std::set<MeshRendererComponent*> m_meshRenderers;
 	std::set<Component*> m_components;
@@ -24,7 +23,8 @@ protected:
 	~World();
 
 public :
-
+	std::set<CameraComponent*> m_cameras;
+	float deltaTime = 0.0f;
 	static World* Instance();
 
 	World(World& other) = delete;

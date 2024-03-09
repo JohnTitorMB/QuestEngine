@@ -4,6 +4,7 @@
 #include "Components/DirectionalLight.h"
 #include "../Game/DirectionalLightEntity.h"
 #include "../Game/DirectionalLightController.h"
+#include "../Game/CameraController.h"
 #include "Components/Transform.h"
 #include "Components/MeshRenderer.h"
 #include "Components/Camera.h"
@@ -74,15 +75,17 @@ void World::InitWorld()
 
 	//Intialise Camera Entity
 	Vector3D cameraPosition = Vector3D(0.0f, 0.0f, -10.8f);
-	Vector3D cameraAngles = Vector3D(0.0f, 0.0f, 0.0f);
+	Quaternion cameraRotation = Quaternion::Identity();
 
 	Entity* cameraEntity = CreateEntity<Entity>();
 	{
 		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>();
 		cameraComponent->SetPosition(cameraPosition);
-		cameraComponent->SetAngle(cameraAngles);
+		cameraComponent->SetRotation(cameraRotation);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
 		cameraComponent->SetFov(60);
+
+		CameraController* cameraController = cameraEntity->AddComponent<CameraController>();
 	}
 
 	//Intialise Cornell Box Entities

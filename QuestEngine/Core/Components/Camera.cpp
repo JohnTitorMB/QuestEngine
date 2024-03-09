@@ -2,10 +2,10 @@
 #include <iostream>
 # define M_PI           3.14159265358979323846  /* pi */
 
-CameraComponent::CameraComponent(Vector3D position, Vector3D angles, float size, bool isPerspective, bool isHorizontal)
+CameraComponent::CameraComponent(Vector3D position, Quaternion rotation, float size, bool isPerspective, bool isHorizontal)
 {
 	m_position = position;
-	m_angles = angles;
+	m_rotation = rotation;
 	m_size = size;
 	m_isHorizontal = isHorizontal;	
 	m_isPerspective = isPerspective;
@@ -25,9 +25,9 @@ void CameraComponent::SetPosition(const Vector3D& position)
 	m_position = position;
 }
 
-void CameraComponent::SetAngle(const Vector3D& angles)
+void CameraComponent::SetRotation(const Quaternion& rotation)
 {
-	m_angles = angles;
+	m_rotation = rotation;
 }
 
 void CameraComponent::SetProjectionMode(EProjectionMode _projectionMode)
@@ -70,9 +70,9 @@ Vector3D CameraComponent::GetPosition()const
 	return m_position;
 }
 
-Vector3D  CameraComponent::GetAngles()const
+Quaternion CameraComponent::GetRotation()const
 {
-	return m_angles;
+	return m_rotation;
 }
 
 float CameraComponent::GetSize()const
@@ -98,7 +98,7 @@ float CameraComponent::GetFar()const
 
 Matrix4x4 CameraComponent::ViewMatrix()const
 {
-	return Matrix4x4::ScaleXYZ(Vector3D(1.0f, 1.0f,-1.0f)) * Matrix4x4::Rotate(m_angles).Inverse() * Matrix4x4::Translate(m_position).Inverse();
+	return Matrix4x4::ScaleXYZ(Vector3D(1.0f, 1.0f,-1.0f)) * Matrix4x4::Rotate(m_rotation).Inverse() * Matrix4x4::Translate(m_position).Inverse();
 }
 
 Matrix4x4 CameraComponent::ProjectionMatrix(float windowWidth, float windowHeight)const

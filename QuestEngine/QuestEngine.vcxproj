@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Library\Glad\src\glad.c" />
+    <ClCompile Include="Game\CameraController.cpp" />
     <ClCompile Include="Core\Assets\Assets.cpp" />
     <ClCompile Include="Core\AssetsManager.cpp" />
     <ClCompile Include="Core\Color.cpp" />
@@ -157,8 +158,14 @@
     <ClCompile Include="Core\Components\DirectionalLight.cpp" />
     <ClCompile Include="Core\Entity.cpp" />
     <ClCompile Include="Core\World.cpp" />
+    <ClCompile Include="Core\Events\EventCallback.cpp" />
+    <ClCompile Include="Core\Events\Event.cpp" />
     <ClCompile Include="Game\DirectionalLightController.cpp" />
     <ClCompile Include="Game\DirectionalLightEntity.cpp" />
+    <ClCompile Include="Core\Inputs\InputAction.cpp" />
+    <ClCompile Include="Core\Inputs\InputMap.cpp" />
+    <ClCompile Include="Core\Inputs\InputSystem.cpp" />
+    <ClCompile Include="Core\Inputs\InputCode.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
     <ClCompile Include="Core\Assets\Material.cpp" />
@@ -171,6 +178,7 @@
     <ClCompile Include="Math\Quaternion.cpp" />
     <ClCompile Include="Core\Components\SpotLight.cpp" />
     <ClCompile Include="Core\Components\PointLight.cpp" />
+    <ClCompile Include="Utilities\MovingAverage.cpp" />
     <ClCompile Include="Utilities\MeshUtilities.cpp" />
     <ClCompile Include="Utilities\FileSystem.cpp" />
     <ClCompile Include="Core\main.cpp" />
@@ -185,6 +193,7 @@
     <ClCompile Include="Math\Vector4D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\CameraController.h" />
     <ClInclude Include="Core\Assets\Assets.h" />
     <ClInclude Include="Core\AssetsManager.h" />
     <ClInclude Include="Core\Color.h" />
@@ -193,8 +202,14 @@
     <ClInclude Include="Core\Components\DirectionalLight.h" />
     <ClInclude Include="Core\Entity.h" />
     <ClInclude Include="Core\World.h" />
+    <ClInclude Include="Core\Events\EventCallback.h" />
+    <ClInclude Include="Core\Events\Event.h" />
     <ClInclude Include="Game\DirectionalLightController.h" />
     <ClInclude Include="Game\DirectionalLightEntity.h" />
+    <ClInclude Include="Core\Inputs\InputAction.h" />
+    <ClInclude Include="Core\Inputs\InputMap.h" />
+    <ClInclude Include="Core\Inputs\InputSystem.h" />
+    <ClInclude Include="Core\Inputs\InputCode.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />
     <ClInclude Include="Core\Assets\Material.h" />
@@ -207,6 +222,7 @@
     <ClInclude Include="Math\Quaternion.h" />
     <ClInclude Include="Core\Components\SpotLight.h" />
     <ClInclude Include="Core\Components\PointLight.h" />
+    <ClInclude Include="Utilities\MovingAverage.h" />
     <ClInclude Include="Utilities\MeshUtilities.h" />
     <ClInclude Include="Utilities\FileSystem.h" />
     <ClInclude Include="Math\Matrix2x2.h" />

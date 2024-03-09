@@ -2,6 +2,8 @@
 #define _WINDOW_H_
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "Inputs/InputSystem.h"
+
 class Window
 {
 	
@@ -15,6 +17,14 @@ public :
 	void RefreshWidthAndHeight();
 
 	static void SetTheFrameBufferSize(GLFWwindow* window, int width, int height);
+	static InputCode ConvertGLFWInputKeyCode(int keyCode);
+
+	static InputCode ConvertGLFWInputMouseCode(int mouseInput);
+	static float ConvertGLFWInputAction(int action);
+
+	void LockMouseInput(bool lock);
+	float lastPositionX = 0.0f;
+	float lastPositionY = 0.0f;
 private:
 	
 	int m_glMajorVersion = 3;
@@ -28,6 +38,10 @@ private:
 	int InitialiseGLFW();
 	int InitialiseGLAD();
 	int CreateWindow();
+
+	void InitialiseGLFWCallback();
+
+	
 };
 
 #endif // !_WINDOW_H_
