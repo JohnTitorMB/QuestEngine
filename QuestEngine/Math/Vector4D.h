@@ -15,17 +15,20 @@ struct Vector4D
 
 	Vector4D operator+(const Vector4D& value) const;
 	Vector4D operator*(const float& value) const;
+	Vector4D operator*(const Vector4D& value) const;
 	Vector4D operator-(const Vector4D& value) const;
 	Vector4D operator/(const float& value) const;
 
 	float Magnitude() const;
 	void Normalize();
 	Vector4D Normalized() const;
+	Vector4D GetSafeInvertedVector()const;
 
 	Vector4D& operator+=(const Vector4D& value);
-	Vector4D& operator*=(float value);
+	Vector4D& operator*=(const float& value);
+	Vector4D& operator*=(const Vector4D& value);
 	Vector4D& operator-=(const Vector4D& value);
-	Vector4D& operator/=(float value);
+	Vector4D& operator/=(const float& value);
 	bool operator==(const Vector4D& value)const;
 	bool operator!=(const Vector4D& value)const;
 

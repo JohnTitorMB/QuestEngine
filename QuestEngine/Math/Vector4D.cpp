@@ -1,5 +1,6 @@
 #include "Vector4D.h"
 #include <math.h>
+#include "Mathf.h"
 
 Vector4D::Vector4D()
 {
@@ -33,6 +34,11 @@ Vector4D Vector4D::operator+(const Vector4D& value) const
 Vector4D Vector4D::operator*(const float& value) const
 {
 	return Vector4D(m_x * value, m_y * value, m_z * value, m_w * value);
+}
+
+Vector4D Vector4D::operator*(const Vector4D& value) const
+{
+	return Vector4D(m_x * value.m_x, m_y * value.m_y, m_z * value.m_z, m_w * value.m_w);
 }
 
 Vector4D Vector4D::operator-(const Vector4D& value) const
@@ -70,12 +76,22 @@ Vector4D& Vector4D::operator+=(const Vector4D& value)
 	return (*this);
 }
 
-Vector4D& Vector4D::operator*=(float value)
+Vector4D& Vector4D::operator*=(const float& value)
 {
 	m_x *= value;
 	m_y *= value;
 	m_z *= value;
 	m_w *= value;
+
+	return (*this);
+}
+
+Vector4D& Vector4D::operator*=(const Vector4D& value)
+{
+	m_x *= value.m_x;
+	m_y *= value.m_y;
+	m_z *= value.m_z;
+	m_w *= value.m_w;
 
 	return (*this);
 }
@@ -90,7 +106,7 @@ Vector4D& Vector4D::operator-=(const Vector4D& value)
 	return (*this);
 }
 
-Vector4D& Vector4D::operator/=(float value)
+Vector4D& Vector4D::operator/=(const float& value)
 {
 	m_x /= value;
 	m_y /= value;
@@ -114,6 +130,26 @@ bool Vector4D::operator!=(const Vector4D& value) const
 Vector4D Vector4D::Normalized() const
 {
 	return (*this) / Magnitude();
+}
+
+Vector4D Vector4D::GetSafeInvertedVector()const
+{
+	Vector4D safeInvertedVector = Vector4D(0.0f, 0.0f, 0.0f, 0.0f);
+	const float epsilon = Mathf::Epsilon8;
+
+	if (abs(m_x) > epsilon)
+		safeInvertedVector.m_x = 1.0f / m_x;
+
+	if (abs(m_y) > epsilon)
+		safeInvertedVector.m_y = 1.0f / m_y;
+
+	if (abs(m_z) > epsilon)
+		safeInvertedVector.m_z = 1.0f / m_z;
+
+	if (abs(m_w) > epsilon)
+		safeInvertedVector.m_w = 1.0f / m_w;
+
+	return safeInvertedVector;
 }
 
 float Vector4D::DotProduct(const Vector4D& a, const Vector4D& b)

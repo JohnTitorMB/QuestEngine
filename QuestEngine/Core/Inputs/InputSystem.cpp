@@ -30,17 +30,19 @@ InputSystem* InputSystem::Instance()
 	return m_inputSystem;
 }
 
-InputMap& InputSystem::CreateInputMap()
+InputMap* InputSystem::CreateInputMap()
 {
 	InputMap* inputMap = new InputMap();
 	m_inputMaps.push_back(inputMap);
-	return *inputMap;
+	return inputMap;
 }
 
 void InputSystem::DestroyInputMap(InputMap& inputMap)
 {
 	std::vector<InputMap*>::iterator iterator = std::remove(m_inputMaps.begin(), m_inputMaps.end(), &inputMap);
+	inputMap.ClearMap();
 	m_inputMaps.erase(iterator, m_inputMaps.end());
+
 }
 
 void InputSystem::RegisterInput(Window* window, InputCode inputCode, float value)
@@ -74,7 +76,6 @@ void InputSystem::ProcessInput(Window* window)
 
 	bool mouseScrollXIsModified = false;
 	bool mouseScrollYIsModified = false;
-	std::cout << "UpdateFrame : " << std::endl;
 	//Process Input
 	for (auto it = m_unhandledInput.begin(); it != m_unhandledInput.end(); it++)
 	{

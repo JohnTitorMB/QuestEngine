@@ -4,13 +4,19 @@
 
 CameraComponent::CameraComponent(Vector3D position, Quaternion rotation, float size, bool isPerspective, bool isHorizontal)
 {
-	m_position = position;
-	m_rotation = rotation;
 	m_size = size;
 	m_isHorizontal = isHorizontal;	
 	m_isPerspective = isPerspective;
 }
 
+CameraComponent::CameraComponent(const CameraComponent& other) : SceneComponent(other)
+{
+	m_size = other.m_size;
+	m_isHorizontal = other.m_isHorizontal;
+	m_isPerspective = other.m_isPerspective;
+	m_near = other.m_near;
+	m_far = other.m_far;
+}
 
 Vector2D CameraComponent::GetVerticalAndHorizontalSize(float width, float height)const
 {
@@ -18,16 +24,6 @@ Vector2D CameraComponent::GetVerticalAndHorizontalSize(float width, float height
 		return Vector2D(m_size, m_size * height / width);
 	else
 		return Vector2D(m_size * width / height, m_size);
-}
-
-void CameraComponent::SetPosition(const Vector3D& position)
-{
-	m_position = position;
-}
-
-void CameraComponent::SetRotation(const Quaternion& rotation)
-{
-	m_rotation = rotation;
 }
 
 void CameraComponent::SetProjectionMode(EProjectionMode _projectionMode)
@@ -65,16 +61,6 @@ void CameraComponent::SetFov(float fov)
 	m_size = 2.0f * m_near * tan(fovInRadian / 2.0f);
 }
 
-Vector3D CameraComponent::GetPosition()const
-{
-	return m_position;
-}
-
-Quaternion CameraComponent::GetRotation()const
-{
-	return m_rotation;
-}
-
 float CameraComponent::GetSize()const
 {
 	return m_size;
@@ -98,7 +84,7 @@ float CameraComponent::GetFar()const
 
 Matrix4x4 CameraComponent::ViewMatrix()const
 {
-	return Matrix4x4::ScaleXYZ(Vector3D(1.0f, 1.0f,-1.0f)) * Matrix4x4::Rotate(m_rotation).Inverse() * Matrix4x4::Translate(m_position).Inverse();
+	return Matrix4x4::ScaleXYZ(Vector3D(1.0f, 1.0f,-1.0f)) * Matrix4x4::Rotate(GetWorldRotation()).Inverse() * Matrix4x4::Translate(GetWorldPosition()).Inverse();
 }
 
 Matrix4x4 CameraComponent::ProjectionMatrix(float windowWidth, float windowHeight)const
@@ -109,4 +95,17 @@ Matrix4x4 CameraComponent::ProjectionMatrix(float windowWidth, float windowHeigh
 		return Matrix4x4::Perspective(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
 	else
 		return Matrix4x4::Orthographic(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
+}
+
+Component* CameraComponent::Clone()
+{
+	CameraComponent* cameraComponent = new CameraComponent(*this);
+	clonnedObject = cameraComponent;
+	clonnedObject->baseObject = this;
+	return cameraComponent;
+}
+
+void CameraComponent::AssignPointerAndReference()
+{
+	SceneComponent::AssignPointerAndReference();
 }

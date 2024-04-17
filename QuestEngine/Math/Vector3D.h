@@ -7,6 +7,7 @@ struct Vector3D
 	static const Vector3D Right;
 	static const Vector3D Up;
 	static const Vector3D Forward;
+	static const Vector3D Zero;
 
 	float m_x;
 	float m_y;
@@ -18,6 +19,7 @@ struct Vector3D
 
 	Vector3D operator+(const Vector3D& value) const;
 	Vector3D operator*(const float& value) const;
+	Vector3D operator*(const Vector3D& value) const;
 	Vector3D operator-(const Vector3D& value) const;
 	Vector3D operator/(const float& value) const;
 
@@ -25,11 +27,12 @@ struct Vector3D
 	float MagnitudeSquared() const;
 	void Normalize();
 	Vector3D Normalized() const;
-
+	Vector3D GetSafeInvertedVector()const;
 	Vector3D& operator+=(const Vector3D& value);
-	Vector3D& operator*=(float value);
+	Vector3D& operator*=(const float& value);
+	Vector3D& operator*=(const Vector3D& value);
 	Vector3D& operator-=(const Vector3D& value);
-	Vector3D& operator/=(float value);
+	Vector3D& operator/=(const float& value);
 	bool operator==(const Vector3D& value)const;
 	bool operator!=(const Vector3D& value)const;
 

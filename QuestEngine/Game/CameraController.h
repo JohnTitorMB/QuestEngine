@@ -5,19 +5,23 @@
 #include "../Core/Events/EventCallback.h"
 #include "../Core/Inputs/InputAction.h"
 #include "../Utilities/MovingAverage.h"
+#include "../Core/Inputs/InputMap.h"
 
 
 class CameraController : public Component
 {
-
 private:
-
+	InputMap* m_inputMap;
 	CameraComponent* m_cameraComponent;
 protected:
 	void Update() override;
 	void Start() override;
 public:
 	CameraController();
+	CameraController(const CameraController& cameraController);
+	~CameraController();
+	Component* Clone()override;
+	void AssignPointerAndReference()override;
 
 	void MoveRight(InputCallbackData data);
 	void MoveLeft(InputCallbackData data);

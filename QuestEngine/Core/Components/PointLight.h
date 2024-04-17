@@ -7,10 +7,12 @@ class PointLightComponent : public LightComponent
 
 public:
 	PointLightComponent();
-	Vector3D m_position;
+	PointLightComponent(const PointLightComponent& other);
 	float m_constantValue;
 	float m_linearValue;
 	float m_quadraticValue;
+	Component* Clone()override;
+	void AssignPointerAndReference()override;
 };
 
 #endif

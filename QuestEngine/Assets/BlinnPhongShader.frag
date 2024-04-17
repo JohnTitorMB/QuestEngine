@@ -19,6 +19,7 @@ struct DirectionalLight
     vec3 direction;
 };  
 uniform DirectionalLight directionalLight;
+uniform int directionalLightCount = 0;
 
 struct PointLight  
 {
@@ -175,7 +176,9 @@ void main()
 {
     vec4 ambientColor = globalAmbiantColor * material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
     vec3 color = vec3(ambientColor.r, ambientColor.g, ambientColor.b);
-    color += ComputeDirectionalLightColor(directionalLight);
+
+    if(directionalLightCount > 0)
+        color += ComputeDirectionalLightColor(directionalLight);
 
     for(int i = 0; i < pointLightCount; i++)
         color += ComputePointLight(pointLights[i]);

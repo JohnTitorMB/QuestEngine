@@ -9,6 +9,17 @@
 
 # define M_PI           3.14159265358979323846f  /* pi */
 
+MeshRendererComponent::MeshRendererComponent(const MeshRendererComponent& other) : SceneComponent(other)
+{
+	m_polygonMode = other.m_polygonMode;
+	m_shader = other.m_shader;
+	m_mesh = other.m_mesh;
+	m_drawPartialMesh = other.m_drawPartialMesh;
+	m_partialMeshElementCount = other.m_partialMeshElementCount;
+	m_partialMeshStartIndex = other.m_partialMeshStartIndex;
+	m_material = other.m_material;
+}
+
 void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)const
 {
 	if (m_mesh == nullptr|| m_shader == nullptr || m_material == nullptr)
@@ -18,14 +29,14 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 	m_shader->UseShader();
 
-	Matrix4x4 modelMatrix = m_transformComponent != nullptr ? m_transformComponent->TransformMatrix() : Matrix4x4::Identity();
+	Matrix4x4 modelMatrix = GetTransform().TransformMatrix();
 	m_shader->SetUniformMatrix4x4("model", modelMatrix);
 	m_shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
 	m_shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
 
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
 	m_shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
-	m_shader->SetUniformVector3D("uViewPos", camera->GetPosition());
+	m_shader->SetUniformVector3D("uViewPos", camera->GetTransform().GetPosition());
 
 	m_shader->SetUniformColor("material.ambientColor", m_material->m_ambientColor);
 	m_shader->SetUniformColor("material.diffuseColor", m_material->m_diffuseColor);
@@ -64,7 +75,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			m_shader->SetUniformColor("directionalLight.ambientColor", directionalLight->m_ambiantColor);
 			m_shader->SetUniformColor("directionalLight.diffuseColor", directionalLight->m_diffuseColor);
 			m_shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
-			m_shader->SetUniformVector3D("directionalLight.direction", directionalLight->m_direction);
+			m_shader->SetUniformVector3D("directionalLight.direction", directionalLight->GetForwardVector());
 			m_shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
 			directionalLightCounter++;
 		}
@@ -85,7 +96,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			m_shader->SetUniformColor(ambiant, pointLight->m_ambiantColor);
 			m_shader->SetUniformColor(diffuse, pointLight->m_diffuseColor);
 			m_shader->SetUniformColor(specular, pointLight->m_specularColor);
-			m_shader->SetUniformVector3D(position, pointLight->m_position);
+			m_shader->SetUniformVector3D(position, pointLight->GetWorldPosition());
 			m_shader->SetUniformColor(ambiant, pointLight->m_ambiantColor);
 			m_shader->SetUniformFloat(constant, pointLight->m_constantValue);
 			m_shader->SetUniformFloat(linear, pointLight->m_linearValue);
@@ -113,8 +124,8 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			m_shader->SetUniformColor(ambiant, spotLight->m_ambiantColor);
 			m_shader->SetUniformColor(diffuse, spotLight->m_diffuseColor);
 			m_shader->SetUniformColor(specular, spotLight->m_specularColor);
-			m_shader->SetUniformVector3D(position, spotLight->m_position);
-			m_shader->SetUniformVector3D(direction, spotLight->m_direction);
+			m_shader->SetUniformVector3D(position, spotLight->GetWorldPosition());
+			m_shader->SetUniformVector3D(direction, spotLight->GetForwardVector());
 
 			float spotCosAngle = cosf(spotLight->m_spotAngle * M_PI/180.0f);
 			float spotCosSmoothValue = cosf((spotLight->m_spotAngle - spotLight->m_spotAngle * spotLight->m_spotSmoothValue) * M_PI/180.0f);
@@ -131,6 +142,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	}
 	m_shader->SetUniformInt("pointLightCount", pointLightCounter);
 	m_shader->SetUniformInt("spotLightCount", spotLightCounter);
+	m_shader->SetUniformInt("directionalLightCount", directionalLightCounter);
 	m_shader->SetUniformColor("globalAmbiantColor", LightingSettings::m_globalAmbiantColor);
 
 	
@@ -179,12 +191,6 @@ void MeshRendererComponent::SetPolygonMode(PolygonMode polygonMode)
 	m_polygonMode = polygonMode;
 }
 
-void MeshRendererComponent::SetTransformComponent(TransformComponent* transformComponent)
-{
-	m_transformComponent = transformComponent;
-}
-
-
 bool MeshRendererComponent::GetDrawPartialMesh()const
 {
 	return m_drawPartialMesh;
@@ -215,9 +221,17 @@ PolygonMode MeshRendererComponent::GetPolygonMode()const
 	return m_polygonMode;
 }
 
-TransformComponent* MeshRendererComponent::GetTransformComponent()const
+Component* MeshRendererComponent::Clone()
 {
-	return m_transformComponent;
+	MeshRendererComponent* meshRendererComponent = new MeshRendererComponent(*this);
+	clonnedObject = meshRendererComponent;
+	clonnedObject->baseObject = this;
+	return meshRendererComponent;
+}
+
+void MeshRendererComponent::AssignPointerAndReference()
+{
+	SceneComponent::AssignPointerAndReference();
 }
 
 const Material* MeshRendererComponent::GetMaterial(Material* material)const

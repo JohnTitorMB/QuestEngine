@@ -1,5 +1,6 @@
 #include "Vector2D.h"
 #include <math.h>
+#include "Mathf.h"
 
 Vector2D::Vector2D()
 {
@@ -29,6 +30,11 @@ Vector2D Vector2D::operator*(const float& value) const
 	return Vector2D(m_x * value, m_y * value);
 }
 
+Vector2D Vector2D::operator*(const Vector2D& value) const
+{
+	return Vector2D(m_x * value.m_x, m_y * value.m_y);
+}
+
 Vector2D Vector2D::operator-(const Vector2D& value) const
 {
 	return Vector2D(m_x - value.m_x, m_y - value.m_y);
@@ -52,6 +58,20 @@ void Vector2D::Normalize()
 	m_y /= magnitude;
 }
 
+Vector2D Vector2D::GetSafeInvertedVector()const
+{
+	Vector2D safeInvertedVector = Vector2D(0.0f, 0.0f);
+	const float epsilon = Mathf::Epsilon8;
+
+	if (abs(m_x) > epsilon)
+		safeInvertedVector.m_x = 1.0f / m_x;
+
+	if (abs(m_y) > epsilon)
+		safeInvertedVector.m_y = 1.0f / m_y;
+
+	return safeInvertedVector;
+}
+
 Vector2D& Vector2D::operator+=(const Vector2D& value)
 {
 	m_x += value.m_x;
@@ -60,10 +80,18 @@ Vector2D& Vector2D::operator+=(const Vector2D& value)
 	return (*this);
 }
 
-Vector2D& Vector2D::operator*=(float value)
+Vector2D& Vector2D::operator*=(const float& value)
 {
 	m_x *= value;
 	m_y *= value;
+
+	return (*this);
+}
+
+Vector2D& Vector2D::operator*=(const Vector2D& value)
+{
+	m_x *= value.m_x;
+	m_y *= value.m_y;
 
 	return (*this);
 }
@@ -76,7 +104,7 @@ Vector2D& Vector2D::operator-=(const Vector2D& value)
 	return (*this);
 }
 
-Vector2D& Vector2D::operator/=(float value)
+Vector2D& Vector2D::operator/=(const float& value)
 {
 	m_x /= value;
 	m_y /= value;

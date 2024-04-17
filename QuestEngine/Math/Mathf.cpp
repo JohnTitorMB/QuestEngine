@@ -3,7 +3,8 @@
 const float Mathf::PI = 3.14159265358979323846f;
 const float Mathf::RadToDeg = 57.2957795131f;
 const float Mathf::DegToRad = 0.01745329252f;
-const float Mathf::Epsilon7 = 1e-7;
+const float Mathf::Epsilon7 = 1e-7f;
+const float Mathf::Epsilon8 = 1e-8f;
 
 float Mathf::Clamp(float value, float min, float max)
 {

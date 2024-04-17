@@ -20,6 +20,7 @@ public:
 	void UnBindInputCode(std::string inputActionName, InputCode inputCode);
 	void Enable();
 	void Disable();
+	void ClearMap();
 };
 
 #endif

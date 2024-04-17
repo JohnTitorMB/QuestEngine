@@ -9,7 +9,9 @@
 #include "Components/MeshRenderer.h"
 #include "Components/Camera.h"
 #include "LightingSettings.h"
-
+#include "../Game/SceneGraphTestComponent.h"
+#include "SceneManager.h"
+#include "../Game/SceneSwitchController.h"
 World* World::m_world = nullptr;
 
 World::World()
@@ -29,17 +31,7 @@ World* World::Instance()
 
 World::~World()
 {
-	for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
-	{
-		Entity* entity = *it;
-		delete entity;
-	}
-
-	m_entities.clear();
-	m_components.clear();
-	m_meshRenderers.clear();
-	m_cameras.clear();
-	m_lights.clear();
+	DestroyWorldEntity();
 
 	if (m_world)
 	{
@@ -73,19 +65,20 @@ void World::InitWorld()
 {
 	InitAssets();
 
+	Scene& cornellBoxScene = SceneManager::Instance()->CreateScene();
+
 	//Intialise Camera Entity
 	Vector3D cameraPosition = Vector3D(0.0f, 0.0f, -10.8f);
 	Quaternion cameraRotation = Quaternion::Identity();
-
-	Entity* cameraEntity = CreateEntity<Entity>();
+	Entity* cameraEntity = cornellBoxScene.CreateEntity<Entity>();
 	{
-		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>();
-		cameraComponent->SetPosition(cameraPosition);
-		cameraComponent->SetRotation(cameraRotation);
+		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
+		cameraComponent->SetWorldPosition(cameraPosition);
+		cameraComponent->SetWorldRotation(cameraRotation);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
 		cameraComponent->SetFov(60);
 
-		CameraController* cameraController = cameraEntity->AddComponent<CameraController>();
+		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 	}
 
 	//Intialise Cornell Box Entities
@@ -112,16 +105,13 @@ void World::InitWorld()
 
 	for (int i = 0; i < 5; i++)
 	{
-		Entity* cubeEntity = CreateEntity<Entity>();
-		{
-			TransformComponent* transformComponent = cubeEntity->AddComponent<TransformComponent>();
-			transformComponent->SetPosition(entitiesPosition[i]);
-			transformComponent->SetRotation(entitiesRotation[i]);
-			transformComponent->SetScale(entitiesScale[i]);
-
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>();
+		Entity* cubeEntity = cornellBoxScene.CreateEntity<Entity>();
+		{			
+			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetWorldPosition(entitiesPosition[i]);
+			meshRendererComponent->SetWorldRotation(entitiesRotation[i]);
+			meshRendererComponent->SetWorldScale(entitiesScale[i]);
 			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetTransformComponent(transformComponent);
 			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
 			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(i)));
 		}
@@ -129,26 +119,79 @@ void World::InitWorld()
 
 
 	//Initialise Directional Light entity
-	DirectionalLightEntity* lightEntity = CreateEntity<DirectionalLightEntity>();
+	DirectionalLightEntity* lightEntity = cornellBoxScene.CreateEntity<DirectionalLightEntity>();
 	{
-		DirectionalLightComponent* dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>();
-		dLightComponent->m_direction = Vector3D(0, 0, 1).Normalized();
+		DirectionalLightComponent* dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
 		dLightComponent->m_ambiantColor = Color(0, 0, 0, 1.0f);
 		dLightComponent->m_specularColor = Color(0.3f, 0.3f, 0.3f, 1.0f);
 		dLightComponent->m_intensity = 3.0f;
 		
-//		lightEntity->SetDirectionalLightComponent(dLightComponent);
-
-		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>();
+		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 	}	
 
-	for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
+	Entity* sceneSwitchController = cornellBoxScene.CreateEntity<Entity>();
 	{
-		Entity* entity = *it;
-		entity->Start();
+		sceneSwitchController->AddComponent<SceneSwitchController>();
 	}
 
+	Scene& graphSceneText = SceneManager::Instance()->CreateScene();
+	Entity* camera2Entity = graphSceneText.CreateEntity<Entity>();
+	{
+		CameraComponent* cameraComponent = camera2Entity->AddComponent<CameraComponent>(true);
+		cameraComponent->SetWorldPosition(cameraPosition);
+		cameraComponent->SetWorldRotation(cameraRotation);
+		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+		cameraComponent->SetFov(60);
+
+		CameraController* cameraController = camera2Entity->AddComponent<CameraController>(true);
+	}
+
+	Entity* cube2Entity = graphSceneText.CreateEntity<Entity>();
+	MeshRendererComponent* meshRenderer2Component = cube2Entity->AddComponent<MeshRendererComponent>(true);
+	meshRenderer2Component->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+	meshRenderer2Component->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+	meshRenderer2Component->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
+
+	Entity* cube3Entity = graphSceneText.CreateEntity<Entity>();
+	MeshRendererComponent* meshRenderer3Component = cube3Entity->AddComponent<MeshRendererComponent>(true);
+	meshRenderer3Component->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+	meshRenderer3Component->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+	meshRenderer3Component->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
+
+	Entity* cube4Entity = graphSceneText.CreateEntity<Entity>();
+	MeshRendererComponent* childMeshComponent = cube4Entity->AddComponent<MeshRendererComponent>(true);
+	childMeshComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+	childMeshComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+	childMeshComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(2)));
+
+	Entity* cube5Entity = graphSceneText.CreateEntity<Entity>();
+	MeshRendererComponent* child2MeshComponent = cube4Entity->AddComponent<MeshRendererComponent>(true);
+	child2MeshComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+	child2MeshComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+	child2MeshComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(3)));
+
+	SceneGraphTestComponent* sceneGraphTestComponent = cube2Entity->AddComponent<SceneGraphTestComponent>(true);
+	sceneGraphTestComponent->SetSceneComponent(meshRenderer2Component);
+	sceneGraphTestComponent->SetSceneComponent2(meshRenderer3Component);
+	sceneGraphTestComponent->SetSceneComponentChild(childMeshComponent);
+	sceneGraphTestComponent->SetSceneComponentChild2(child2MeshComponent);
+
+	meshRenderer2Component->SetWorldPosition(Vector3D(0, 1, 0));
+	childMeshComponent->SetParent(meshRenderer2Component);
+	childMeshComponent->SetRelativePosition(Vector3D(4.0f, 0, 0));
+
+	child2MeshComponent->SetParent(childMeshComponent);
+	child2MeshComponent->SetRelativePosition(Vector3D(2.0f, 0, 0));
+
+	meshRenderer3Component->SetWorldPosition(Vector3D(-2, 1, 0));
+
+	Entity* sceneSwitchController2 = graphSceneText.CreateEntity<Entity>();
+	{
+		sceneSwitchController2->AddComponent<SceneSwitchController>();
+	}
+
+	SceneManager::Instance()->LoadScene(1);
 }
 
 
@@ -178,6 +221,21 @@ void World::Display(Window* window)
 	}
 }
 
+void World::DestroyWorldEntity()
+{
+	for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
+	{
+		Entity* entity = *it;
+		delete entity;
+	}
+
+	m_entities.clear();
+	m_components.clear();
+	m_meshRenderers.clear();
+	m_cameras.clear();
+	m_lights.clear();
+}
+
 void World::RegisterComponent(Component* component)
 {
 	m_components.insert(component);
@@ -193,4 +251,20 @@ void World::RegisterComponent(Component* component)
 	CameraComponent* c = dynamic_cast<CameraComponent*>(component);
 	if (c)
 		m_cameras.insert(c);
+}
+
+void World::UnRegisterComponent(Component* component)
+{
+	m_components.erase(component);
+	MeshRendererComponent* m = dynamic_cast<MeshRendererComponent*>(component);
+	if (m)
+		m_meshRenderers.erase(m);
+
+	LightComponent* l = dynamic_cast<LightComponent*>(component);
+	if (l)
+		m_lights.erase(l);
+
+	CameraComponent* c = dynamic_cast<CameraComponent*>(component);
+	if (c)
+		m_cameras.erase(c);
 }

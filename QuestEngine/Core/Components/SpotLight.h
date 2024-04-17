@@ -6,15 +6,17 @@ class SpotLightComponent : public LightComponent
 public:
 
 	SpotLightComponent();
+	SpotLightComponent(const SpotLightComponent& other);
 
-	Vector3D m_position;
-	Vector3D m_direction;
 	float m_spotAngle;
 	float m_spotSmoothValue;
 
 	float m_constantValue;
 	float m_linearValue;
 	float m_quadraticValue;
+
+	Component* Clone()override;
+	void AssignPointerAndReference()override;
 };
 
 #endif

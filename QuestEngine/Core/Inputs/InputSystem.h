@@ -29,7 +29,7 @@ private :
 public:
 	static InputSystem* Instance();
 
-	InputMap& CreateInputMap();
+	InputMap* CreateInputMap();
 	void DestroyInputMap(InputMap& inputMap);
 
 	void RegisterInput(Window* window, InputCode inputCode, float value);

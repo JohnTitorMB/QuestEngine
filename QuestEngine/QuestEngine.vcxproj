@@ -178,6 +178,12 @@
     <ClCompile Include="Math\Quaternion.cpp" />
     <ClCompile Include="Core\Components\SpotLight.cpp" />
     <ClCompile Include="Core\Components\PointLight.cpp" />
+    <ClCompile Include="Core\Scene.cpp" />
+    <ClCompile Include="Core\SceneManager.cpp" />
+    <ClCompile Include="Core\Components\SceneComponent.cpp" />
+    <ClCompile Include="Game\SceneGraphTestComponent.cpp" />
+    <ClCompile Include="Core\Object.cpp" />
+    <ClCompile Include="Game\SceneSwitchController.cpp" />
     <ClCompile Include="Utilities\MovingAverage.cpp" />
     <ClCompile Include="Utilities\MeshUtilities.cpp" />
     <ClCompile Include="Utilities\FileSystem.cpp" />
@@ -222,6 +228,12 @@
     <ClInclude Include="Math\Quaternion.h" />
     <ClInclude Include="Core\Components\SpotLight.h" />
     <ClInclude Include="Core\Components\PointLight.h" />
+    <ClInclude Include="Core\Scene.h" />
+    <ClInclude Include="Core\SceneManager.h" />
+    <ClInclude Include="Core\Components\SceneComponent.h" />
+    <ClInclude Include="Game\SceneGraphTestComponent.h" />
+    <ClInclude Include="Core\Object.h" />
+    <ClInclude Include="Game\SceneSwitchController.h" />
     <ClInclude Include="Utilities\MovingAverage.h" />
     <ClInclude Include="Utilities\MeshUtilities.h" />
     <ClInclude Include="Utilities\FileSystem.h" />

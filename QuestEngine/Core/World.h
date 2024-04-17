@@ -4,18 +4,25 @@
 #include "Components/MeshRenderer.h"
 #include "Components/Light.h"
 #include "Window.h"
-
+#include <unordered_map>
 
 class Entity;
 class World
 {
+	friend class Entity;
+	friend class SceneManager;
+
+private:
 	std::set<Entity*> m_entities;
 	std::set<LightComponent*> m_lights;
 	std::set<MeshRendererComponent*> m_meshRenderers;
 	std::set<Component*> m_components;
+	std::set<CameraComponent*> m_cameras;
 
+private:
+	void DestroyWorldEntity();
 	void RegisterComponent(Component* component);
-	friend class Entity;
+	void UnRegisterComponent(Component* component);
 
 protected:
 	static World* m_world;
@@ -23,7 +30,6 @@ protected:
 	~World();
 
 public :
-	std::set<CameraComponent*> m_cameras;
 	float deltaTime = 0.0f;
 	static World* Instance();
 
@@ -33,10 +39,9 @@ public :
 	T* CreateEntity()
 	{
 		static_assert(std::is_base_of<Entity, T>::value, "T must be derived from Entity");
-		T* entity = new T();
+		Entity* entity = (Entity*)(new T());
 		m_entities.insert(entity);
-
-		return entity;
+		return (T*)entity;
 	}
 	void InitAssets();
 	void InitWorld();

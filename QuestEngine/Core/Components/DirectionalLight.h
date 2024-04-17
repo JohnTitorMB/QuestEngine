@@ -7,9 +7,10 @@ class DirectionalLightComponent : public LightComponent
 
 public:
 	DirectionalLightComponent();
+	DirectionalLightComponent(const DirectionalLightComponent& other);
 	~DirectionalLightComponent();
-	Vector3D m_direction;
-
+	Component* Clone()override;
+	void AssignPointerAndReference()override;
 };
 #endif
 

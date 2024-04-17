@@ -15,6 +15,10 @@ protected:
 public:
 
 	DirectionalLightControllerComponent();
+	DirectionalLightControllerComponent(const DirectionalLightControllerComponent& other);
 	void SetDirectionalLightComponent(DirectionalLightComponent* directionalLightComponent);
+
+	Component* Clone()override;
+	void AssignPointerAndReference()override;
 };
 #endif

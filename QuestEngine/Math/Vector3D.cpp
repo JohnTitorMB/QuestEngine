@@ -6,6 +6,7 @@
 const Vector3D Vector3D::Right = Vector3D(1,0,0);
 const Vector3D Vector3D::Up = Vector3D(0, 1, 0);
 const Vector3D Vector3D::Forward = Vector3D(0, 0, 1);
+const Vector3D Vector3D::Zero = Vector3D(0, 0, 0);
 
 Vector3D::Vector3D()
 {
@@ -36,6 +37,11 @@ Vector3D Vector3D::operator+(const Vector3D& value) const
 Vector3D Vector3D::operator*(const float& value) const
 {
 	return Vector3D(m_x * value, m_y * value, m_z * value);
+}
+
+Vector3D Vector3D::operator*(const Vector3D& value) const
+{
+	return Vector3D(m_x * value.m_x, m_y * value.m_y, m_z * value.m_z);
 }
 
 Vector3D Vector3D::operator-(const Vector3D& value) const
@@ -98,11 +104,20 @@ Vector3D& Vector3D::operator+=(const Vector3D& value)
 	return (*this);
 }
 
-Vector3D& Vector3D::operator*=(float value)
+Vector3D& Vector3D::operator*=(const float& value)
 {
 	m_x *= value;
 	m_y *= value;
 	m_z *= value;
+
+	return (*this);
+}
+
+Vector3D& Vector3D::operator*=(const Vector3D& value)
+{
+	m_x *= value.m_x;
+	m_y *= value.m_y;
+	m_z *= value.m_z;
 
 	return (*this);
 }
@@ -116,7 +131,7 @@ Vector3D& Vector3D::operator-=(const Vector3D& value)
 	return (*this);
 }
 
-Vector3D& Vector3D::operator/=(float value)
+Vector3D& Vector3D::operator/=(const float& value)
 {
 	m_x /= value;
 	m_y /= value;
@@ -127,14 +142,14 @@ Vector3D& Vector3D::operator/=(float value)
 
 bool Vector3D::operator==(const Vector3D& value) const
 {
-	const float epsilon = 1e-5; // ajustez selon vos besoins
+	const float epsilon = Mathf::Epsilon8;
 
 	return (abs(m_x - value.m_x) < epsilon && abs(m_y - value.m_y) < epsilon && abs(m_z - value.m_z) < epsilon);
 }
 
 bool Vector3D::operator!=(const Vector3D& value) const
 {
-	const float epsilon = 1e-5; // ajustez selon vos besoins
+	const float epsilon = Mathf::Epsilon8;
 	return (abs(m_x - value.m_x) > epsilon || abs(m_y - value.m_y) > epsilon || abs(m_z - value.m_z) > epsilon);
 }
 
@@ -142,6 +157,23 @@ bool Vector3D::operator!=(const Vector3D& value) const
 Vector3D Vector3D::Normalized() const
 {
 	return (*this) / Magnitude();
+}
+
+Vector3D Vector3D::GetSafeInvertedVector()const
+{
+	Vector3D safeInvertedVector = Vector3D(0.0f,0.0f,0.0f);
+	const float epsilon = Mathf::Epsilon8;
+
+	if (abs(m_x) > epsilon)
+		safeInvertedVector.m_x = 1.0f / m_x;
+
+	if (abs(m_y) > epsilon)
+		safeInvertedVector.m_y = 1.0f / m_y;
+
+	if (abs(m_z) > epsilon)
+		safeInvertedVector.m_z = 1.0f / m_z;
+
+	return safeInvertedVector;
 }
 
 float Vector3D::DotProduct(const Vector3D& a, const Vector3D& b)

@@ -8,6 +8,7 @@
 #include "../Assets/Mesh.h"
 #include "../Assets/Material.h"
 #include "../Component.h"
+#include "SceneComponent.h"
 #include <set>
 
 enum class PolygonMode
@@ -17,13 +18,12 @@ enum class PolygonMode
 	Point = GL_POINT,
 };
 
-class MeshRendererComponent : public Component
+class MeshRendererComponent : public SceneComponent
 {
 private:
 
 	PolygonMode m_polygonMode = PolygonMode::Fill;
 	Shader* m_shader = nullptr;
-	TransformComponent* m_transformComponent = nullptr;
 	Mesh* m_mesh = nullptr;
 	bool m_drawPartialMesh = false;
 	int m_partialMeshElementCount = 0;
@@ -31,6 +31,7 @@ private:
 	Material* m_material = nullptr;
 public:
 	MeshRendererComponent() = default;
+	MeshRendererComponent(const MeshRendererComponent& other);
 
 	void Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)const;
 	void SetDrawPartialMesh(bool drawPartialMesh);
@@ -40,7 +41,6 @@ public:
 	void SetShader(Shader* shader);
 	void SetMaterial(Material* material);
 	void SetPolygonMode(PolygonMode polygonMode);
-	void SetTransformComponent(TransformComponent* transformComponent);
 
 	bool GetDrawPartialMesh()const;
 	int GetPartialMeshElementCount()const;
@@ -50,8 +50,8 @@ public:
 	const Material* GetMaterial(Material* material)const;
 
 	PolygonMode GetPolygonMode()const;
-	TransformComponent* GetTransformComponent()const;
-
+	Component* Clone()override;
+	void AssignPointerAndReference()override;
 };
 
 #endif // !_MESH_RENDERER_H_

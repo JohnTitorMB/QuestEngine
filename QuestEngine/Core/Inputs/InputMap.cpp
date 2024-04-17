@@ -7,20 +7,7 @@ InputMap::InputMap()
 
 InputMap::~InputMap()
 {
-	InputSystem* inputSystem = InputSystem::Instance();
-
-	for (std::pair<std::string, InputAction*> inputAction : m_inputActions)
-	{
-		if (inputAction.second != nullptr)
-		{
-			for(InputCode inputCode : m_inputscode[inputAction.first])
-				inputSystem->UnBindInputActionKey(inputCode, inputAction.second);
-
-			delete inputAction.second;
-		}
-	}
-
-	m_inputActions.clear();
+	ClearMap();
 }
 InputAction& InputMap::CreateInputAction(std::string inputActionName)
 {
@@ -57,7 +44,6 @@ void InputMap::UnBindInputCode(std::string inputActionName, InputCode inputCode)
 
 void InputMap::Enable()
 {
-
 	for (std::pair<std::string, InputAction*> inputAction : m_inputActions)
 	{
 		m_inputActions[inputAction.first]->Enable();
@@ -66,9 +52,27 @@ void InputMap::Enable()
 
 void InputMap::Disable()
 {
-	
 	for (std::pair<std::string, InputAction*> inputAction : m_inputActions)
 	{
 		m_inputActions[inputAction.first]->Disable();
 	}
+}
+
+void InputMap::ClearMap()
+{
+	InputSystem* inputSystem = InputSystem::Instance();
+
+	for (std::pair<std::string, InputAction*> inputAction : m_inputActions)
+	{
+		if (inputAction.second != nullptr)
+		{
+			for (InputCode inputCode : m_inputscode[inputAction.first])
+				inputSystem->UnBindInputActionKey(inputCode, inputAction.second);
+
+			delete inputAction.second;
+		}
+	}
+
+	m_inputscode.clear();
+	m_inputActions.clear();
 }

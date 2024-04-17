@@ -8,6 +8,7 @@ public:
 	static const float RadToDeg;
 	static const float DegToRad;
 	static const float Epsilon7;
+	static const float Epsilon8;
 
 	static float Clamp(float value, float min, float max);
 	static float PingPong(float t, float length);
