@@ -3,7 +3,7 @@
 #include "Entity.h"
 #include <vector>
 #include <unordered_map>
-
+#include "Assets/EntityGroupAsset.h"
 class SceneManager;
 class Scene
 {
@@ -22,6 +22,8 @@ public:
 	}
 
 	void RemoveEntity(Entity* entity);
+
+	std::set<Entity*>CloneGroupEntityToScene(EntityGroupAsset* entityGroupAsset);
 };
 
 #endif // !_SCENE_H_

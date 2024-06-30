@@ -185,7 +185,7 @@ Matrix4x4 Matrix4x4::Transpose() const
 Matrix4x4 Matrix4x4::Inverse()const
 {
 	float determinant = Determinant();
-	float epsilon = 1e-5; // Change this to the level of precision you need
+	float epsilon = 1e-9; // Change this to the level of precision you need
 
 	if (fabs(determinant) < epsilon)
 	{

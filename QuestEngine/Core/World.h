@@ -5,7 +5,7 @@
 #include "Components/Light.h"
 #include "Window.h"
 #include <unordered_map>
-
+#include "Assets/EntityGroupAsset.h"
 class Entity;
 class World
 {
@@ -43,6 +43,9 @@ public :
 		m_entities.insert(entity);
 		return (T*)entity;
 	}
+
+	std::set<Entity*> InstantiateEntityGroup(EntityGroupAsset* entityGroupAsset);
+	void DestroyEntity(Entity* entity);
 	void InitAssets();
 	void InitWorld();
 	void Update();

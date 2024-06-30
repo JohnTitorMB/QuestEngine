@@ -1,4 +1,7 @@
 #include "World.h"
+World* World::m_world = nullptr;
+
+
 #include "AssetsManager.h"
 #include "../Utilities/MeshUtilities.h"
 #include "Components/DirectionalLight.h"
@@ -12,7 +15,9 @@
 #include "../Game/SceneGraphTestComponent.h"
 #include "SceneManager.h"
 #include "../Game/SceneSwitchController.h"
-World* World::m_world = nullptr;
+#include "OBJLoader.h"
+#include "../Game/SceneOBJLoaderComponnent.h"
+#include "../Game/RotatorComponnent.h"
 
 World::World()
 {
@@ -47,10 +52,12 @@ void World::InitAssets()
 
 	//Initialise Textures
 	Texture* cubeTexture = AssetsManager::CreateTexture("CubeFaceTexture","Assets/CubeTextureFace.png");
+	Texture* whiteTexture = AssetsManager::CreateTexture("White","Assets/WhiteTexture.png");
 	Texture* cubeSpecularTexture = AssetsManager::CreateTexture("CubeSpecularTexture","Assets/CubeTextureSpecular.png");
 
 	//Initialise Mesh
 	Mesh* cubeMesh = MeshUtilities::CreateCustomCubeUV("CubeMesh", 1.0f, MeshUtilities::CubeUVInfo());
+	Mesh* sphereMesh = MeshUtilities::CreateUVSphere("SphereMesh", 1.0f,32.0f,32.0f);
 
 	//Initialise Materials
 	Material* material = AssetsManager::CreateMaterial("Material0", cubeTexture, cubeTexture, cubeSpecularTexture, Color(1, 0, 0, 1), Color(1, 0, 0, 1), Color(1, 1, 1, 1),32);
@@ -59,142 +66,141 @@ void World::InitAssets()
 	Material* material4 = AssetsManager::CreateMaterial("Material3", cubeTexture, cubeTexture, cubeSpecularTexture, Color(0, 1, 1, 1), Color(0, 1, 1, 1), Color(1, 1, 1, 1), 32);
 	Material* material5 = AssetsManager::CreateMaterial("Material4", cubeTexture, cubeTexture, cubeSpecularTexture, Color(1, 0, 1, 1), Color(1, 0, 1, 1), Color(1, 1, 1, 1), 32);
 	
+	using std::chrono::high_resolution_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::duration;
+	using std::chrono::milliseconds;
+
+	auto t1 = high_resolution_clock::now();
+
+	EntityGroupAsset* obj = OBJLibrary::OBJLoader::LoadOBJ("OBJObject0", "Assets/OBJ/1.Cube/cube.obj");
+	Entity* entity = obj->GetEntityAt(0);
+	entity->AddComponent<RotatorComponnent>();
+	
+	EntityGroupAsset* obj1 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject1", "Assets/OBJ/3.Cup/Cup.obj");
+	entity = obj1->GetEntityAt(0);
+	entity->AddComponent<RotatorComponnent>();
+
+	EntityGroupAsset* obj2 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject2", "Assets/OBJ/13.Conference/conference.obj", 0.001f);
+	EntityGroupAsset* obj3 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject3", "Assets/OBJ/16.Lost-empire/lost_empire.obj");
+	EntityGroupAsset* obj4 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject4", "Assets/OBJ/18.SportsCar/sportsCar.obj");
+
+	entity = obj4->GetEntityAt(0);
+	entity->AddComponent<RotatorComponnent>();
+
+	EntityGroupAsset* obj5 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject5", "Assets/OBJ/20.Breakfast_room/breakfast_room.obj"); //one material have a diffuse color equal to zero but have diffuse path.
+	EntityGroupAsset* obj6 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject6", "Assets/OBJ/21.Bmw/bmw.obj", 0.005f);
+	entity = obj6->GetEntityAt(0);
+	entity->AddComponent<RotatorComponnent>();
+
+
+	EntityGroupAsset* obj7 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject7", "Assets/OBJ/23.Fireplace_room/fireplace_room.obj");
+	EntityGroupAsset* obj8 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject8", "Assets/OBJ/24.White_oak/white_oak.obj",0.01f); // alpha of this obj is not supported
+	EntityGroupAsset* obj9 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject9", "Assets/OBJ/25.Vokselia_spawn/vokselia_spawn.obj");
+	EntityGroupAsset* obj10 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject10", "Assets/OBJ/26.Living_room/living_room.obj");
+	EntityGroupAsset* obj11 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject11", "Assets/OBJ/30.RoadBike/roadBike.obj");
+	entity = obj11->GetEntityAt(0);
+	entity->AddComponent<RotatorComponnent>();
+
+	EntityGroupAsset* obj12 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject12", "Assets/OBJ/31.salle_de_bain/salle_de_bain.obj");
+	EntityGroupAsset* obj13 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject13", "Assets/OBJ/35.Rungholt/rungholt.obj");	
+	EntityGroupAsset* obj14 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject14", "Assets/OBJ/39.Sponza/sponza.obj", 0.05f);
+	EntityGroupAsset* obj15 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject15", "Assets/OBJ/41.San_Miguel/san-miguel.obj");
+	EntityGroupAsset* obj16 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject16", "Assets/OBJ/42.Pure3D_Medieval/p3d_medieval_enterable_bld-13.obj",0.01f);
+	EntityGroupAsset* obj17 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject17", "Assets/OBJ/43.uploads_files_2558144_well/uploads_files_2558144_well.obj");
+	EntityGroupAsset* obj18 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject18", "Assets/OBJ/45.Cottage/Cottage.obj");
+
+	auto t2 = high_resolution_clock::now();
+
+	/* Getting number of milliseconds as an integer. */
+	auto ms_int = duration_cast<milliseconds>(t2 - t1);
+
+	/* Getting number of milliseconds as a double. */
+	duration<double, std::milli> ms_double = t2 - t1;
+
+//	std::cout << "ObjLoaderDuration : " << ms_int.count() << "ms\n";
+//	std::cout << "ObjLoaderDuration : " << ms_double.count() << "ms\n";
+
+	//Initialise Mesh
+	Mesh* convexPolygonFan = MeshUtilities::CreateConvexPolygonFanMethod("ConvexPolygonFan", { Vector2D(0.5f, 0.866f),Vector2D(0.866f, 0.5f),Vector2D(1.0f, 0.0f),Vector2D(0.866f, -0.5f),
+		Vector2D(0.5f, -0.866f), Vector2D(0.0f, -1.0f), Vector2D(-0.5f, -0.866f), Vector2D(-0.866f, -0.5f), Vector2D(-1.0f, 0.0f), Vector2D(-0.866f, 0.5f), Vector2D(-0.5f, 0.866f), Vector2D(0.0f, 1.0f) });
+
+	Mesh* convexPolygonEar = MeshUtilities::CreatePolygonWithEarMethod("ConvexPolygonEar", { Vector2D(0.5f, 0.866f),Vector2D(0.866f, 0.5f),Vector2D(1.0f, 0.0f),Vector2D(0.866f, -0.5f),
+		Vector2D(0.5f, -0.866f), Vector2D(0.0f, - 1.0f), Vector2D(-0.5f, - 0.866f), Vector2D(-0.866f, -0.5f), Vector2D(-1.0f, 0.0f), Vector2D(-0.866f, 0.5f), Vector2D(-0.5f, 0.866f), Vector2D(0.0f, 1.0f) });
+
+
+
 }
 
 void World::InitWorld()
 {
 	InitAssets();
 
-	Scene& cornellBoxScene = SceneManager::Instance()->CreateScene();
+	LightingSettings::m_globalAmbiantColor = Color(0.2f,0.2f,0.2f,1);
+	Scene& objLoaderScene = SceneManager::Instance()->CreateScene();
 
-	//Intialise Camera Entity
-	Vector3D cameraPosition = Vector3D(0.0f, 0.0f, -10.8f);
-	Quaternion cameraRotation = Quaternion::Identity();
-	Entity* cameraEntity = cornellBoxScene.CreateEntity<Entity>();
+	Entity* cameraEntity = objLoaderScene.CreateEntity<Entity>();
 	{
 		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
-		cameraComponent->SetWorldPosition(cameraPosition);
-		cameraComponent->SetWorldRotation(cameraRotation);
+		cameraComponent->SetWorldPosition(Vector3D(0, 0, -5));
+		cameraComponent->SetNear(0.01f);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
 		cameraComponent->SetFov(60);
-
+		cameraEntity->SetRootComponent(cameraComponent);
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 	}
 
-	//Intialise Cornell Box Entities
-
-	std::vector<Vector3D> entitiesPosition = std::vector<Vector3D>{ Vector3D(0.0f, -3.0f, 0.0f),
-																	Vector3D(0.0f, 3.0f, 0.0f),
-																	Vector3D(3.0f,  0.0f, 0.0f),
-																	Vector3D(-3.0f,  0.0f, 0.0f),
-																	Vector3D(0.0f, 0.0f, 3.0f)};
-
-	std::vector<Vector3D> entitiesScale = std::vector<Vector3D>{ Vector3D(6.0f, 0.01f, 6.0f),
-																Vector3D(6.0f, 0.01f, 6.0f),
-																Vector3D(0.01f, 6.0f, 6.0f),
-																Vector3D(0.01f, 6.0f, 6.0f),
-																Vector3D(6.0f, 6.0f, 0.01f) };
-
-	std::vector<Quaternion> entitiesRotation = std::vector<Quaternion>{ Quaternion::AxisAngle(Vector3D::Right,180),
-																	 Quaternion::AxisAngle(Vector3D::Right,180),
-																	 Quaternion::AxisAngle(Vector3D::Up, 180),
-																	 Quaternion::AxisAngle(Vector3D::Up, 180),
-																	 Quaternion::Identity() };
-	
-	LightingSettings::m_globalAmbiantColor = Color(0.5, 0.5, 0.5, 1.0f);
-
-	for (int i = 0; i < 5; i++)
-	{
-		Entity* cubeEntity = cornellBoxScene.CreateEntity<Entity>();
-		{			
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(entitiesPosition[i]);
-			meshRendererComponent->SetWorldRotation(entitiesRotation[i]);
-			meshRendererComponent->SetWorldScale(entitiesScale[i]);
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(i)));
-		}
-	}
-
-
 	//Initialise Directional Light entity
-	DirectionalLightEntity* lightEntity = cornellBoxScene.CreateEntity<DirectionalLightEntity>();
+	DirectionalLightEntity* lightEntity = objLoaderScene.CreateEntity<DirectionalLightEntity>();
 	{
 		DirectionalLightComponent* dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
-		dLightComponent->m_ambiantColor = Color(0, 0, 0, 1.0f);
-		dLightComponent->m_specularColor = Color(0.3f, 0.3f, 0.3f, 1.0f);
-		dLightComponent->m_intensity = 3.0f;
-		
+		dLightComponent->m_ambiantColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
+		dLightComponent->m_diffuseColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+		dLightComponent->m_specularColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+		dLightComponent->m_intensity = 1.0f;
+
 		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
-	}	
 
-	Entity* sceneSwitchController = cornellBoxScene.CreateEntity<Entity>();
-	{
-		sceneSwitchController->AddComponent<SceneSwitchController>();
+		dLightComponent->SetParent(cameraEntity->GetRootComponent());
 	}
 
-	Scene& graphSceneText = SceneManager::Instance()->CreateScene();
-	Entity* camera2Entity = graphSceneText.CreateEntity<Entity>();
+	//Initialise Directional Light entity
+	Entity* sceneObjEntity = objLoaderScene.CreateEntity<Entity>();
 	{
-		CameraComponent* cameraComponent = camera2Entity->AddComponent<CameraComponent>(true);
-		cameraComponent->SetWorldPosition(cameraPosition);
-		cameraComponent->SetWorldRotation(cameraRotation);
-		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
-		cameraComponent->SetFov(60);
-
-		CameraController* cameraController = camera2Entity->AddComponent<CameraController>(true);
+		SceneOBJLoaderComponnent* sceneObjComponent = sceneObjEntity->AddComponent<SceneOBJLoaderComponnent>(true);
 	}
 
-	Entity* cube2Entity = graphSceneText.CreateEntity<Entity>();
-	MeshRendererComponent* meshRenderer2Component = cube2Entity->AddComponent<MeshRendererComponent>(true);
-	meshRenderer2Component->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-	meshRenderer2Component->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-	meshRenderer2Component->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-
-	Entity* cube3Entity = graphSceneText.CreateEntity<Entity>();
-	MeshRendererComponent* meshRenderer3Component = cube3Entity->AddComponent<MeshRendererComponent>(true);
-	meshRenderer3Component->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-	meshRenderer3Component->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-	meshRenderer3Component->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-
-	Entity* cube4Entity = graphSceneText.CreateEntity<Entity>();
-	MeshRendererComponent* childMeshComponent = cube4Entity->AddComponent<MeshRendererComponent>(true);
-	childMeshComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-	childMeshComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-	childMeshComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(2)));
-
-	Entity* cube5Entity = graphSceneText.CreateEntity<Entity>();
-	MeshRendererComponent* child2MeshComponent = cube4Entity->AddComponent<MeshRendererComponent>(true);
-	child2MeshComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-	child2MeshComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-	child2MeshComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(3)));
-
-	SceneGraphTestComponent* sceneGraphTestComponent = cube2Entity->AddComponent<SceneGraphTestComponent>(true);
-	sceneGraphTestComponent->SetSceneComponent(meshRenderer2Component);
-	sceneGraphTestComponent->SetSceneComponent2(meshRenderer3Component);
-	sceneGraphTestComponent->SetSceneComponentChild(childMeshComponent);
-	sceneGraphTestComponent->SetSceneComponentChild2(child2MeshComponent);
-
-	meshRenderer2Component->SetWorldPosition(Vector3D(0, 1, 0));
-	childMeshComponent->SetParent(meshRenderer2Component);
-	childMeshComponent->SetRelativePosition(Vector3D(4.0f, 0, 0));
-
-	child2MeshComponent->SetParent(childMeshComponent);
-	child2MeshComponent->SetRelativePosition(Vector3D(2.0f, 0, 0));
-
-	meshRenderer3Component->SetWorldPosition(Vector3D(-2, 1, 0));
-
-	Entity* sceneSwitchController2 = graphSceneText.CreateEntity<Entity>();
-	{
-		sceneSwitchController2->AddComponent<SceneSwitchController>();
-	}
-
-	SceneManager::Instance()->LoadScene(1);
+	SceneManager::Instance()->LoadScene(0);
 }
 
+std::set<Entity*> World::InstantiateEntityGroup(EntityGroupAsset* entityGroupAsset)
+{
+	if (entityGroupAsset == nullptr)
+		return std::set<Entity*>();
 
+	std::set<Entity*> clonnedEntities = entityGroupAsset->CloneEntities();
+
+	for (Entity* entity : clonnedEntities)
+		m_entities.insert(entity);
+
+	return clonnedEntities;
+}
+
+void World::DestroyEntity(Entity* entity)
+{
+	if (entity->isWorldEntity)
+	{
+		m_entities.erase(entity);
+		if (entity)
+			delete entity;
+	}
+	else
+	{
+		std::cout << "this entity cannot be destroyed from the world, it is not an entity born on the world!" << std::endl;
+	}
+	
+}
 
 void World::Update()
 {
@@ -208,15 +214,19 @@ void World::Update()
 
 void World::Display(Window* window)
 {
+	if (window == nullptr)
+		std::cout << "Error" << std::endl;
+
 	for (auto it = m_cameras.begin(); it != m_cameras.end(); ++it)
 	{
 		CameraComponent* camera = *it;
-
+		
+		int count = 0; 
 		for (auto rendererIt = m_meshRenderers.begin(); rendererIt != m_meshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
-
 			meshRenderer->Draw(camera, m_lights, window);
+			count++;
 		}
 	}
 }

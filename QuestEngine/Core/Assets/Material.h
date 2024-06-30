@@ -17,6 +17,7 @@ public:
 	Texture* m_diffuseTexture;
 	Texture* m_specularTexture;
 	float m_shininess = 32;
+	std::string name = "";
 };
 #endif
 

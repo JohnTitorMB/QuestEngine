@@ -173,7 +173,7 @@ vec3 ComputeSpotLight(SpotLight sLight)
 }
 
 void main()
-{
+{    
     vec4 ambientColor = globalAmbiantColor * material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
     vec3 color = vec3(ambientColor.r, ambientColor.g, ambientColor.b);
 

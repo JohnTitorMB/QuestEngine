@@ -2,7 +2,7 @@
 #define _DIRECTIONALLIGHTCONTROLLER_H_
 #include "../Core/Component.h"
 #include "../Core/Components/DirectionalLight.h"
-
+#include "../Core/Components/Camera.h"
 class DirectionalLightControllerComponent : public Component
 {
 private :
@@ -20,5 +20,7 @@ public:
 
 	Component* Clone()override;
 	void AssignPointerAndReference()override;
+
+	CameraComponent* cameraComponent;
 };
 #endif

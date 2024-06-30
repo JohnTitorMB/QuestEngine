@@ -66,7 +66,9 @@ public:
 	void SetAnisotropy(float anisotropyValue);
 	float GetAnisotropy()const;
 	float GetMaxGPUAnisotropy()const;
-
+	float GetWidth()const;
+	float GetHeight()const;
+	std::string m_path;
 
 private:
 	unsigned char* LoadTexture(std::string filePath);
@@ -76,7 +78,6 @@ private:
 	GLuint m_textureID;
 	int m_width = 0;
 	int m_height = 0;
-
 	int m_mipmapBaseLevel = 0;
 	int m_mipmapMaxLevel = 1000;
 	int m_mipmapMinLOD = -1000;

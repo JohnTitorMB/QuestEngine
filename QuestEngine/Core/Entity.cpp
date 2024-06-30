@@ -8,7 +8,7 @@ Entity::Entity()
 	m_rootSceneComponent = nullptr;
 }
 
-Entity::Entity(const Entity& other)
+Entity::Entity(const Entity& other, bool isAddedOnScene)
 {
 	m_rootSceneComponent = nullptr;
 
@@ -19,7 +19,12 @@ Entity::Entity(const Entity& other)
 		Component* newComponent = component->Clone();
 		newComponent->SetOwnEntity(this);
 		m_components.insert(newComponent);
-		World::Instance()->RegisterComponent(newComponent);
+
+		if (isAddedOnScene == false)
+		{
+			isWorldEntity = true;
+			World::Instance()->RegisterComponent(newComponent);
+		}
 	}
 }
 
@@ -28,7 +33,11 @@ Entity::~Entity()
 	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
 		Component* component = *it;
+		if (isWorldEntity)
+		{
+			World::Instance()->UnRegisterComponent(component);
 
+		}
 		delete component;
 	}
 
@@ -59,9 +68,9 @@ void Entity::Update()
 	}
 }
 
-Entity* Entity::Clone()
+Entity* Entity::Clone(bool isAddedOnScene)
 {
-	Entity* entity = new Entity(*this);
+	Entity* entity = new Entity(*this, isAddedOnScene);
 	clonnedObject = entity;
 	clonnedObject->baseObject = this;
 	return entity;
@@ -107,4 +116,14 @@ void Entity::SetRootComponent(SceneComponent* rootComponent)
 SceneComponent* Entity::GetRootComponent() const
 {
 	return m_rootSceneComponent;
+}
+
+const std::string Entity::GetName() const
+{
+	return m_name;
+}
+
+void Entity::SetName(const std::string& name)
+{
+	m_name = name;
 }

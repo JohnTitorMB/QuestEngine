@@ -28,7 +28,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
 
 	m_shader->UseShader();
-
+	
 	Matrix4x4 modelMatrix = GetTransform().TransformMatrix();
 	m_shader->SetUniformMatrix4x4("model", modelMatrix);
 	m_shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
@@ -76,6 +76,8 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			m_shader->SetUniformColor("directionalLight.diffuseColor", directionalLight->m_diffuseColor);
 			m_shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
 			m_shader->SetUniformVector3D("directionalLight.direction", directionalLight->GetForwardVector());
+
+			//std::cout << "Direction : " << directionalLight->GetForwardVector() << std::endl;
 			m_shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
 			directionalLightCounter++;
 		}
@@ -206,12 +208,12 @@ int MeshRendererComponent::GetPartialMeshStartIndex()const
 	return m_partialMeshStartIndex;
 }
 
-const Mesh* MeshRendererComponent::GetMesh()const
+Mesh* MeshRendererComponent::GetMesh()const
 {
 	return m_mesh;
 }
 
-const Shader* MeshRendererComponent::GetShader()const
+Shader* MeshRendererComponent::GetShader()const
 {
 	return m_shader;
 }
@@ -234,7 +236,7 @@ void MeshRendererComponent::AssignPointerAndReference()
 	SceneComponent::AssignPointerAndReference();
 }
 
-const Material* MeshRendererComponent::GetMaterial(Material* material)const
+Material* MeshRendererComponent::GetMaterial()const
 {
 	return m_material;
 }

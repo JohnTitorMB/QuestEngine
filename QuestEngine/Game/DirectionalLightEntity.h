@@ -20,7 +20,7 @@ public:
 	DirectionalLightEntity(const DirectionalLightEntity& other);
 	void SetDirectionalLightComponent(DirectionalLightComponent* directionalLightComponent);
 
-	Entity* Clone()override;
+	Entity* Clone(bool isAddedOnScene = false)override;
 	void AssignPointerAndReference()override;
 };
 #endif

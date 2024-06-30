@@ -14,16 +14,18 @@ class Entity : public Object
 	SceneComponent* m_rootSceneComponent;
 	friend class World;
 	friend class Scene;
+	std::string m_name;
+	bool isWorldEntity = false;
 public:
 	
 	Entity();
-	Entity(const Entity& other);
+	Entity(const Entity& other, bool isAddedOnScene = false);
 	virtual ~Entity();
 
 	void Destroy();
 	virtual void Start();
 	virtual void Update();
-	virtual Entity* Clone();
+	virtual Entity* Clone(bool isAddedOnScene = false);
 	virtual void AssignPointerAndReference();
 
 	template<class T>
@@ -34,10 +36,10 @@ public:
 		T* t = new T();
 		Component* c = dynamic_cast<Component*>(t);
 		c->SetOwnEntity(this);
-		m_components.insert(t);
+		m_components.insert(c);
 
 		if(!isAddedOnScene)
-		World::Instance()->RegisterComponent(c);
+			World::Instance()->RegisterComponent(c);
 		return t;
 	};
 
@@ -74,6 +76,8 @@ public:
 	void DestroyComponent(Component* component);
 	void SetRootComponent(SceneComponent* rootComponent);
 	SceneComponent* GetRootComponent()const;
+	const std::string GetName()const;
+	void SetName(const std::string& name);
 };
 
 #include "Component.h"

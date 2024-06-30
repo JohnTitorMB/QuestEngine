@@ -22,7 +22,7 @@ struct Vector2D
 	Vector2D GetSafeInvertedVector()const;
 
 	static float DotProduct(const Vector2D& a, const Vector2D& b);
-
+	static float GetAngle(const Vector2D& a, const Vector2D& b, const bool clockWise = false);
 	Vector2D& operator+=(const Vector2D& value);
 	Vector2D& operator*=(const float& value);
 	Vector2D& operator*=(const Vector2D& value);

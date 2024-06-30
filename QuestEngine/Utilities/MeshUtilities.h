@@ -34,6 +34,9 @@ public:
 	static Mesh* CreateRegularConvexPolygon(const std::string& assetName, int sideCount, float radius);
 	static Mesh* CreateCircle(const std::string& assetName, float radius);
 	static Mesh* CreateGrid(const std::string& assetName, int widthTileCount, int heightTileCount);
+
+	static Mesh* CreateConvexPolygonFanMethod(const std::string& assetName, const std::vector<Vector2D>& polygon);
+	static Mesh* CreatePolygonWithEarMethod(const std::string& assetName, const std::vector<Vector2D>& polygon);
 };
 
 #endif // !_MESH_UTILITIES_H_

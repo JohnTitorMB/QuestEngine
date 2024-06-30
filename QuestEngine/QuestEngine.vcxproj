@@ -149,6 +149,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Library\Glad\src\glad.c" />
+    <ClCompile Include="Game\ComponentExample.cpp" />
+    <ClCompile Include="Core\Assets\EntityGroupAsset.cpp" />
+    <ClCompile Include="Core\tiny_obj_loader.cc" />
     <ClCompile Include="Game\CameraController.cpp" />
     <ClCompile Include="Core\Assets\Assets.cpp" />
     <ClCompile Include="Core\AssetsManager.cpp" />
@@ -166,6 +169,9 @@
     <ClCompile Include="Core\Inputs\InputMap.cpp" />
     <ClCompile Include="Core\Inputs\InputSystem.cpp" />
     <ClCompile Include="Core\Inputs\InputCode.cpp" />
+    <ClCompile Include="Game\SceneOBJLoaderComponnent.cpp" />
+    <ClCompile Include="Game\RotatorComponnent.cpp" />
+    <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
     <ClCompile Include="Core\Assets\Material.cpp" />
@@ -184,6 +190,7 @@
     <ClCompile Include="Game\SceneGraphTestComponent.cpp" />
     <ClCompile Include="Core\Object.cpp" />
     <ClCompile Include="Game\SceneSwitchController.cpp" />
+    <ClCompile Include="Core\OBJLoader.cpp" />
     <ClCompile Include="Utilities\MovingAverage.cpp" />
     <ClCompile Include="Utilities\MeshUtilities.cpp" />
     <ClCompile Include="Utilities\FileSystem.cpp" />
@@ -199,6 +206,9 @@
     <ClCompile Include="Math\Vector4D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\ComponentExample.h" />
+    <ClInclude Include="Core\Assets\EntityGroupAsset.h" />
+    <ClInclude Include="Core\tiny_obj_loader.h" />
     <ClInclude Include="Game\CameraController.h" />
     <ClInclude Include="Core\Assets\Assets.h" />
     <ClInclude Include="Core\AssetsManager.h" />
@@ -216,6 +226,9 @@
     <ClInclude Include="Core\Inputs\InputMap.h" />
     <ClInclude Include="Core\Inputs\InputSystem.h" />
     <ClInclude Include="Core\Inputs\InputCode.h" />
+    <ClInclude Include="Game\SceneOBJLoaderComponnent.h" />
+    <ClInclude Include="Game\RotatorComponnent.h" />
+    <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />
     <ClInclude Include="Core\Assets\Material.h" />
@@ -234,6 +247,7 @@
     <ClInclude Include="Game\SceneGraphTestComponent.h" />
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Game\SceneSwitchController.h" />
+    <ClInclude Include="Core\OBJLoader.h" />
     <ClInclude Include="Utilities\MovingAverage.h" />
     <ClInclude Include="Utilities\MeshUtilities.h" />
     <ClInclude Include="Utilities\FileSystem.h" />

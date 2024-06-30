@@ -45,9 +45,9 @@ public:
 	bool GetDrawPartialMesh()const;
 	int GetPartialMeshElementCount()const;
 	int GetPartialMeshStartIndex()const;
-	const Mesh* GetMesh()const;
-	const Shader* GetShader()const;
-	const Material* GetMaterial(Material* material)const;
+	Mesh* GetMesh()const;
+	Shader* GetShader()const;
+	Material* GetMaterial()const;
 
 	PolygonMode GetPolygonMode()const;
 	Component* Clone()override;

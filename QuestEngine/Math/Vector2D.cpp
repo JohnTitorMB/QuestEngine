@@ -132,6 +132,35 @@ float Vector2D::DotProduct(const Vector2D& a, const Vector2D& b)
 	return a.m_x * b.m_x + a.m_y * b.m_y;
 }
 
+float Vector2D::GetAngle(const Vector2D& a, const Vector2D& b, const bool clockWise)
+{
+	// Calculate the dot product
+	float dotProduct = Vector2D::DotProduct(a,b);
+
+	// Calculate the magnitudes of the vectors
+	float mag1 = a.Magnitude();
+	float mag2 = b.Magnitude();
+
+	// Calculate the cosine of the angle between the vectors
+	float cosAngle = dotProduct / (mag1 * mag2);
+
+	// Clamp the cosine value to [-1, 1] to avoid numerical errors
+	cosAngle = std::max(-1.0f, std::min(1.0f, cosAngle));
+
+	// Calculate the angle in radians
+	float angle = std::acos(cosAngle);
+
+	// Convert angle to degrees
+	angle = angle * 180.0f / Mathf::PI;
+
+	// Determine the sign of the angle based on the specified clockwise parameter
+	if (clockWise) {
+		angle = 360.0f - angle;
+	}
+
+	return angle;
+}
+
 std::ostream& operator<<(std::ostream& os, const Vector2D& value)
 {
 	os << "(X : " << value.m_x << ", Y : " << value.m_y << ")" << std::endl;

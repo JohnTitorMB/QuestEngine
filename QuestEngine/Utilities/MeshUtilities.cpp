@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../Core/AssetsManager.h"
 #include "../Core/Assets/Mesh.h"
+#include "GeometryUtilities.h"
 
 Mesh* MeshUtilities::CreateCube(const std::string& assetName,float size)
 {
@@ -631,4 +632,53 @@ Mesh* MeshUtilities::CreateGrid(const std::string& assetName,  int widthTileCoun
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
 	return mesh;
+}
+
+/// <summary>
+/// Create a Mesh by triangulating a convex polygon using the fan method
+/// </summary>
+/// <param name="polygon"> polygon where each point is ordered clockwise or counter-clockwise</param>
+/// <returns>return indices triangle</returns>
+Mesh* MeshUtilities::CreateConvexPolygonFanMethod(const std::string& assetName, const std::vector<Vector2D>& polygon)
+{
+	if (polygon.size() < 3)
+	{
+		//TODO : Make assert error here
+		return nullptr;
+	}
+
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
+	std::vector<unsigned int> indices = GeometryUtilities::TriangulateConvexPolygonFanMethod(polygon);
+
+	std::vector<Vector3D> vertices;
+	std::vector<Vector3D> normals;
+
+	for (Vector2D point : polygon)
+		vertices.push_back(Vector3D(point.m_x, point.m_y, 0.0f));
+
+	mesh->SetVertices(vertices);
+	mesh->SetIndices(indices);
+	mesh->ComputeNormals();
+}
+
+Mesh* MeshUtilities::CreatePolygonWithEarMethod(const std::string& assetName, const std::vector<Vector2D>& polygon)
+{
+	if (polygon.size() < 3)
+	{
+		//TODO : Make assert error here
+		return nullptr;
+	}
+
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
+	std::vector<unsigned int> indices = GeometryUtilities::TriangulatePolygonEarMethod(polygon);
+
+	std::vector<Vector3D> vertices;
+	std::vector<Vector3D> normals;
+
+	for (Vector2D point : polygon)
+		vertices.push_back(Vector3D(point.m_x, point.m_y, 0.0f));
+
+	mesh->SetVertices(vertices);
+	mesh->SetIndices(indices);
+	mesh->ComputeNormals();
 }

@@ -33,7 +33,7 @@ void DirectionalLightEntity::SetDirectionalLightComponent(DirectionalLightCompon
 	m_directionalLightComponent = directionalLightComponent;
 }
 
-Entity* DirectionalLightEntity::Clone()
+Entity* DirectionalLightEntity::Clone(bool isAddedOnScene)
 {
 	DirectionalLightEntity* directionalLightEntity = new DirectionalLightEntity(*this);
 	clonnedObject = directionalLightEntity;

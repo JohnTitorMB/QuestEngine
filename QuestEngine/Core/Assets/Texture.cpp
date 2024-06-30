@@ -9,8 +9,14 @@ Texture::Texture(std::string filePath)
 {
 	GenereTextureID();
 	unsigned char * data = LoadTexture(filePath);
-	UpdateTextureData(data);
-	stbi_image_free(data);
+	if (data)
+	{
+		UpdateTextureData(data);
+		stbi_image_free(data);
+		m_path = filePath;
+	}
+
+
 }
 
 Texture::~Texture()
@@ -208,4 +214,14 @@ float Texture::GetMaxGPUAnisotropy()const
 	GLfloat maxAnisotropy;
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
 	return maxAnisotropy;
+}
+
+float Texture::GetWidth() const
+{
+	return m_width;
+}
+
+float Texture::GetHeight() const
+{
+	return m_height;
 }

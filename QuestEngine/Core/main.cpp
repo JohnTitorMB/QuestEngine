@@ -6,13 +6,16 @@
 #include "Inputs/InputSystem.h"
 #include <chrono>
 #include <thread>
+#include "OBJLoader.h"
+/*
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#include <iostream>*/
 
-class ManagerTest;
-class ObjectTest;
 
 int main()
 {
-	//Initialise Opengl Window
 	Window* window = new Window(1920, 1080, new char[] {"Opengl Window"});
 	glEnable(GL_DEPTH_TEST);
 
@@ -27,6 +30,7 @@ int main()
 	float stepLight = 1.0f;
 
 	float previousTime = glfwGetTime();
+
 	while (!glfwWindowShouldClose(window->GetWindow()))
 	{
 		float currentTime = glfwGetTime();
@@ -37,10 +41,11 @@ int main()
 		glfwPollEvents();
 		inputSystem->ProcessInput(window);
 		
-		glClearColor(0.3f, 0.3f, 0.3f,1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
 		world->Update();
+		
 		world->Display(window);
 
 		glfwSwapBuffers(window->GetWindow());
@@ -48,6 +53,10 @@ int main()
 
 	delete window;
 	window = nullptr;
+
+
+//	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
+//	_CrtDumpMemoryLeaks();
 
 	return 0;
 }
