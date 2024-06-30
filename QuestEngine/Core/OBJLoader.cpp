@@ -173,7 +173,7 @@ void OBJLoader::SkipLine(const std::vector<char>& buffer, size_t& pos)
 	}
 }
 
-inline std::string& OBJLibrary::OBJLoader::ReadRemainStringFromBuffer(const std::vector<char>& buffer, size_t& pos)
+inline std::string OBJLibrary::OBJLoader::ReadRemainStringFromBuffer(const std::vector<char>& buffer, size_t& pos)
 {
 	std::string s = "";
 	while (pos < buffer.size() && buffer[pos] != '\n' && buffer[pos] != '\r')
@@ -337,7 +337,8 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 			buffer[current_position + 5] == 'b')
 		{
 			current_position += 7;
-			std::string mtlPath = ReadRemainStringFromBuffer(buffer, current_position);
+			std::string mtlPath = ""; 
+			mtlPath = ReadRemainStringFromBuffer(buffer, current_position);
 				if (materialsID.find(mtlPath) == materialsID.end())
 			{
 				std::unordered_map<std::string, MaterialData> mtlData = LoadMTLData(GetFullPath(p, mtlPath));

@@ -101,7 +101,7 @@ namespace OBJLibrary
         static inline Vector3D& ReadVector3DFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline Color& ReadRGBColorFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline void SkipLine(const std::vector<char>& buffer, size_t& pos);
-        static inline std::string& ReadRemainStringFromBuffer(const std::vector<char>& buffer, size_t& pos);
+        static inline std::string ReadRemainStringFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline std::string GetFullPath(const std::filesystem::path& path, std::string subFilePath);
 
     public:
