@@ -12,7 +12,7 @@ CameraController::CameraController()
 	m_sensibility = 0.2f;
 	m_pitchMinValue = -89;
 	m_pitchMaxValue = 89;
-	movementSpeed = 0.01f;
+	movementSpeed = 0.1f;
 	m_inputMap = nullptr;
 }
 

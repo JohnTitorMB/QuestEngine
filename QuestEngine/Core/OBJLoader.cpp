@@ -97,7 +97,7 @@ inline long OBJLibrary::OBJLoader::ReadLongFromBuffer(const std::vector<char>& b
 	return x;
 }
 
-inline Vector2D& OBJLibrary::OBJLoader::ReadVector2DFromBuffer(const std::vector<char>& buffer, size_t& pos)
+inline void OBJLibrary::OBJLoader::ReadVector2DFromBuffer(const std::vector<char>& buffer, size_t& pos, Vector2D& result)
 {
 	const char* start = buffer.data() + pos;
 
@@ -111,11 +111,11 @@ inline Vector2D& OBJLibrary::OBJLoader::ReadVector2DFromBuffer(const std::vector
 	float y = std::strtof(start, &end);
 	pos += end - start;
 
-	Vector2D vec = Vector2D(x, y);
-	return vec;
+	result = Vector2D(x, y);
+	return;
 }
 
-inline Vector3D& OBJLibrary::OBJLoader::ReadVector3DFromBuffer(const std::vector<char>& buffer, size_t& pos)
+inline void OBJLibrary::OBJLoader::ReadVector3DFromBuffer(const std::vector<char>& buffer, size_t& pos, Vector3D& result)
 {
 	const char* start = buffer.data() + pos;
 
@@ -135,11 +135,11 @@ inline Vector3D& OBJLibrary::OBJLoader::ReadVector3DFromBuffer(const std::vector
 	float z = std::strtof(start, &end);
 	pos += end - start;
 
-	Vector3D vec = Vector3D(x, y, z);
-	return vec;
+	result = Vector3D(x, y, z);
+	return;
 }
 
-inline Color& OBJLibrary::OBJLoader::ReadRGBColorFromBuffer(const std::vector<char>& buffer, size_t& pos)
+inline void OBJLibrary::OBJLoader::ReadRGBColorFromBuffer(const std::vector<char>& buffer, size_t& pos, Color& result)
 {
 	const char* start = buffer.data() + pos;
 
@@ -159,8 +159,8 @@ inline Color& OBJLibrary::OBJLoader::ReadRGBColorFromBuffer(const std::vector<ch
 	float b = std::strtof(start, &end);
 	pos += end - start;
 
-	Color color = Color(r, g, b, 1);
-	return color;
+	result = Color(r, g, b, 1);
+	return;
 }
 
 void OBJLoader::SkipLine(const std::vector<char>& buffer, size_t& pos)
@@ -248,7 +248,8 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 		if (buffer[current_position] == 'v' && buffer[current_position + 1] == 't')
 		{
 			current_position += 3;
-			Vector2D uv = ReadVector2DFromBuffer(buffer, current_position);
+			Vector2D uv = Vector2D(0, 0);
+			ReadVector2DFromBuffer(buffer, current_position, uv);
 			uvs.emplace_back(uv);
 
  			SkipLine(buffer, current_position);
@@ -257,7 +258,8 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 		else if (buffer[current_position] == 'v' && buffer[current_position + 1] == 'n')
 		{
 			current_position += 3;
-			Vector3D normal = ReadVector3DFromBuffer(buffer, current_position);
+			Vector3D normal = Vector3D(0, 0, 0);
+			ReadVector3DFromBuffer(buffer, current_position, normal);
 			normals.emplace_back(normal);
 
 			SkipLine(buffer, current_position);
@@ -267,8 +269,9 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 		else if (buffer[current_position] == 'v')
 		{
 			current_position += 2;
-			Vector3D vertex = ReadVector3DFromBuffer(buffer, current_position) * scaleFactor;
-			vertices.emplace_back(vertex);
+			Vector3D vertex = Vector3D(0, 0, 0);
+			ReadVector3DFromBuffer(buffer, current_position, vertex);
+			vertices.emplace_back((vertex * scaleFactor));
 			SkipLine(buffer, current_position);
 		}
 		else if (buffer[current_position] == 'o')
@@ -591,21 +594,24 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 		if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'a')
 		{
 			current_position += 3;
-			Color color = ReadRGBColorFromBuffer(buffer, current_position);
+			Color color = Color();
+			ReadRGBColorFromBuffer(buffer, current_position, color);
 			currentMaterialData.m_ambientColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'd')
 		{
 			current_position += 3;
-			Color color = ReadRGBColorFromBuffer(buffer, current_position);
+			Color color = Color();
+			ReadRGBColorFromBuffer(buffer, current_position, color);
 			currentMaterialData.m_diffuseColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 's')
 		{
 			current_position += 3;
-			Color color = ReadRGBColorFromBuffer(buffer, current_position);
+			Color color = Color();
+			ReadRGBColorFromBuffer(buffer, current_position, color);
 			currentMaterialData.m_specularColor = color;
 			SkipLine(buffer, current_position);
 		}

@@ -97,9 +97,9 @@ namespace OBJLibrary
         static Material* CreateMaterial(std::string assetName, MaterialData materialData);
         static inline float ReadFloatFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline long ReadLongFromBuffer(const std::vector<char>& buffer, size_t& pos);
-        static inline Vector2D& ReadVector2DFromBuffer(const std::vector<char>& buffer, size_t& pos);
-        static inline Vector3D& ReadVector3DFromBuffer(const std::vector<char>& buffer, size_t& pos);
-        static inline Color& ReadRGBColorFromBuffer(const std::vector<char>& buffer, size_t& pos);
+        static inline void ReadVector2DFromBuffer(const std::vector<char>& buffer, size_t& pos, Vector2D& result);
+        static inline void ReadVector3DFromBuffer(const std::vector<char>& buffer, size_t& pos, Vector3D& result);
+        static inline void ReadRGBColorFromBuffer(const std::vector<char>& buffer, size_t& pos, Color& result);
         static inline void SkipLine(const std::vector<char>& buffer, size_t& pos);
         static inline std::string ReadRemainStringFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline std::string GetFullPath(const std::filesystem::path& path, std::string subFilePath);

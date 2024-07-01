@@ -23,12 +23,7 @@ void DirectionalLightControllerComponent::Update()
 	Component::Update();
 	if (m_directionalLightComponent != nullptr)
 	{
-		Quaternion currentRotation = m_directionalLightComponent->GetWorldRotation();
-	//	m_directionalLightComponent->SetWorldRotation(currentRotation* Quaternion::AxisAngle(Vector3D(0, 1, 0).Normalized(), 1.0f));
-
-	//s	m_directionalLightComponent->SetWorldPosition(m_directionalLightComponent->GetForwardVector() * -50);
-
-		
+		Quaternion currentRotation = m_directionalLightComponent->GetWorldRotation();		
 	}
 }
 

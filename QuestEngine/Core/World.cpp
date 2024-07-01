@@ -18,7 +18,7 @@ World* World::m_world = nullptr;
 #include "OBJLoader.h"
 #include "../Game/SceneOBJLoaderComponnent.h"
 #include "../Game/RotatorComponnent.h"
-
+#include "Components/Transform.h"
 World::World()
 {
 
@@ -84,10 +84,10 @@ void World::InitAssets()
 	EntityGroupAsset* obj2 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject2", "Assets/OBJ/13.Conference/conference.obj", 0.001f);
 	EntityGroupAsset* obj3 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject3", "Assets/OBJ/16.Lost-empire/lost_empire.obj");
 	EntityGroupAsset* obj4 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject4", "Assets/OBJ/18.SportsCar/sportsCar.obj");
-
+	
 	entity = obj4->GetEntityAt(0);
 	entity->AddComponent<RotatorComponnent>();
-
+	
 	EntityGroupAsset* obj5 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject5", "Assets/OBJ/20.Breakfast_room/breakfast_room.obj"); //one material have a diffuse color equal to zero but have diffuse path.
 	EntityGroupAsset* obj6 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject6", "Assets/OBJ/21.Bmw/bmw.obj", 0.005f);
 	entity = obj6->GetEntityAt(0);
@@ -96,6 +96,8 @@ void World::InitAssets()
 
 	EntityGroupAsset* obj7 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject7", "Assets/OBJ/23.Fireplace_room/fireplace_room.obj");
 	EntityGroupAsset* obj8 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject8", "Assets/OBJ/24.White_oak/white_oak.obj",0.01f); // alpha of this obj is not supported
+
+	
 	EntityGroupAsset* obj9 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject9", "Assets/OBJ/25.Vokselia_spawn/vokselia_spawn.obj");
 	EntityGroupAsset* obj10 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject10", "Assets/OBJ/26.Living_room/living_room.obj");
 	EntityGroupAsset* obj11 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject11", "Assets/OBJ/30.RoadBike/roadBike.obj");
@@ -110,16 +112,6 @@ void World::InitAssets()
 	EntityGroupAsset* obj17 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject17", "Assets/OBJ/43.uploads_files_2558144_well/uploads_files_2558144_well.obj");
 	EntityGroupAsset* obj18 = OBJLibrary::OBJLoader::LoadOBJ("OBJObject18", "Assets/OBJ/45.Cottage/Cottage.obj");
 
-	auto t2 = high_resolution_clock::now();
-
-	/* Getting number of milliseconds as an integer. */
-	auto ms_int = duration_cast<milliseconds>(t2 - t1);
-
-	/* Getting number of milliseconds as a double. */
-	duration<double, std::milli> ms_double = t2 - t1;
-
-//	std::cout << "ObjLoaderDuration : " << ms_int.count() << "ms\n";
-//	std::cout << "ObjLoaderDuration : " << ms_double.count() << "ms\n";
 
 	//Initialise Mesh
 	Mesh* convexPolygonFan = MeshUtilities::CreateConvexPolygonFanMethod("ConvexPolygonFan", { Vector2D(0.5f, 0.866f),Vector2D(0.866f, 0.5f),Vector2D(1.0f, 0.0f),Vector2D(0.866f, -0.5f),
@@ -127,8 +119,6 @@ void World::InitAssets()
 
 	Mesh* convexPolygonEar = MeshUtilities::CreatePolygonWithEarMethod("ConvexPolygonEar", { Vector2D(0.5f, 0.866f),Vector2D(0.866f, 0.5f),Vector2D(1.0f, 0.0f),Vector2D(0.866f, -0.5f),
 		Vector2D(0.5f, -0.866f), Vector2D(0.0f, - 1.0f), Vector2D(-0.5f, - 0.866f), Vector2D(-0.866f, -0.5f), Vector2D(-1.0f, 0.0f), Vector2D(-0.866f, 0.5f), Vector2D(-0.5f, 0.866f), Vector2D(0.0f, 1.0f) });
-
-
 
 }
 
@@ -151,7 +141,7 @@ void World::InitWorld()
 	}
 
 	//Initialise Directional Light entity
-	DirectionalLightEntity* lightEntity = objLoaderScene.CreateEntity<DirectionalLightEntity>();
+	Entity* lightEntity = objLoaderScene.CreateEntity<Entity>();
 	{
 		DirectionalLightComponent* dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
 		dLightComponent->m_ambiantColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
