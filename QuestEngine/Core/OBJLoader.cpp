@@ -43,32 +43,35 @@ Material* OBJLibrary::OBJLoader::CreateMaterial(std::string assetName,MaterialDa
 {
 	Texture* defaultTexture = AssetsManager::GetAsset<Texture>("White");
 	Color whiteColor = Color(1.0f,1.0f,1.0f,1.0f);
-	Material* material = AssetsManager::CreateMaterial(assetName, defaultTexture, defaultTexture, defaultTexture, whiteColor, whiteColor, whiteColor, 32);
-	material->m_ambientColor = materialData.m_ambientColor;
-	material->m_diffuseColor = materialData.m_diffuseColor;
-	material->m_specularColor = materialData.m_specularColor;
-	material->m_shininess = materialData.m_shininess;
+	Material* material = AssetsManager::CreateBlinnPhongMaterial(assetName, defaultTexture, defaultTexture, defaultTexture, whiteColor, whiteColor, whiteColor, 32);
+	material->SetColor("material.ambientColor", materialData.m_ambientColor);
+	material->SetColor("material.diffuseColor", materialData.m_diffuseColor);
+	material->SetColor("material.specularColor", materialData.m_specularColor);
+	material->SetFloat("material.shininess", materialData.m_shininess);
 
 	if (!materialData.m_ambientMapPath.empty())
 	{
 		Texture* ambiantTexture = AssetsManager::CreateTexture(assetName + "ambientTexture", materialData.m_ambientMapPath, true);
 		if (ambiantTexture)
-			material->m_ambientTexture = ambiantTexture;
+			material->SetTexture("material.ambiantTexture", ambiantTexture);
 	}
 
 	if (!materialData.m_diffuseMapPath.empty())
 	{
 		Texture* diffuseTexture = AssetsManager::CreateTexture(assetName + "diffuseTexture", materialData.m_diffuseMapPath, true);
 		if (diffuseTexture)
-			material->m_diffuseTexture = diffuseTexture;
+			material->SetTexture("material.diffuseTexture", diffuseTexture);
 	}
 
 	if (!materialData.m_specularMapPath.empty())
 	{
 		Texture* specularTexture = AssetsManager::CreateTexture(assetName + "specularTexture", materialData.m_specularMapPath, true);
 		if (specularTexture)
-			material->m_specularTexture = specularTexture;
+			material->SetTexture("material.specularTexture", specularTexture);
 	}
+
+	material->SetTexture("material.ambiantTexture", material->GetTexture("material.diffuseTexture"));
+	material->SetColor("material.ambientColor", material->GetColor("material.diffuseColor"));
 
 	return material;
 }

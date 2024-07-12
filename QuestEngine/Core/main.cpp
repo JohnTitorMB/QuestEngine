@@ -16,6 +16,11 @@
 
 int main()
 {
+	Vector2D size = Vector2D(2.0f * 1920 / 1080, 2.0f);
+	float near = 30;
+	float far = 100;
+	Matrix4x4::PerspectiveReverseZ(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, near, far);
+
 	Window* window = new Window(1920, 1080, new char[] {"Opengl Window"});
 	glEnable(GL_DEPTH_TEST);
 

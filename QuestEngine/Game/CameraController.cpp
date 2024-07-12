@@ -107,6 +107,9 @@ void CameraController::Update()
 		
 		m_deltaX = 0;
 		m_deltaY = 0;
+
+	//	std::cout << "WorldPosition : " << m_cameraComponent->GetWorldPosition() << std::endl;
+	//	std::cout << "WorldRotation : " << m_cameraComponent->GetWorldRotation() << std::endl;
 	}
 }
 
@@ -219,7 +222,7 @@ void CameraController::ScrollMove(InputCallbackData data)
 {
 	Vector3D cameraPos = m_cameraComponent->GetWorldPosition();
 	Vector3D cameraForward = m_cameraComponent->GetWorldRotation().GetForwardDirection();
-	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * data.m_value);
+	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * data.m_value*10);
 }
 
 void CameraController::RotateX(InputCallbackData data)

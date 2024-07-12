@@ -9,6 +9,7 @@
 class CameraComponent : public SceneComponent
 {
 public :
+	
 	enum class EProjectionMode
 	{
 		PERSPECTIVE,
@@ -24,6 +25,11 @@ private :
 	float m_near = 0.3f;
 	float m_far = 1000.0f;
 	
+	bool m_useDepthZeroToOneProjection = false;
+	bool m_useReversedZProjection = false;
+	bool m_useInfiniteProjection = false;
+	float m_infiniteEpisilon = 1e-6;
+
 protected:
 	
 public:
@@ -33,11 +39,22 @@ public:
 	void SetNear(float near);
 	void SetFar(float far);
 	void SetFov(float fov);
+	
+	void SetUseDepthZeroToOneProjection(bool value);
+	void SetUseReversedZProjection(bool value);
+	void SetUseInfiniteProjection(bool value);
+	void SetInifiniteProjectionEpsilon(float value);
+
 	Vector2D GetVerticalAndHorizontalSize(float width, float height)const;
 	float GetNear()const;
 	float GetFar()const;
 	float GetSize()const;
 	bool GetSizeType()const;
+	bool GetUseDepthZeroToOneProjection();
+	bool GetUseReversedZProjection();
+	bool GetUseInfiniteProjection();
+	float GetInifiniteProjectionEpsilon();
+
 	Matrix4x4 ViewMatrix()const;
 	Matrix4x4 ProjectionMatrix(float windowWidth, float windowHeight)const;
 

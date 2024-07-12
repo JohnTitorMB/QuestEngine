@@ -6,7 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include "../../Game/DirectionalLightController.h"
-
+#include "../AssetsManager.h"
+#include "../World.h"
 # define M_PI           3.14159265358979323846f  /* pi */
 
 MeshRendererComponent::MeshRendererComponent(const MeshRendererComponent& other) : SceneComponent(other)
@@ -20,48 +21,104 @@ MeshRendererComponent::MeshRendererComponent(const MeshRendererComponent& other)
 	m_material = other.m_material;
 }
 
+void MeshRendererComponent::SendMaterialToShader()const
+{
+	const std::unordered_map<std::string, int> integerKeyValue = m_material->GetIntMap();
+	const std::unordered_map<std::string, float> floatKeyValue = m_material->GetFloatMap();
+	const std::unordered_map<std::string, Vector2D> vector2DKeyValue = m_material->GetVector2DMap();
+	const std::unordered_map<std::string, Vector3D> vector3DKeyValue = m_material->GetVector3DMap();
+	const std::unordered_map<std::string, Vector4D> vector4DKeyValue = m_material->GetVector4DMap();
+	const std::unordered_map<std::string, Texture*> textureKeyValue = m_material->GetTextureMap();
+
+	for (auto pair : integerKeyValue)
+		m_shader->SetUniformInt(pair.first, pair.second);
+
+	for (auto pair : floatKeyValue)
+		m_shader->SetUniformFloat(pair.first, pair.second);
+
+	for (auto pair : vector2DKeyValue)
+		m_shader->SetUniformVector2D(pair.first, pair.second);
+
+	for (auto pair : vector3DKeyValue)
+		m_shader->SetUniformVector3D(pair.first, pair.second);
+
+	for (auto pair : vector4DKeyValue)
+		m_shader->SetUniformVector4D(pair.first, pair.second);
+
+	int textureIndex = 0;
+	for (auto pair : textureKeyValue)
+	{
+		m_shader->SetUniformInt(pair.first, textureIndex);
+
+		if (pair.second)
+			pair.second->Bind(textureIndex);
+		textureIndex++;
+	}
+}
+
 void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)const
 {
-	if (m_mesh == nullptr|| m_shader == nullptr || m_material == nullptr)
+	Shader* shader = m_shader;
+
+	switch (World::m_renderingType)
+	{
+	case RenderingType::UV:
+		shader = AssetsManager::GetAsset<Shader>("UVShader");
+		break;
+	case RenderingType::Normal:
+		shader = AssetsManager::GetAsset<Shader>("NormalShader");
+		break;
+	case RenderingType::FragCoordZ:
+		shader = AssetsManager::GetAsset<Shader>("FragCoordZShader");
+		break;
+	case RenderingType::LinearDepth:
+		shader = AssetsManager::GetAsset<Shader>("LinearDepthShader");
+		break;
+	case RenderingType::Fog:
+		shader = AssetsManager::GetAsset<Shader>("BlinnPhongShaderFog");
+		break;
+	default:
+		break;
+	}
+
+	if (m_mesh == nullptr|| shader == nullptr || m_material == nullptr)
 		return;
 
 	glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
+	if(camera->GetUseDepthZeroToOneProjection())
+		glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+	else
+		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
 
-	m_shader->UseShader();
+	if (camera->GetUseReversedZProjection())
+	{
+		glDepthFunc(GL_GREATER);
+		glClearDepth(0.0f);
+	}
+	else
+	{
+		glDepthFunc(GL_LESS);
+		glClearDepth(1.0f);
+	}
 	
+	shader->UseShader();
+	
+
+	shader->SetUniformFloat("viewNear", 0.01f);
+	shader->SetUniformFloat("viewFar", camera->GetFar());
+	shader->SetUniformVector3D("viewDirection", camera->GetForwardVector());
+
 	Matrix4x4 modelMatrix = GetTransform().TransformMatrix();
-	m_shader->SetUniformMatrix4x4("model", modelMatrix);
-	m_shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
-	m_shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
+	shader->SetUniformMatrix4x4("model", modelMatrix);
+	shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
+	shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
 
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
-	m_shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
-	m_shader->SetUniformVector3D("uViewPos", camera->GetTransform().GetPosition());
-
-	m_shader->SetUniformColor("material.ambientColor", m_material->m_ambientColor);
-	m_shader->SetUniformColor("material.diffuseColor", m_material->m_diffuseColor);
-	m_shader->SetUniformColor("material.specularColor", m_material->m_specularColor);
-	m_shader->SetUniformFloat("material.shininess", m_material->m_shininess);
-
-	m_shader->SetUniformInt("material.ambiantTexture", 0);
-	m_shader->SetUniformInt("material.diffuseTexture", 1);
-	m_shader->SetUniformInt("material.specularTexture", 2);
+	shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
+	shader->SetUniformVector3D("uViewPos", camera->GetTransform().GetPosition());
 
 
-	if (m_material->m_ambientTexture)
-		m_material->m_ambientTexture->Bind(0);
-
-	if (m_material->m_diffuseTexture)
-		m_material->m_diffuseTexture->Bind(1);
-	
-	if(m_material->m_specularTexture)
-		m_material->m_specularTexture->Bind(2);
-
-
-	m_shader->SetUniformVector4D("material.diffuseTextureST", Vector4D(0,0,1,1));
-	m_shader->SetUniformVector4D("material.ambiantTextureST", Vector4D(0,0,1,1));
-	m_shader->SetUniformVector4D("material.specularTextureST", Vector4D(0,0,1,1));
-
+	SendMaterialToShader();
 
 	int directionalLightCounter = 0;
 	int spotLightCounter = 0;
@@ -72,13 +129,11 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 		if (light->m_lightType == LightComponent::LightType::Directional)
 		{
 			DirectionalLightComponent* directionalLight = dynamic_cast<DirectionalLightComponent*>(light);
-			m_shader->SetUniformColor("directionalLight.ambientColor", directionalLight->m_ambiantColor);
-			m_shader->SetUniformColor("directionalLight.diffuseColor", directionalLight->m_diffuseColor);
-			m_shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
-			m_shader->SetUniformVector3D("directionalLight.direction", directionalLight->GetForwardVector());
-
-			//std::cout << "Direction : " << directionalLight->GetForwardVector() << std::endl;
-			m_shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
+			shader->SetUniformColor("directionalLight.ambientColor", directionalLight->m_ambiantColor);
+			shader->SetUniformColor("directionalLight.diffuseColor", directionalLight->m_diffuseColor);
+			shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
+			shader->SetUniformVector3D("directionalLight.direction", directionalLight->GetForwardVector());
+			shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
 			directionalLightCounter++;
 		}
 		else if (light->m_lightType == LightComponent::LightType::Point)
@@ -95,15 +150,15 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 			std::string intensity = (std::ostringstream() << "pointLights[" << pointLightCounter << "].intensity").str();
 
-			m_shader->SetUniformColor(ambiant, pointLight->m_ambiantColor);
-			m_shader->SetUniformColor(diffuse, pointLight->m_diffuseColor);
-			m_shader->SetUniformColor(specular, pointLight->m_specularColor);
-			m_shader->SetUniformVector3D(position, pointLight->GetWorldPosition());
-			m_shader->SetUniformColor(ambiant, pointLight->m_ambiantColor);
-			m_shader->SetUniformFloat(constant, pointLight->m_constantValue);
-			m_shader->SetUniformFloat(linear, pointLight->m_linearValue);
-			m_shader->SetUniformFloat(quadratic, pointLight->m_quadraticValue);
-			m_shader->SetUniformFloat(intensity, pointLight->m_intensity);
+			shader->SetUniformColor(ambiant, pointLight->m_ambiantColor);
+			shader->SetUniformColor(diffuse, pointLight->m_diffuseColor);
+			shader->SetUniformColor(specular, pointLight->m_specularColor);
+			shader->SetUniformVector3D(position, pointLight->GetWorldPosition());
+			shader->SetUniformColor(ambiant, pointLight->m_ambiantColor);
+			shader->SetUniformFloat(constant, pointLight->m_constantValue);
+			shader->SetUniformFloat(linear, pointLight->m_linearValue);
+			shader->SetUniformFloat(quadratic, pointLight->m_quadraticValue);
+			shader->SetUniformFloat(intensity, pointLight->m_intensity);
 			pointLightCounter++;
 		}
 		else if (light->m_lightType == LightComponent::LightType::Spot)
@@ -123,29 +178,29 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			std::string quadratic = (std::ostringstream() << "spotLights[" << spotLightCounter << "].quadratic").str();
 			std::string intensity = (std::ostringstream() << "spotLights[" << spotLightCounter << "].intensity").str();
 
-			m_shader->SetUniformColor(ambiant, spotLight->m_ambiantColor);
-			m_shader->SetUniformColor(diffuse, spotLight->m_diffuseColor);
-			m_shader->SetUniformColor(specular, spotLight->m_specularColor);
-			m_shader->SetUniformVector3D(position, spotLight->GetWorldPosition());
-			m_shader->SetUniformVector3D(direction, spotLight->GetForwardVector());
+			shader->SetUniformColor(ambiant, spotLight->m_ambiantColor);
+			shader->SetUniformColor(diffuse, spotLight->m_diffuseColor);
+			shader->SetUniformColor(specular, spotLight->m_specularColor);
+			shader->SetUniformVector3D(position, spotLight->GetWorldPosition());
+			shader->SetUniformVector3D(direction, spotLight->GetForwardVector());
 
 			float spotCosAngle = cosf(spotLight->m_spotAngle * M_PI/180.0f);
 			float spotCosSmoothValue = cosf((spotLight->m_spotAngle - spotLight->m_spotAngle * spotLight->m_spotSmoothValue) * M_PI/180.0f);
-			m_shader->SetUniformFloat(spotCosAngleName, spotCosAngle);
-			m_shader->SetUniformFloat(spotCosSmoothAngleName, spotCosSmoothValue);	
+			shader->SetUniformFloat(spotCosAngleName, spotCosAngle);
+			shader->SetUniformFloat(spotCosSmoothAngleName, spotCosSmoothValue);	
 
-			m_shader->SetUniformFloat(constant, spotLight->m_constantValue);
-			m_shader->SetUniformFloat(linear, spotLight->m_linearValue);
-			m_shader->SetUniformFloat(quadratic, spotLight->m_quadraticValue);
-			m_shader->SetUniformFloat(intensity, spotLight->m_intensity);
+			shader->SetUniformFloat(constant, spotLight->m_constantValue);
+			shader->SetUniformFloat(linear, spotLight->m_linearValue);
+			shader->SetUniformFloat(quadratic, spotLight->m_quadraticValue);
+			shader->SetUniformFloat(intensity, spotLight->m_intensity);
 
 			spotLightCounter++;
 		}
 	}
-	m_shader->SetUniformInt("pointLightCount", pointLightCounter);
-	m_shader->SetUniformInt("spotLightCount", spotLightCounter);
-	m_shader->SetUniformInt("directionalLightCount", directionalLightCounter);
-	m_shader->SetUniformColor("globalAmbiantColor", LightingSettings::m_globalAmbiantColor);
+	shader->SetUniformInt("pointLightCount", pointLightCounter);
+	shader->SetUniformInt("spotLightCount", spotLightCounter);
+	shader->SetUniformInt("directionalLightCount", directionalLightCounter);
+	shader->SetUniformColor("globalAmbiantColor", LightingSettings::m_globalAmbiantColor);
 
 	
 	m_mesh->UseMesh();

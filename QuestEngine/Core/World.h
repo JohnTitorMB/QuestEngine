@@ -6,6 +6,17 @@
 #include "Window.h"
 #include <unordered_map>
 #include "Assets/EntityGroupAsset.h"
+
+enum class RenderingType
+{
+	Default,
+	UV,
+	Normal,
+	FragCoordZ,
+	LinearDepth,
+	Fog
+};
+
 class Entity;
 class World
 {
@@ -30,6 +41,8 @@ protected:
 	~World();
 
 public :
+
+	static RenderingType m_renderingType;
 	float deltaTime = 0.0f;
 	static World* Instance();
 

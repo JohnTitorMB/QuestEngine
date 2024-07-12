@@ -27,7 +27,7 @@ public:
 
 	static Mesh* CreateMesh(const std::string& assetName, bool useOneVbo);
 	static Texture* CreateTexture(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
-	static Material* CreateMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess);
+	static Material* CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess);
 	static Shader* CreateShader(const std::string& assetName, std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
 	static EntityGroupAsset* CreateEntityGroup(const std::string& assetName);
 

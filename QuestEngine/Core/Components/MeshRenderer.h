@@ -29,6 +29,9 @@ private:
 	int m_partialMeshElementCount = 0;
 	int m_partialMeshStartIndex = 0;
 	Material* m_material = nullptr;
+
+	void SendMaterialToShader()const;
+
 public:
 	MeshRendererComponent() = default;
 	MeshRendererComponent(const MeshRendererComponent& other);
@@ -52,6 +55,7 @@ public:
 	PolygonMode GetPolygonMode()const;
 	Component* Clone()override;
 	void AssignPointerAndReference()override;
+ 
 };
 
 #endif // !_MESH_RENDERER_H_

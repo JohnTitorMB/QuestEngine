@@ -151,8 +151,8 @@ int Window::InitialiseGLFW()
 		return -1;
 	}
 
-	glfwInitHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwInitHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwInitHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwInitHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwInitHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	return 1;

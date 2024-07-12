@@ -61,6 +61,26 @@ void CameraComponent::SetFov(float fov)
 	m_size = 2.0f * m_near * tan(fovInRadian / 2.0f);
 }
 
+void CameraComponent::SetUseDepthZeroToOneProjection(bool value)
+{
+	m_useDepthZeroToOneProjection = value;
+}
+
+void CameraComponent::SetUseReversedZProjection(bool value)
+{
+	m_useReversedZProjection = value;
+}
+
+void CameraComponent::SetUseInfiniteProjection(bool value)
+{
+	m_useInfiniteProjection = value;
+}
+
+void CameraComponent::SetInifiniteProjectionEpsilon(float value)
+{
+	m_infiniteEpisilon = value;
+}
+
 float CameraComponent::GetSize()const
 {
 	return m_size;
@@ -69,6 +89,26 @@ float CameraComponent::GetSize()const
 bool CameraComponent::GetSizeType()const
 {
 	return m_isHorizontal;
+}
+
+bool CameraComponent::GetUseDepthZeroToOneProjection()
+{
+	return m_useDepthZeroToOneProjection;
+}
+
+bool CameraComponent::GetUseReversedZProjection()
+{
+	return m_useReversedZProjection;
+}
+
+bool CameraComponent::GetUseInfiniteProjection()
+{
+	return m_useInfiniteProjection;
+}
+
+float CameraComponent::GetInifiniteProjectionEpsilon()
+{
+	return m_infiniteEpisilon;
 }
 
 float CameraComponent::GetNear()const
@@ -92,10 +132,46 @@ Matrix4x4 CameraComponent::ProjectionMatrix(float windowWidth, float windowHeigh
 	Vector2D size = GetVerticalAndHorizontalSize(windowWidth, windowHeight);
 
 	if (m_isPerspective)
-		return Matrix4x4::Perspective(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
+	{
+		if (m_useDepthZeroToOneProjection)
+		{
+			if (m_useReversedZProjection)
+			{
+				if (m_useInfiniteProjection)
+					return Matrix4x4::InfinitePerspectiveReverseZDepthZeroToOne(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_infiniteEpisilon);
+				else
+					return Matrix4x4::PerspectiveReverseZDepthZeroToOne(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
+			}
+			else
+			{
+				if (m_useInfiniteProjection)
+					return Matrix4x4::InfinitePerspectiveDepthZeroToOne(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_infiniteEpisilon);
+				else
+					return Matrix4x4::PerspectiveDepthZeroToOne(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
+			}
+		}
+		else
+		{
+			if (m_useReversedZProjection)
+			{
+				if (m_useInfiniteProjection)
+					return Matrix4x4::InfinitePerspectiveReverseZ(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_infiniteEpisilon);
+				else
+					return Matrix4x4::PerspectiveReverseZ(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
+			}
+			else
+			{
+				if (m_useInfiniteProjection)
+					return Matrix4x4::InfinitePerspective(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_infiniteEpisilon);
+				else
+					return Matrix4x4::Perspective(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
+			}
+		}
+	}
 	else
 		return Matrix4x4::Orthographic(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, m_near, m_far);
 }
+
 
 Component* CameraComponent::Clone()
 {

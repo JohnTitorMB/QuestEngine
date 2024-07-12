@@ -62,6 +62,8 @@ int Shader::ConfigureFragmentShader(const char* fragmentShaderSource)
 		std::cout << "Fragment Shader Compilation Failed\n" << infoLog << std::endl;
 	}
 
+
+
 	return fragmentShader;
 }
 
@@ -87,6 +89,9 @@ void Shader::ConfigureShaderProgram(int vertexShaderIndex, int fragementShaderIn
 
 	glDeleteShader(vertexShaderIndex);
 	glDeleteShader(fragementShaderIndex);
+
+	GLint numUniforms = 0;
+	glGetProgramiv(m_shaderProgram, GL_ACTIVE_UNIFORMS, &numUniforms);
 }
 
 void Shader::SetUniformVector4D(std::string name, float v0, float v1, float v2, float v3)

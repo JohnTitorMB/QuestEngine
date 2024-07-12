@@ -183,6 +183,9 @@
     <ClCompile Include="Game\RotatorComponnent.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="Game\RenderingSwitchComponent.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Window.h">
@@ -347,12 +350,20 @@
     <ClInclude Include="Game\RotatorComponnent.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="Game\RenderingSwitchComponent.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\DefaultFragmentShader.frag" />
     <None Include="Assets\DefaultVertexShader.vert" />
     <None Include="Assets\BlinnPhongShader.frag" />
     <None Include="Assets\BlinnPhongShader.vert" />
+    <None Include="Assets\UVShader.frag" />
+    <None Include="Assets\NormalShader.frag" />
+    <None Include="Assets\FragCoordZShader.frag" />
+    <None Include="Assets\LinearDepthShader.frag" />
+    <None Include="Assets\BlinnPhongShaderFog.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Texture.png">

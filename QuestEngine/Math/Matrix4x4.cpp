@@ -499,25 +499,100 @@ Matrix4x4 Matrix4x4::Orthographic(float left, float right, float bottom, float t
 
 	return ortho;
 }
+#include <iostream>
 
-Matrix4x4 Matrix4x4::Perspective(float left, float right, float bottom, float top, float near, float far)
+Matrix4x4 Matrix4x4::Perspective(float left, float right, float bottom, float top, float near, float far) //Work
 {
 	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
 		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
-		0, 0, -(far+near) / (far - near), -2.0f * far * near / (far - near),
+		0, 0, -(far+near) / (far - near), (-2.0f * far * near) / (far - near),
 		0, 0, -1, 0);
 
 	return perspective;
 }
 
-Matrix4x4 Matrix4x4::Perspective(float fov, float aspect, float near, float far)
+Matrix4x4 Matrix4x4::Perspective(float fov, float aspect, float near, float far) //Work
 {
-	Matrix4x4 perspective = Matrix4x4(1.0f / (aspect * tanf(fov / 2.0f)), 0, 0, 0,
-		0, 1.0f / (tanf(fov / 2.0f)), 0, 0,
-		0, 0, -(far + near) / (far - near), -(2.0f * far * near) / (far - near),
+	Matrix4x4 perspective = Matrix4x4(1.0f / (aspect * tanf(fov * 0.5f)), 0, 0, 0,
+		0, 1.0f / (tanf(fov * 0.5f)), 0, 0,
+		0, 0, -(far + near) / (far - near), (-2.0f * far * near) / (far - near),
 		0, 0, -1, 0);
+
+
+
 	return perspective;
 
+}
+
+Matrix4x4 Matrix4x4::InfinitePerspective(float left, float right, float bottom, float top, float near, float epsilon) //Work
+{
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, -1 * (1 - epsilon), -2 * near * (1 - epsilon),
+		0, 0, -1, 0);
+	return perspective;
+}
+
+Matrix4x4 Matrix4x4::PerspectiveReverseZ(float left, float right, float bottom, float top, float near, float far) //work
+{
+
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, -(near + far) / (near - far), (-2.0f * near * far) / (near - far),
+		0, 0, -1, 0);
+
+	return perspective;
+}
+
+Matrix4x4 Matrix4x4::InfinitePerspectiveReverseZ(float left, float right, float bottom, float top, float near, float epsilon) //work
+{
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, 1 * (1 - epsilon), 2 * near * (1 - epsilon),
+		0, 0, -1, 0);
+
+	return perspective;
+}
+
+
+Matrix4x4 Matrix4x4::PerspectiveDepthZeroToOne(float left, float right, float bottom, float top, float near, float far) //Work
+{
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, -far / (far - near), -near * far / (far - near),
+		0, 0, -1, 0);
+
+	return perspective;
+}
+	
+Matrix4x4 Matrix4x4::InfinitePerspectiveDepthZeroToOne(float left, float right, float bottom, float top, float near, float epsilon) //Work
+{
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, -1 * (1 - epsilon), -near * (1 - epsilon),
+		0, 0, -1, 0);
+
+	return perspective;
+}
+
+Matrix4x4 Matrix4x4::PerspectiveReverseZDepthZeroToOne(float left, float right, float bottom, float top, float near, float far) // doesn't work
+{
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, -near/(near-far), -near*far/(near-far),
+		0, 0, -1, 0);
+
+	return perspective;
+}
+
+Matrix4x4 Matrix4x4::InfinitePerspectiveReverseZDepthZeroToOne(float left, float right, float bottom, float top, float near, float epsilon) // doesn't work
+{
+	Matrix4x4 perspective = Matrix4x4(2.0f * near / (right - left), 0, (right + left) / (right - left), 0,
+		0, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0,
+		0, 0, 0, near * (1 - epsilon),
+		0, 0, -1, 0);
+
+	return perspective;
 }
 
 

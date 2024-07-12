@@ -93,14 +93,27 @@ Texture* AssetsManager::CreateTexture(const std::string& assetName, std::string 
 	return texture;
 }
 
-Material* AssetsManager::CreateMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess)
+Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess)
 {
 	AssetsManager* assetsManager = AssetsManager::Instance();
 	std::string newAssetName = assetName;
 	if (assetsManager->m_assetsNameMap.find(assetName) != assetsManager->m_assetsNameMap.end())
 		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
 
-	Material* material = new Material(ambientTexture, diffuseTexture, specularTexture, ambientColor, diffuseColor, specularColor, shininess);
+	Material* material = new Material();
+	material->SetColor("material.ambientColor", ambientColor);
+	material->SetColor("material.diffuseColor", diffuseColor);
+	material->SetColor("material.specularColor", specularColor);
+	material->SetFloat("material.shininess", shininess);
+
+	material->SetTexture("material.ambiantTexture", ambientTexture);
+	material->SetTexture("material.diffuseTexture", diffuseTexture);
+	material->SetTexture("material.specularTexture", specularTexture);
+
+	material->SetVector4D("material.diffuseTextureST", Vector4D(0, 0, 1, 1));
+	material->SetVector4D("material.ambiantTextureST", Vector4D(0, 0, 1, 1));
+	material->SetVector4D("material.specularTextureST", Vector4D(0, 0, 1, 1));
+
 	assetsManager->m_assetsNameMap.emplace(newAssetName, material);
 	assetsManager->m_assets.insert(material);
 	return material;

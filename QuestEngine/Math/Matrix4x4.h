@@ -53,8 +53,16 @@ public:
 	static Matrix4x4 TR(const Vector3D& translate, const Quaternion& v);
 	static Matrix4x4 TRS(const Vector3D& translate, const Quaternion& rotation, const Vector3D& scale);
 	static Matrix4x4 Orthographic(float left, float right, float bottom, float top, float near, float far);
-	static Matrix4x4 Perspective(float left, float right, float bottom, float top, float near, float far);
-	static Matrix4x4 Perspective(float fov, float aspect, float near, float far);
+	static Matrix4x4 Perspective(float left, float right, float bottom, float top, float near, float far); //Work
+	static Matrix4x4 Perspective(float fov, float aspect, float near, float far); //Work
+	
+	static Matrix4x4 InfinitePerspective(float left, float right, float bottom, float top, float near, float epsilon); //work
+	static Matrix4x4 PerspectiveReverseZ(float left, float right, float bottom, float top, float near, float far); // doesn't work
+	static Matrix4x4 InfinitePerspectiveReverseZ(float left, float right, float bottom, float top, float near, float epsilon); // doesn't work	
+	static Matrix4x4 PerspectiveDepthZeroToOne(float left, float right, float bottom, float top, float near, float far); //Work
+	static Matrix4x4 InfinitePerspectiveDepthZeroToOne(float left, float right, float bottom, float top, float near, float epsilon); // Work
+	static Matrix4x4 PerspectiveReverseZDepthZeroToOne(float left, float right, float bottom, float top, float near, float far); //work
+	static Matrix4x4 InfinitePerspectiveReverseZDepthZeroToOne(float left, float right, float bottom, float top, float near, float epsilon); // work
 
 
 	std::array<float, 16> GetAsArray() const;

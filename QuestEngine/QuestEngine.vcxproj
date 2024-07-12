@@ -171,6 +171,7 @@
     <ClCompile Include="Core\Inputs\InputCode.cpp" />
     <ClCompile Include="Game\SceneOBJLoaderComponnent.cpp" />
     <ClCompile Include="Game\RotatorComponnent.cpp" />
+    <ClCompile Include="Game\RenderingSwitchComponent.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="Core\Inputs\InputCode.h" />
     <ClInclude Include="Game\SceneOBJLoaderComponnent.h" />
     <ClInclude Include="Game\RotatorComponnent.h" />
+    <ClInclude Include="Game\RenderingSwitchComponent.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />
@@ -264,8 +266,13 @@
   <ItemGroup>
     <None Include="Assets\BlinnPhongShader.frag" />
     <None Include="Assets\BlinnPhongShader.vert" />
+    <None Include="Assets\BlinnPhongShaderFog.frag" />
     <None Include="Assets\DefaultFragmentShader.frag" />
     <None Include="Assets\DefaultVertexShader.vert" />
+    <None Include="Assets\FragCoordZShader.frag" />
+    <None Include="Assets\LinearDepthShader.frag" />
+    <None Include="Assets\NormalShader.frag" />
+    <None Include="Assets\UVShader.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\CubeTextureFace.png" />
