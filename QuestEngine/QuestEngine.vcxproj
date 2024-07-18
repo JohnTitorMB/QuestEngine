@@ -169,9 +169,8 @@
     <ClCompile Include="Core\Inputs\InputMap.cpp" />
     <ClCompile Include="Core\Inputs\InputSystem.cpp" />
     <ClCompile Include="Core\Inputs\InputCode.cpp" />
-    <ClCompile Include="Game\SceneOBJLoaderComponnent.cpp" />
-    <ClCompile Include="Game\RotatorComponnent.cpp" />
     <ClCompile Include="Game\RenderingSwitchComponent.cpp" />
+    <ClCompile Include="Core\TimeManager.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -188,9 +187,7 @@
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\SceneManager.cpp" />
     <ClCompile Include="Core\Components\SceneComponent.cpp" />
-    <ClCompile Include="Game\SceneGraphTestComponent.cpp" />
     <ClCompile Include="Core\Object.cpp" />
-    <ClCompile Include="Game\SceneSwitchController.cpp" />
     <ClCompile Include="Core\OBJLoader.cpp" />
     <ClCompile Include="Utilities\MovingAverage.cpp" />
     <ClCompile Include="Utilities\MeshUtilities.cpp" />
@@ -227,9 +224,8 @@
     <ClInclude Include="Core\Inputs\InputMap.h" />
     <ClInclude Include="Core\Inputs\InputSystem.h" />
     <ClInclude Include="Core\Inputs\InputCode.h" />
-    <ClInclude Include="Game\SceneOBJLoaderComponnent.h" />
-    <ClInclude Include="Game\RotatorComponnent.h" />
     <ClInclude Include="Game\RenderingSwitchComponent.h" />
+    <ClInclude Include="Core\TimeManager.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />
@@ -246,9 +242,7 @@
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Core\SceneManager.h" />
     <ClInclude Include="Core\Components\SceneComponent.h" />
-    <ClInclude Include="Game\SceneGraphTestComponent.h" />
     <ClInclude Include="Core\Object.h" />
-    <ClInclude Include="Game\SceneSwitchController.h" />
     <ClInclude Include="Core\OBJLoader.h" />
     <ClInclude Include="Utilities\MovingAverage.h" />
     <ClInclude Include="Utilities\MeshUtilities.h" />

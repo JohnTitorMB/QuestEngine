@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #include "OBJLoader.h"
+#include "TimeManager.h"
 /*
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -35,13 +36,31 @@ int main()
 	float stepLight = 1.0f;
 
 	float previousTime = glfwGetTime();
+	float deltaTime = 0.0f;
+	int frameCount = 0;
+	float fpsTimeCounter = 0.0f;
+
+	bool vsync = true;
+	window->SetVsync(vsync);
+
 
 	while (!glfwWindowShouldClose(window->GetWindow()))
 	{
 		float currentTime = glfwGetTime();
-		world->deltaTime = currentTime - previousTime;
-
+		deltaTime = currentTime - previousTime;
 		previousTime = currentTime;
+
+		frameCount++;
+		fpsTimeCounter += deltaTime;
+
+		if (fpsTimeCounter >= 1.0f)
+		{
+			float fps = frameCount / fpsTimeCounter;
+			std::cout << "FPS: " << fps << std::endl;
+
+			frameCount = 0;
+			fpsTimeCounter = 0.0f;
+		}
 
 		glfwPollEvents();
 		inputSystem->ProcessInput(window);
@@ -55,6 +74,7 @@ int main()
 
 		glfwSwapBuffers(window->GetWindow());
 	}
+
 
 	delete window;
 	window = nullptr;

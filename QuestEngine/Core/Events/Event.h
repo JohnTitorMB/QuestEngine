@@ -16,9 +16,64 @@ public:
 		m_actions.clear();
 	}
 
-	void AddListener(IEventCallback<Args...>* action)
+	Event(Event& other)
 	{
-		m_actions.push_back(action);
+		for (IEventCallback<Args...>* action : other.m_actions)
+		{
+			m_actions.push_back(action->Clone());
+		}
+	}
+
+	Event(Event&& other)
+	{
+		m_actions = std::move(other.m_actions);
+		other.m_actions.clear();
+	}
+
+	Event& operator=(const Event& other)
+	{
+		if (this != &other)
+		{
+			for (IEventCallback<Args...>* action : m_actions)
+			{
+				delete action;
+			}
+
+			m_actions.clear();
+
+			for (IEventCallback<Args...>* action : other.m_actions)
+			{
+				m_actions.push_back(action->Clone());
+			}
+		}
+
+		return *this;
+	}
+
+	Event& operator=(Event&& other)
+	{
+		if (this != &other)
+		{
+			for (IEventCallback<Args...>* action : m_actions)
+			{
+				delete action;
+			}
+
+			m_actions.clear();
+
+			m_actions = std::move(other.m_actions);
+			other.m_actions.clear();
+		}
+
+		return *this;
+	}
+
+	template<typename T, typename... ExtraArgs>
+	IEventCallback<Args...>* AddListener(T* instance, void (T::* function)(Args..., ExtraArgs...), const ExtraArgs&... extraArgs )
+	{
+		EventCallback<T, Args...>* callback = new EventCallback<T, Args...>(instance, function, extraArgs...);
+		m_actions.push_back(callback);
+		return callback;
 	}
 
 	void RemoveListener(IEventCallback<Args...>* action)
@@ -29,6 +84,7 @@ public:
 			return;
 
 		m_actions.erase(position);
+
 
 		if(action != nullptr)
 			delete action;

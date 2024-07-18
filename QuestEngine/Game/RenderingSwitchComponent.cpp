@@ -19,35 +19,35 @@ void RenderingSwitchComponent::Start()
 	m_inputMap = inputSystem->CreateInputMap();
 
 	InputAction& inputAction = m_inputMap->CreateInputAction("DefaultMode");
-	inputAction.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::DefaultMode));
+	inputAction.Started.AddListener(this, &RenderingSwitchComponent::DefaultMode);
 	m_inputMap->BindInputCode("DefaultMode", InputCode::E_KEY_1);
 
 	InputAction& inputAction2 = m_inputMap->CreateInputAction("UVMode");
-	inputAction2.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::UVMode));
+	inputAction2.Started.AddListener(this, &RenderingSwitchComponent::UVMode);
 	m_inputMap->BindInputCode("UVMode", InputCode::E_KEY_2);
 
 	InputAction& inputAction3 = m_inputMap->CreateInputAction("NormalMode");
-	inputAction3.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::NormalMode));
+	inputAction3.Started.AddListener(this, &RenderingSwitchComponent::NormalMode);
 	m_inputMap->BindInputCode("NormalMode", InputCode::E_KEY_3);
 
 	InputAction& inputAction4 = m_inputMap->CreateInputAction("FragCoordZMode");
-	inputAction4.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::FragCoordZMode));
+	inputAction4.Started.AddListener(this, &RenderingSwitchComponent::FragCoordZMode);
 	m_inputMap->BindInputCode("FragCoordZMode", InputCode::E_KEY_4);
 
 	InputAction& inputAction5 = m_inputMap->CreateInputAction("LinearDepthMode");
-	inputAction5.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::LinearDepthMode));
+	inputAction5.Started.AddListener(this, &RenderingSwitchComponent::LinearDepthMode);
 	m_inputMap->BindInputCode("LinearDepthMode", InputCode::E_KEY_5);
 
 	InputAction& inputAction6 = m_inputMap->CreateInputAction("FogMode");
-	inputAction6.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::FogMode));
+	inputAction6.Started.AddListener(this, &RenderingSwitchComponent::FogMode);
 	m_inputMap->BindInputCode("FogMode", InputCode::E_KEY_6);
 
 	InputAction& inputAction8 = m_inputMap->CreateInputAction("PrevCameraMode");
-	inputAction8.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::PrevCameraMode));
+	inputAction8.Started.AddListener(this, &RenderingSwitchComponent::PrevCameraMode);
 	m_inputMap->BindInputCode("PrevCameraMode", InputCode::E_KEY_Q);
 
 	InputAction& inputAction9 = m_inputMap->CreateInputAction("NextCameraMode");
-	inputAction9.Started.AddListener(new EventCallback<RenderingSwitchComponent, InputCallbackData>(this, &RenderingSwitchComponent::NextCameraMode));
+	inputAction9.Started.AddListener(this, &RenderingSwitchComponent::NextCameraMode);
 	m_inputMap->BindInputCode("NextCameraMode", InputCode::E_KEY_E);
 
 }

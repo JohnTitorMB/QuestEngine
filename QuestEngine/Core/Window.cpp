@@ -76,6 +76,20 @@ void Window::LockMouseInput(bool lock)
 		glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
+void Window::SetVsync(bool value)
+{
+	m_vsync = value;
+	if(!m_vsync)
+		glfwSwapInterval(0.0f);
+	else
+		glfwSwapInterval(1.0f);
+}
+
+bool Window::GetVsync() const
+{
+	return m_vsync;
+}
+
 InputCode Window::ConvertGLFWInputKeyCode(int keyCode)
 {	
 	return (InputCode)keyCode;
@@ -185,7 +199,6 @@ int Window::CreateWindow()
 	}
 
 	glfwMakeContextCurrent(m_window);
-
 	return 1;
 }
 

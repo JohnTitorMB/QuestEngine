@@ -12,14 +12,12 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "Components/MeshRenderer.h"
 #include "Components/Camera.h"
 #include "LightingSettings.h"
-#include "../Game/SceneGraphTestComponent.h"
 #include "SceneManager.h"
-#include "../Game/SceneSwitchController.h"
 #include "OBJLoader.h"
-#include "../Game/SceneOBJLoaderComponnent.h"
-#include "../Game/RotatorComponnent.h"
 #include "Components/Transform.h"
 #include "../Game/RenderingSwitchComponent.h"
+#include "TimeManager.h"
+
 World::World()
 {
 
@@ -38,6 +36,7 @@ World* World::Instance()
 World::~World()
 {
 	DestroyWorldEntity();
+	TimeManager::Instance()->Destroy();
 
 	if (m_world)
 	{
@@ -73,7 +72,7 @@ void World::InitAssets()
 	Material* material5 = AssetsManager::CreateBlinnPhongMaterial("Material4", whiteTexture, whiteTexture, whiteTexture, Color(1, 0, 1, 1), Color(1, 0, 1, 1), Color(1, 1, 1, 1), 32);
 	
 
-	EntityGroupAsset* obj = OBJLibrary::OBJLoader::LoadOBJ("OBJObject0", "Assets/OBJ/35.Rungholt/rungholt.obj");
+	//EntityGroupAsset* obj = OBJLibrary::OBJLoader::LoadOBJ("OBJObject0", "Assets/OBJ/35.Rungholt/rungholt.obj");
 }
 
 void World::InitWorld()
@@ -86,7 +85,6 @@ void World::InitWorld()
 	Entity* cameraEntity = objLoaderScene.CreateEntity<Entity>();
 	{
 		cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
-		//cameraComponent->SetWorldPosition(Vector3D(0, 0, -5));
 		cameraComponent->SetNear(0.01f);
 		cameraComponent->SetFar(1000.0);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
@@ -94,6 +92,7 @@ void World::InitWorld()
 		cameraEntity->SetRootComponent(cameraComponent);
 
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
+		cameraComponent->SetWorldPosition(Vector3D(0, 4, -20));
 	}
 
 	//Initialise Directional Light entity
@@ -105,35 +104,22 @@ void World::InitWorld()
 		dLightComponent->m_specularColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
 		dLightComponent->m_intensity = 1.0f;
 
+		dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50, -30, 0)));
+
 		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
-
-		//dLightComponent->SetParent(cameraEntity->GetRootComponent());
 	}
 
-	/*
+	
 	Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>();
 	{
 		MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
 		meshRendererComponent->SetWorldPosition(Vector3D(0,0,0));
-		meshRendererComponent->SetWorldScale(Vector3D(10,1,1));
+		meshRendererComponent->SetWorldScale(Vector3D(10,1, 10));
 		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
 		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
 		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
 	}
-
-	Entity* cubeEntity2 = objLoaderScene.CreateEntity<Entity>();
-	{
-		MeshRendererComponent* meshRendererComponent2 = cubeEntity2->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent2->SetWorldPosition(Vector3D(0, 0, 0));
-		meshRendererComponent2->SetWorldScale(Vector3D(1, 10, 1));
-		meshRendererComponent2->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-		meshRendererComponent2->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-		meshRendererComponent2->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-	}
-	*/
-
-	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("OBJObject" + std::to_string(0)));
 
 	//Initialise Directional Light entity
 	Entity* entity = objLoaderScene.CreateEntity<Entity>();
@@ -175,12 +161,23 @@ void World::DestroyEntity(Entity* entity)
 
 void World::Update()
 {
+	//Update Time
+	TimeManager::Instance()->m_time = glfwGetTime();
+	TimeManager::Instance()->m_deltaTime = TimeManager::Instance()->m_time - TimeManager::Instance()->m_previousTime;
+
+
+	//Update Timer
+	TimeManager::Instance()->UpdateTimers();
+
+	//Update World Entities
 	for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
 	{
 		Entity* entity = *it;
 
 		entity->Update();
 	}
+
+	TimeManager::Instance()->m_previousTime = TimeManager::Instance()->m_time;
 }
 
 void World::Display(Window* window)

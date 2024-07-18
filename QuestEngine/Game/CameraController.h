@@ -35,6 +35,7 @@ public:
 	void ControlCamera(InputCallbackData data);
 	void UnControlCamera(InputCallbackData data);
 
+	void AutoMove(float speed);
 
 	float m_pitch = 0;
 	float m_yaw = 0;

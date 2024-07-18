@@ -153,13 +153,7 @@
     <ClCompile Include="Core\Components\SceneComponent.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Game\SceneGraphTestComponent.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Object.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\SceneSwitchController.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="Core\OBJLoader.cpp">
@@ -174,16 +168,13 @@
     <ClCompile Include="Core\tiny_obj_loader.cc">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Game\SceneOBJLoaderComponnent.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="Game\ComponentExample.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Game\RotatorComponnent.cpp">
+    <ClCompile Include="Game\RenderingSwitchComponent.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Game\RenderingSwitchComponent.cpp">
+    <ClCompile Include="Core\TimeManager.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -320,13 +311,7 @@
     <ClInclude Include="Core\Components\SceneComponent.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Game\SceneGraphTestComponent.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Object.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\SceneSwitchController.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="Core\OBJLoader.h">
@@ -341,16 +326,13 @@
     <ClInclude Include="Core\tiny_obj_loader.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Game\SceneOBJLoaderComponnent.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="Game\ComponentExample.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Game\RotatorComponnent.h">
+    <ClInclude Include="Game\RenderingSwitchComponent.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Game\RenderingSwitchComponent.h">
+    <ClInclude Include="Core\TimeManager.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

@@ -43,7 +43,6 @@ protected:
 public :
 
 	static RenderingType m_renderingType;
-	float deltaTime = 0.0f;
 	static World* Instance();
 
 	World(World& other) = delete;
@@ -63,6 +62,7 @@ public :
 	void InitWorld();
 	void Update();
 	void Display(Window* window);
+	
 };
 
 #include "Entity.h"

@@ -25,6 +25,8 @@ public :
 	void LockMouseInput(bool lock);
 	float lastPositionX = 0.0f;
 	float lastPositionY = 0.0f;
+	void SetVsync(bool value);
+	bool GetVsync()const;
 private:
 	
 	int m_glMajorVersion = 3;
@@ -33,6 +35,7 @@ private:
 	int m_width = 1280;
 	int m_height = 720;
 	char* m_title;
+	bool m_vsync = true;
 
 	GLFWwindow* m_window;
 	int InitialiseGLFW();

@@ -3,6 +3,7 @@
 #include "../Core/Inputs/InputSystem.h"
 #include "../Math/Mathf.h"
 #include "../Core/World.h"
+#include "../Core/TimeManager.h"
 CameraController::CameraController()
 {
 	m_pitch = 0;
@@ -12,7 +13,7 @@ CameraController::CameraController()
 	m_sensibility = 0.2f;
 	m_pitchMinValue = -89;
 	m_pitchMaxValue = 89;
-	movementSpeed = 0.1f;
+	movementSpeed = 10;
 	m_inputMap = nullptr;
 }
 
@@ -47,43 +48,45 @@ void CameraController::Start()
 	
 	/* --------------------------------------------------Controller Action ------------------------------------*/
 	InputAction& inputAction = m_inputMap->CreateInputAction("MoveRight");
-	inputAction.Ongoing.AddListener(new EventCallback<CameraController, InputCallbackData>(this, &CameraController::MoveRight));
+	inputAction.Ongoing.AddListener(this, &CameraController::MoveRight);
 	m_inputMap->BindInputCode("MoveRight", InputCode::E_KEY_RIGHT);
 
 	InputAction&  inputAction2 = m_inputMap->CreateInputAction("MoveLeft");
-	inputAction2.Ongoing.AddListener(new EventCallback<CameraController, InputCallbackData>(this, &CameraController::MoveLeft));
+	inputAction2.Ongoing.AddListener(this, &CameraController::MoveLeft);
 	m_inputMap->BindInputCode("MoveLeft", InputCode::E_KEY_LEFT);
 
 	InputAction&  inputAction3 = m_inputMap->CreateInputAction("MoveForward");
-	inputAction3.Ongoing.AddListener(new EventCallback<CameraController, InputCallbackData>(this, &CameraController::MoveForward));
+	inputAction3.Ongoing.AddListener(this, &CameraController::MoveForward);
 	m_inputMap->BindInputCode("MoveForward", InputCode::E_KEY_UP);
 
 	InputAction& inputAction4 = m_inputMap->CreateInputAction("MoveBackward");
-	inputAction4.Ongoing.AddListener(new EventCallback<CameraController, InputCallbackData>(this, &CameraController::MoveBackward));
+	inputAction4.Ongoing.AddListener(this, &CameraController::MoveBackward);
 	m_inputMap->BindInputCode("MoveBackward", InputCode::E_KEY_DOWN);
 
 	InputAction& inputAction5 = m_inputMap->CreateInputAction("RotateX");
-	inputAction5.OnModified.AddListener(new EventCallback<CameraController, InputCallbackData>(this, &CameraController::RotateX));
+	inputAction5.OnModified.AddListener(this, &CameraController::RotateX);
 	m_inputMap->BindInputCode("RotateX", InputCode::E_MOUSE_POS_Y);
 
 	InputAction& inputAction6 = m_inputMap->CreateInputAction("RotateY");
-	inputAction6.OnModified.AddListener(new EventCallback<CameraController, InputCallbackData>(this, &CameraController::RotateY));
+	inputAction6.OnModified.AddListener(this, &CameraController::RotateY);
 	m_inputMap->BindInputCode("RotateY", InputCode::E_MOUSE_POS_X);
 
 	InputAction& inputAction7 = m_inputMap->CreateInputAction("ControlCamera");
-	inputAction7.Started.AddListener(new EventCallback<CameraController, InputCallbackData>(this, &CameraController::ControlCamera));
+	inputAction7.Started.AddListener(this, &CameraController::ControlCamera);
 	m_inputMap->BindInputCode("ControlCamera", InputCode::E_MOUSE_BUTTON_RIGHT);
 
-	auto m_eventUnControlCamera = new EventCallback<CameraController, InputCallbackData>(this, &CameraController::UnControlCamera);
 	InputAction& inputAction8 = m_inputMap->CreateInputAction("UnControlCamera");
-	inputAction8.Started.AddListener(m_eventUnControlCamera);
+	inputAction8.Started.AddListener(this, &CameraController::UnControlCamera);
 	m_inputMap->BindInputCode("UnControlCamera", InputCode::E_KEY_ESCAPE);
 
-	auto m_eventScrollMoveCallback = new EventCallback<CameraController, InputCallbackData>(this, &CameraController::ScrollMove);
 	InputAction& inputAction11 = m_inputMap->CreateInputAction("ScrollMove");
-	inputAction11.Started.AddListener(m_eventScrollMoveCallback);
+	inputAction11.Started.AddListener(this, &CameraController::ScrollMove);
 	m_inputMap->BindInputCode("ScrollMove", InputCode::E_MOUSE_SCROLL_Y);
 	
+	Event<> autoMoveEvent = Event<>();
+	autoMoveEvent.AddListener(this, &CameraController::AutoMove, 0.1f);
+	Timer& timer = TimeManager::Instance()->SetTimer(0.5f, true, autoMoveEvent);
+
 	m_averageDeltaX.Resize(6);
 	m_averageDeltaY.Resize(6);
 }
@@ -91,8 +94,7 @@ void CameraController::Start()
 void CameraController::Update()
 {
 	if (m_controlCamera)
-	{
-	
+	{	
 		m_averageDeltaY.AddSample(m_deltaY);
 		m_averageDeltaX.AddSample(m_deltaX);
 	
@@ -107,9 +109,6 @@ void CameraController::Update()
 		
 		m_deltaX = 0;
 		m_deltaY = 0;
-
-	//	std::cout << "WorldPosition : " << m_cameraComponent->GetWorldPosition() << std::endl;
-	//	std::cout << "WorldRotation : " << m_cameraComponent->GetWorldRotation() << std::endl;
 	}
 }
 
@@ -129,6 +128,15 @@ void CameraController::UnControlCamera(InputCallbackData data)
 	InputSystem* inputSystem = InputSystem::Instance();
 	m_controlCamera = false;
 	inputSystem->UnLockMouseCursor();
+}
+
+void CameraController::AutoMove(float speed)
+{
+	Vector3D cameraPos = m_cameraComponent->GetWorldPosition();
+	Vector3D cameraRight = m_cameraComponent->GetWorldRotation().GetRightDirection();
+	m_cameraComponent->SetWorldPosition(cameraPos + cameraRight * movementSpeed * speed);
+
+	std::cout << "AutoMove" << ", speed : " << speed << std::endl;
 }
 
 void CameraController::DigitalInputTestStarted(InputCallbackData data)
@@ -193,7 +201,8 @@ void CameraController::MoveRight(InputCallbackData data)
 	Vector3D cameraPos = m_cameraComponent->GetWorldPosition();
 	Vector3D cameraRight = m_cameraComponent->GetWorldRotation().GetRightDirection();
 
-	m_cameraComponent->SetWorldPosition(cameraPos + cameraRight * movementSpeed);
+	
+	m_cameraComponent->SetWorldPosition(cameraPos + cameraRight * movementSpeed * TimeManager::Instance()->GetDeltaTime());
 }
 
 void CameraController::MoveLeft(InputCallbackData data)
@@ -201,21 +210,21 @@ void CameraController::MoveLeft(InputCallbackData data)
 	Vector3D cameraPos = m_cameraComponent->GetWorldPosition();
 	Vector3D cameraRight = m_cameraComponent->GetWorldRotation().GetRightDirection();
 
-	m_cameraComponent->SetWorldPosition(cameraPos + cameraRight  * -movementSpeed);
+	m_cameraComponent->SetWorldPosition(cameraPos + cameraRight  * -movementSpeed * TimeManager::Instance()->GetDeltaTime());
 }
 
 void CameraController::MoveForward(InputCallbackData data)
 {
 	Vector3D cameraPos = m_cameraComponent->GetWorldPosition();
 	Vector3D cameraForward = m_cameraComponent->GetWorldRotation().GetForwardDirection();
-	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * movementSpeed);
+	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * movementSpeed * TimeManager::Instance()->GetDeltaTime());
 }
 
 void CameraController::MoveBackward(InputCallbackData data)
 {
 	Vector3D cameraPos = m_cameraComponent->GetWorldPosition();
 	Vector3D cameraForward = m_cameraComponent->GetWorldRotation().GetForwardDirection();
-	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * -movementSpeed);
+	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * -movementSpeed * TimeManager::Instance()->GetDeltaTime());
 }
 
 void CameraController::ScrollMove(InputCallbackData data)
