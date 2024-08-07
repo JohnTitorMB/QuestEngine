@@ -27,13 +27,17 @@ private:
 	std::set<Entity*> m_entities;
 	std::set<LightComponent*> m_lights;
 	std::set<MeshRendererComponent*> m_meshRenderers;
+	std::vector<MeshRendererComponent*> m_meshRenderersStoredByPriority;
 	std::set<Component*> m_components;
 	std::set<CameraComponent*> m_cameras;
+
+	bool m_isMeshRendererOrdored = false;
 
 private:
 	void DestroyWorldEntity();
 	void RegisterComponent(Component* component);
 	void UnRegisterComponent(Component* component);
+	void OrdoredMeshRenderer();
 
 protected:
 	static World* m_world;
@@ -62,6 +66,7 @@ public :
 	void InitWorld();
 	void Update();
 	void Display(Window* window);
+	void RefreshPriorityRenderingComponent(MeshRendererComponent* component);
 	
 };
 

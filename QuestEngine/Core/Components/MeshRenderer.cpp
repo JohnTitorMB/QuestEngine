@@ -10,16 +10,6 @@
 #include "../World.h"
 # define M_PI           3.14159265358979323846f  /* pi */
 
-MeshRendererComponent::MeshRendererComponent(const MeshRendererComponent& other) : SceneComponent(other)
-{
-	m_polygonMode = other.m_polygonMode;
-	m_shader = other.m_shader;
-	m_mesh = other.m_mesh;
-	m_drawPartialMesh = other.m_drawPartialMesh;
-	m_partialMeshElementCount = other.m_partialMeshElementCount;
-	m_partialMeshStartIndex = other.m_partialMeshStartIndex;
-	m_material = other.m_material;
-}
 
 void MeshRendererComponent::SendMaterialToShader()const
 {
@@ -83,24 +73,47 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 	if (m_mesh == nullptr|| shader == nullptr || m_material == nullptr)
 		return;
+	
 
 	glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
-	if(camera->GetUseDepthZeroToOneProjection())
+	if (camera->GetUseDepthZeroToOneProjection())
 		glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 	else
 		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
 
-	if (camera->GetUseReversedZProjection())
-	{
-		glDepthFunc(GL_GREATER);
-		glClearDepth(0.0f);
-	}
+	//Cull Face Specification
+	if (m_isCullFaceEnable)
+		glEnable(GL_CULL_FACE);
 	else
-	{
-		glDepthFunc(GL_LESS);
-		glClearDepth(1.0f);
-	}
-	
+		glDisable(GL_CULL_FACE);
+
+	glCullFace((int)m_cullFace);
+	glFrontFace((int)m_frontFace);
+
+	//Stencil Specification
+	if (m_isStencilTestEnable)
+		glEnable(GL_STENCIL_TEST);
+	else
+		glDisable(GL_STENCIL_TEST);
+
+	glStencilMaskSeparate(GL_BACK, m_stencilBackMask);
+	glStencilFuncSeparate(GL_BACK, (int)m_stencilTestBackFunc, m_stencilTestBackRef, m_stencilTestBackMask);
+	glStencilOpSeparate(GL_BACK, (int)m_stencilFailBackAction, (int)m_depthFailBackAction, (int)m_depthPassBackAction);
+
+	glStencilMaskSeparate(GL_FRONT, m_stencilFrontMask);
+	glStencilFuncSeparate(GL_FRONT, (int)m_stencilTestFrontFunc, m_stencilTestFrontRef, m_stencilTestFrontMask);
+	glStencilOpSeparate(GL_FRONT, (int)m_stencilFailFrontAction, (int)m_depthFailFrontAction, (int)m_depthPassFrontAction);
+
+
+	//Depth Specification
+	if (m_isDepthTestEnable)
+		glEnable(GL_DEPTH_TEST);
+	else
+		glDisable(GL_DEPTH_TEST);
+
+	glDepthMask(m_isDepthMaskEnable);
+	glDepthFunc((int)m_depthTestFunc);
+
 	shader->UseShader();
 	
 
@@ -248,6 +261,13 @@ void MeshRendererComponent::SetPolygonMode(PolygonMode polygonMode)
 	m_polygonMode = polygonMode;
 }
 
+void MeshRendererComponent::SetGeometryRenderingPriority(int value)
+{
+	m_geometryRenderingPriority = value;
+
+	World::Instance()->RefreshPriorityRenderingComponent(this);
+}
+
 bool MeshRendererComponent::GetDrawPartialMesh()const
 {
 	return m_drawPartialMesh;
@@ -261,6 +281,11 @@ int MeshRendererComponent::GetPartialMeshElementCount()const
 int MeshRendererComponent::GetPartialMeshStartIndex()const
 {
 	return m_partialMeshStartIndex;
+}
+
+int MeshRendererComponent::GetGeometryRenderingPriority() const
+{
+	return m_geometryRenderingPriority;
 }
 
 Mesh* MeshRendererComponent::GetMesh()const
@@ -289,6 +314,215 @@ Component* MeshRendererComponent::Clone()
 void MeshRendererComponent::AssignPointerAndReference()
 {
 	SceneComponent::AssignPointerAndReference();
+}
+
+void MeshRendererComponent::EnableDepthMask(bool value)
+{
+	m_isDepthMaskEnable = value;
+}
+
+void MeshRendererComponent::EnableDepthTest(bool value)
+{
+	m_isDepthTestEnable = value;
+}
+
+void MeshRendererComponent::SetDepthTestFunc(DepthTestFunc depthTestFunc)
+{
+	m_depthTestFunc = depthTestFunc;
+}
+
+bool MeshRendererComponent::IsDepthMaskEnable()
+{
+	return m_isDepthMaskEnable;
+}
+
+bool MeshRendererComponent::IsDepthTestEnable()
+{
+	return m_isDepthTestEnable;
+}
+
+DepthTestFunc MeshRendererComponent::GetDepthTestFunc()
+{
+	return m_depthTestFunc;
+}
+
+void MeshRendererComponent::SetStencilBackMask(int mask)
+{
+	m_stencilBackMask = mask;
+}
+
+void MeshRendererComponent::SetStencilFrontMask(int mask)
+{
+	m_stencilFrontMask = mask;
+}
+
+void MeshRendererComponent::SetStencilTestFrontFunc(StencilTestFunc stencilTestFunc)
+{
+	m_stencilTestFrontFunc = stencilTestFunc;
+}
+
+void MeshRendererComponent::SetStencilTestBackFunc(StencilTestFunc stencilTestFunc)
+{
+	m_stencilTestBackFunc = stencilTestFunc;
+}
+
+void MeshRendererComponent::SetStencilTestFrontRef(int stencilTestRef)
+{
+	m_stencilTestFrontRef = stencilTestRef;
+}
+
+void MeshRendererComponent::SetStencilTestBackRef(int stencilTestRef)
+{
+	m_stencilTestBackRef = stencilTestRef;
+}
+
+void MeshRendererComponent::SetStencilTestFrontMask(int stencilTestMask)
+{
+	m_stencilTestFrontMask = stencilTestMask;
+}
+
+void MeshRendererComponent::SetStencilFailBackAction(StencilTestAction stencilTestAction)
+{
+	m_stencilFailBackAction = stencilTestAction;
+}
+
+void MeshRendererComponent::SetDepthFailBackAction(StencilTestAction stencilTestAction)
+{
+	m_depthFailBackAction = stencilTestAction;
+}
+
+void MeshRendererComponent::SetDepthPassBackAction(StencilTestAction stencilTestAction)
+{
+	m_depthPassBackAction = stencilTestAction;
+}
+
+void MeshRendererComponent::SetStencilFailFrontAction(StencilTestAction stencilTestAction)
+{
+	m_stencilFailFrontAction = stencilTestAction;
+}
+
+void MeshRendererComponent::SetDepthFailFrontAction(StencilTestAction stencilTestAction)
+{
+	m_depthFailFrontAction = stencilTestAction;
+}
+
+void MeshRendererComponent::SetDepthPassFrontAction(StencilTestAction stencilTestAction)
+{
+	m_depthPassFrontAction = stencilTestAction;
+}
+
+void MeshRendererComponent::EnableCullFace(bool value)
+{
+	m_isCullFaceEnable = value;
+}
+
+void MeshRendererComponent::SetCullFace(CullFace cullFace)
+{
+	m_cullFace = cullFace;
+}
+
+void MeshRendererComponent::SetFrontFace(FrontFace frontFace)
+{
+	m_frontFace = frontFace;
+}
+
+void MeshRendererComponent::SetStencilTestBackMask(int stencilTestMask)
+{
+	m_stencilTestBackMask = stencilTestMask;
+}
+
+void MeshRendererComponent::EnableStencilTest(bool value)
+{
+	m_isStencilTestEnable = value;
+}
+
+bool MeshRendererComponent::IsStencilTestEnable()
+{
+	return m_isStencilTestEnable;
+}
+
+int MeshRendererComponent::GetStencilBackMask()
+{
+	return m_stencilBackMask;
+}
+
+int MeshRendererComponent::GetStencilFrontMask()
+{
+	return m_stencilFrontMask;
+}
+
+StencilTestFunc MeshRendererComponent::GetStencilTestFrontFunc()
+{
+	return m_stencilTestFrontFunc;
+}
+StencilTestFunc MeshRendererComponent::GetStencilTestBackFunc()
+{
+	return m_stencilTestBackFunc;
+}
+
+int MeshRendererComponent::GetStencilTestFrontRef()
+{
+	return m_stencilTestFrontRef;
+}
+
+int MeshRendererComponent::GetStencilTestBackRef()
+{
+	return m_stencilTestBackRef;
+}
+
+int MeshRendererComponent::GetStencilTestFrontMask()
+{
+	return m_stencilTestFrontMask;
+}
+
+StencilTestAction MeshRendererComponent::GetStencilFailBackAction()
+{
+	return m_stencilFailBackAction;
+}
+
+StencilTestAction MeshRendererComponent::GetDepthFailBackAction()
+{
+	return m_depthFailBackAction;
+}
+
+StencilTestAction MeshRendererComponent::GetDepthPassBackAction()
+{
+	return m_depthPassBackAction;
+}
+
+StencilTestAction MeshRendererComponent::GetStencilFailFrontAction()
+{
+	return m_stencilFailFrontAction;
+}
+
+StencilTestAction MeshRendererComponent::GetDepthFailFrontAction()
+{
+	return m_depthFailFrontAction;
+}
+
+StencilTestAction MeshRendererComponent::GetDepthPassFrontAction()
+{
+	return m_depthPassFrontAction;
+}
+
+bool MeshRendererComponent::IsCullFaceEnable(bool value)
+{
+	return m_isCullFaceEnable;
+}
+
+CullFace MeshRendererComponent::GetCullFace(CullFace cullFace)
+{
+	return m_cullFace;
+}
+
+FrontFace MeshRendererComponent::GetFrontFace(FrontFace frontFace)
+{
+	return m_frontFace;
+}
+
+int MeshRendererComponent::GetStencilTestBackMask()
+{
+	return m_stencilTestBackMask;
 }
 
 Material* MeshRendererComponent::GetMaterial()const

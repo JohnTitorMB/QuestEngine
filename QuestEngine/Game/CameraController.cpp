@@ -13,7 +13,7 @@ CameraController::CameraController()
 	m_sensibility = 0.2f;
 	m_pitchMinValue = -89;
 	m_pitchMaxValue = 89;
-	movementSpeed = 10;
+	movementSpeed = 3;
 	m_inputMap = nullptr;
 }
 
@@ -82,10 +82,6 @@ void CameraController::Start()
 	InputAction& inputAction11 = m_inputMap->CreateInputAction("ScrollMove");
 	inputAction11.Started.AddListener(this, &CameraController::ScrollMove);
 	m_inputMap->BindInputCode("ScrollMove", InputCode::E_MOUSE_SCROLL_Y);
-	
-	Event<> autoMoveEvent = Event<>();
-	autoMoveEvent.AddListener(this, &CameraController::AutoMove, 0.1f);
-	Timer& timer = TimeManager::Instance()->SetTimer(0.5f, true, autoMoveEvent);
 
 	m_averageDeltaX.Resize(6);
 	m_averageDeltaY.Resize(6);

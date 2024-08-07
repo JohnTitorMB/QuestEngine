@@ -23,7 +23,7 @@ int main()
 	Matrix4x4::PerspectiveReverseZ(-size.m_x / 2.0f, size.m_x / 2.0f, -size.m_y / 2.0f, size.m_y / 2.0f, near, far);
 
 	Window* window = new Window(1920, 1080, new char[] {"Opengl Window"});
-	glEnable(GL_DEPTH_TEST);
+
 
 	//Init World
 	World* world = World::Instance();
@@ -35,38 +35,21 @@ int main()
 	float cameraAngle = 0.0f;
 	float stepLight = 1.0f;
 
-	float previousTime = glfwGetTime();
-	float deltaTime = 0.0f;
-	int frameCount = 0;
-	float fpsTimeCounter = 0.0f;
-
 	bool vsync = true;
 	window->SetVsync(vsync);
 
-
 	while (!glfwWindowShouldClose(window->GetWindow()))
 	{
-		float currentTime = glfwGetTime();
-		deltaTime = currentTime - previousTime;
-		previousTime = currentTime;
-
-		frameCount++;
-		fpsTimeCounter += deltaTime;
-
-		if (fpsTimeCounter >= 1.0f)
-		{
-			float fps = frameCount / fpsTimeCounter;
-			std::cout << "FPS: " << fps << std::endl;
-
-			frameCount = 0;
-			fpsTimeCounter = 0.0f;
-		}
-
 		glfwPollEvents();
 		inputSystem->ProcessInput(window);
-		
+
+		glStencilMask(0xFF);
+		glDepthMask(true);
 		glClearColor(0.1f, 0.1f, 0.1f,1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+		glClearDepth(1.0f);
+		glClearStencil(0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 
 		world->Update();
 		
