@@ -3,6 +3,14 @@
 #include <string>
 #include <glad/glad.h>
 #include "Assets.h"
+#include "../../Library/stb_image.h"
+#include <vector>
+
+enum class TextureType
+{
+	DEFAULT = GL_TEXTURE_2D,
+	CUBEMAP = GL_TEXTURE_CUBE_MAP,
+};
 
 enum class Wrap
 {
@@ -41,12 +49,13 @@ public:
 
 	void SetWrapHorizontalParameter(Wrap wrapHorizontalParameter);
 	void SetVerticalParameter(Wrap wrapVerticalParameter);
+	void SetDepthParameter(Wrap wrapVerticalParameter);
 	Wrap GetHorizontalParameter()const;
 	Wrap GetVerticalParameter()const;
+	Wrap GetDepthParameter()const;
 
 	void SetMinification(MinificationFilter minificationFilter);
 	void SetMagnification(MagnificationFilter magnificationFilter);
-	void SetMipmapTexture(int level, std::string filePath);
 
 	MinificationFilter SetMinification()const;
 	MagnificationFilter SetMagnification()const;
@@ -70,26 +79,32 @@ public:
 	float GetHeight()const;
 	std::string m_path;
 
-private:
+protected:
 	unsigned char* LoadTexture(std::string filePath);
-	void GenereTextureID();
-	void UpdateTextureData(const unsigned char* data);
-
 	GLuint m_textureID;
 	int m_width = 0;
 	int m_height = 0;
+
 	int m_mipmapBaseLevel = 0;
 	int m_mipmapMaxLevel = 1000;
 	int m_mipmapMinLOD = -1000;
 	int m_mipmapMaxLOD = 1000;
 	int m_mipmapLODBias = 0;
 	float m_anisotropyValue = 16;
-
+	TextureType m_textureType = TextureType::DEFAULT;
 
 	Wrap m_wrapHorizontalParameter = Wrap::Repeat;
 	Wrap m_wrapVerticalParameter = Wrap::Repeat;
+	Wrap m_wrapDepthParameter = Wrap::Repeat;
 	MagnificationFilter m_magnificationFilter = MagnificationFilter::Bilinear;
 	MinificationFilter m_minificationFilter = MinificationFilter::Trilinear;
+
+	static std::vector<unsigned char> GetSubData(const unsigned char* data, int srcWidth, int srcHeight, int x, int y, int subWidth, int subHeight, bool inversedX = false, bool inversedY = false);
+
+private:
+	void GenereTextureID();
+
+
 };
 
 #endif // !_TEXTURE_H_

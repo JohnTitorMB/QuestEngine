@@ -2,6 +2,16 @@
 
 
 
+Scene::~Scene()
+{
+	for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
+	{
+		Entity* entity = *it;
+		if (entity != nullptr)
+			delete entity;
+	}
+}
+
 void Scene::RemoveEntity(Entity* entity)
 {
 	if (entity != nullptr)

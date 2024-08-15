@@ -116,6 +116,9 @@ private:
 
 
 public:
+
+
+	bool m_useViewMatrixWithoutTranslation = false;
 	MeshRendererComponent() = default;
 	MeshRendererComponent& operator=(const MeshRendererComponent& other) = default;
 

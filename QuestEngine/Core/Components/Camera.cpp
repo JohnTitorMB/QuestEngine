@@ -127,6 +127,11 @@ Matrix4x4 CameraComponent::ViewMatrix()const
 	return Matrix4x4::ScaleXYZ(Vector3D(1.0f, 1.0f,-1.0f)) * Matrix4x4::Rotate(GetWorldRotation()).Inverse() * Matrix4x4::Translate(GetWorldPosition()).Inverse();
 }
 
+Matrix4x4 CameraComponent::ViewMatrixWithoutTranslation()const
+{
+	return Matrix4x4::ScaleXYZ(Vector3D(1.0f, 1.0f, -1.0f)) * Matrix4x4::Rotate(GetWorldRotation()).Inverse();
+}
+
 Matrix4x4 CameraComponent::ProjectionMatrix(float windowWidth, float windowHeight)const
 {
 	Vector2D size = GetVerticalAndHorizontalSize(windowWidth, windowHeight);

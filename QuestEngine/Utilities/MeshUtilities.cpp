@@ -136,12 +136,12 @@ Mesh* MeshUtilities::CreateUVSphere(const std::string& assetName, float radius, 
 			int next = y * (segments + 1) + x + 1;
 
 			indices.push_back(current);
-			indices.push_back(next);
 			indices.push_back(current + segments + 1);
+			indices.push_back(next);
 
 			indices.push_back(current + segments + 1);
-			indices.push_back(next);
 			indices.push_back(next + segments + 1);
+			indices.push_back(next);
 		}
 	}
 

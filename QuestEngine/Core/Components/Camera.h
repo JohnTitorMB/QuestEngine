@@ -56,6 +56,7 @@ public:
 	float GetInifiniteProjectionEpsilon();
 
 	Matrix4x4 ViewMatrix()const;
+	Matrix4x4 ViewMatrixWithoutTranslation()const;
 	Matrix4x4 ProjectionMatrix(float windowWidth, float windowHeight)const;
 
 	Component* Clone()override;

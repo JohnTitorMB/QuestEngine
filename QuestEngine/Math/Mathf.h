@@ -13,6 +13,7 @@ public:
 	static float Clamp(float value, float min, float max);
 	static float PingPong(float t, float length);
 	static float Repeat(float t, float length);
+	static float Lerp(float a, float b, float t);
 };
 
 

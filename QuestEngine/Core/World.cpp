@@ -17,6 +17,8 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "Components/Transform.h"
 #include "../Game/RenderingSwitchComponent.h"
 #include "TimeManager.h"
+#include "../Game/SkydomeCycleComponent.h"
+#include "../Game/RotatorComponent.h"
 
 World::World()
 {
@@ -36,13 +38,6 @@ World* World::Instance()
 World::~World()
 {
 	DestroyWorldEntity();
-	TimeManager::Instance()->Destroy();
-
-	if (m_world)
-	{
-		delete m_world;
-		m_world = nullptr;
-	}
 }
 
 void World::InitAssets()
@@ -55,32 +50,34 @@ void World::InitAssets()
 	Shader* shader5 = AssetsManager::CreateShader("LinearDepthShader", "Assets/BlinnPhongShader.vert", "Assets/LinearDepthShader.frag");
 	Shader* shader6 = AssetsManager::CreateShader("BlinnPhongShaderFog", "Assets/BlinnPhongShader.vert", "Assets/BlinnPhongShaderFog.frag");
 
-	//Initialise Textures
-	Texture* cubeTexture = AssetsManager::CreateTexture("CubeFaceTexture","Assets/CubeTextureFace.png");
-	Texture* whiteTexture = AssetsManager::CreateTexture("White","Assets/WhiteTexture.png");
-	Texture* cubeSpecularTexture = AssetsManager::CreateTexture("CubeSpecularTexture","Assets/CubeTextureSpecular.png");
 
+	Shader* cubeMapShader = AssetsManager::CreateShader("CubeMapShader", "Assets/CubeMapShader.vert", "Assets/CubeMapShader.frag");
+	Shader* skyboxShader = AssetsManager::CreateShader("SkyboxShader", "Assets/SkyboxShader.vert", "Assets/SkyboxShader.frag");
+	Shader* skydomeShader = AssetsManager::CreateShader("SkydomeShader", "Assets/SkydomeShader.vert", "Assets/SkydomeShader.frag");
+
+	//Initialise Textures
+	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
+	Texture* cubeMap = AssetsManager::CreateCubeMap("CubeMapTexture","Assets/CubeMap.jpg");	
+	Texture* simpleTexture = AssetsManager::CreateTexture2D("SimpleTexture","Assets/Texture.png");
+	
 	//Initialise Mesh
-	Mesh* cubeMesh = MeshUtilities::CreateCustomCubeUV("CubeMesh", 1.0f, MeshUtilities::CubeUVInfo());
-	Mesh* quadMesh = MeshUtilities::CreatePlane("QuadMesh", 4.8f);
-	Mesh* sphereMesh = MeshUtilities::CreateUVSphere("SphereMesh", 1.0f,32.0f,32.0f);
+	Mesh* cubeMesh = MeshUtilities::CreateCube("CubeMesh", 1.0f);
+	Mesh* sphereMesh = MeshUtilities::CreateUVSphere("SphereMesh", 0.5f,32,32);
 
 	//Initialise Materials
-	Material* material = AssetsManager::CreateBlinnPhongMaterial("Material0", whiteTexture, whiteTexture, whiteTexture, Color(1, 0, 0, 1), Color(1, 0, 0, 1), Color(1, 1, 1, 1),32);
-	Material* material2 = AssetsManager::CreateBlinnPhongMaterial("Material1", whiteTexture, whiteTexture, whiteTexture, Color(0, 1, 0, 1), Color(0, 1, 0, 1), Color(1, 1, 0, 1), 32);
-	Material* material3 = AssetsManager::CreateBlinnPhongMaterial("Material2", whiteTexture, whiteTexture, whiteTexture, Color(0, 0, 1, 1), Color(0, 0, 1, 1), Color(1, 1, 1, 1), 32);
-	Material* material4 = AssetsManager::CreateBlinnPhongMaterial("Material3", whiteTexture, whiteTexture, whiteTexture, Color(0, 1, 1, 1), Color(0, 1, 1, 1), Color(1, 1, 1, 1), 32);
-	Material* material5 = AssetsManager::CreateBlinnPhongMaterial("Material4", whiteTexture, whiteTexture, whiteTexture, Color(1, 0, 1, 1), Color(1, 0, 1, 1), Color(1, 1, 1, 1), 32);
-	
-
-	Material* material6 = AssetsManager::CreateBlinnPhongMaterial("Red", whiteTexture, whiteTexture, whiteTexture, Color(1, 0, 0, 1), Color(1, 0, 0, 1), Color(1, 1, 1, 1), 32);
-	Material* material7 = AssetsManager::CreateBlinnPhongMaterial("Blue", whiteTexture, whiteTexture, whiteTexture, Color(0, 0, 1, 1), Color(0, 0, 1, 1), Color(1, 1, 1, 1), 32);
-	Material* material8 = AssetsManager::CreateBlinnPhongMaterial("Cyan", whiteTexture, whiteTexture, whiteTexture, Color(0, 1, 1, 1), Color(0, 1, 1, 1), Color(1, 1, 1, 1), 32);
-	Material* material9 = AssetsManager::CreateBlinnPhongMaterial("WhiteM", whiteTexture, whiteTexture, whiteTexture, Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), 32);
+	Material* cubeMapMaterial = AssetsManager::CreateMaterial("CubeMapMaterial");
+	cubeMapMaterial->SetTexture("cubemap", cubeMap);
 
 
-
-	//EntityGroupAsset* obj = OBJLibrary::OBJLoader::LoadOBJ("OBJObject0", "Assets/OBJ/35.Rungholt/rungholt.obj");
+	Material* skyDomeMaterial = AssetsManager::CreateMaterial("SkydomeMaterial");
+	skyDomeMaterial->SetVector3D("lightDirection", Vector3D(0,-1,0));
+	skyDomeMaterial->SetColor("colorA", Color(60 / 255.0f, 127 / 255.0f, 170 / 255.0f, 1.0f));
+	skyDomeMaterial->SetColor("colorB", Color(112 / 255.0f, 188 / 255.0f, 220 / 255.0f, 1.0f));
+	skyDomeMaterial->SetColor("sunColor", Color(255 / 255.0f, 223 / 255.0f, 79 / 255.0f, 1.0f));
+	skyDomeMaterial->SetFloat("horizonOffset", 0.53f);
+	skyDomeMaterial->SetFloat("exposure", 8);
+	skyDomeMaterial->SetFloat("sunSize", 2.0f * Mathf::DegToRad);
+	skyDomeMaterial->SetFloat("sunSmoothThreshold", 0.2f * Mathf::DegToRad);
 }
 
 void World::InitWorld()
@@ -104,9 +101,10 @@ void World::InitWorld()
 	}
 
 	//Initialise Directional Light entity
+	DirectionalLightComponent* dLightComponent = nullptr;
 	Entity* lightEntity = objLoaderScene.CreateEntity<Entity>();
 	{
-		DirectionalLightComponent* dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
+		dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
 		dLightComponent->m_ambiantColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
 		dLightComponent->m_diffuseColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
 		dLightComponent->m_specularColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -117,757 +115,67 @@ void World::InitWorld()
 		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 	}
-
-	int exampleIndex = 3;
-
-	if (exampleIndex == 0)
+	
+	
+	
+	
+	
+	Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>(); //CubeMap
 	{
-		Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>(); // Red Object
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(10, 1, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
+		MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
+		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
+		meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0,0,0)));
+		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("CubeMapShader"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("CubeMapMaterial"));
+		meshRendererComponent->EnableCullFace(true);
 
-
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-
-		Entity* cubeEntity2 = objLoaderScene.CreateEntity<Entity>(); //Green Object
-		{
-			MeshRendererComponent* meshRendererComponent2 = cubeEntity2->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent2->SetWorldPosition(Vector3D(0, 0, -2));
-			meshRendererComponent2->SetWorldScale(Vector3D(1.0f, 10.0f, 1.0f));
-			meshRendererComponent2->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent2->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent2->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1))); //Green Matarial
-
-			meshRendererComponent2->EnableDepthTest(true);
-			meshRendererComponent2->EnableStencilTest(false);
-			meshRendererComponent2->SetGeometryRenderingPriority(0);
-		}
-	}
-
-	//Simple Stencil test
-	if (exampleIndex == 1)
-	{
-		Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>(); // Red Object
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(10, 1, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-
-
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetDepthPassFrontAction(StencilTestAction::Replace);
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Always);
-			meshRendererComponent->SetStencilTestFrontRef(0xFF);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-
-		Entity* cubeEntity2 = objLoaderScene.CreateEntity<Entity>(); //Green Object
-		{
-			MeshRendererComponent* meshRendererComponent2 = cubeEntity2->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent2->SetWorldPosition(Vector3D(0, 0, -2));
-			meshRendererComponent2->SetWorldScale(Vector3D(1.0f, 10.0f, 1.0f));
-			meshRendererComponent2->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent2->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent2->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1))); //Green Matarial
-
-			meshRendererComponent2->EnableDepthTest(true);
-			meshRendererComponent2->EnableStencilTest(true);
-
-			meshRendererComponent2->SetStencilTestFrontFunc(StencilTestFunc::Equal);
-			meshRendererComponent2->SetStencilTestFrontRef(0xFF);
-			meshRendererComponent2->SetGeometryRenderingPriority(1);
-		}
-	}
-
-	//Outline Stencil Test	
-	if (exampleIndex == 2)
-	{
-		Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>(); //Red Object
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-
-
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetDepthPassFrontAction(StencilTestAction::Replace);
-			meshRendererComponent->SetDepthFailFrontAction(StencilTestAction::Replace);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Always);
-			meshRendererComponent->SetStencilTestFrontRef(0xFA);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-		Entity* hideObject = objLoaderScene.CreateEntity<Entity>(); //HideObject
-		{
-			MeshRendererComponent* meshRendererComponent = hideObject->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, -2));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 5, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-
-
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-
-		Entity* cubeEntity2 = objLoaderScene.CreateEntity<Entity>(); //Green Object
-		{
-			MeshRendererComponent* meshRendererComponent2 = cubeEntity2->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent2->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent2->SetWorldScale(Vector3D(1.1f, 1.1f, 1.1f));
-			meshRendererComponent2->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent2->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent2->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-
-			meshRendererComponent2->EnableDepthTest(false);
-			meshRendererComponent2->EnableStencilTest(true);
-
-			meshRendererComponent2->SetStencilFailFrontAction(StencilTestAction::Keep);
-			meshRendererComponent2->SetDepthFailFrontAction(StencilTestAction::Keep);
-			meshRendererComponent2->SetDepthPassFrontAction(StencilTestAction::Keep);
-
-
-			meshRendererComponent2->SetStencilTestFrontFunc(StencilTestFunc::Notequal);
-			meshRendererComponent2->SetStencilTestFrontRef(0xFA);
-			meshRendererComponent2->SetGeometryRenderingPriority(1);
-		}
+		meshRendererComponent->SetGeometryRenderingPriority(0);
 	}
 	
-	//Cube stencil mask	
-	if (exampleIndex == 3)
+	Entity* skyBoxEntity = objLoaderScene.CreateEntity<Entity>(); //SkyBox
 	{
-		//Green Up Face
-		Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, -2.5 + 0.05f, 0));
+		MeshRendererComponent* meshRendererComponent = skyBoxEntity->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
+		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
+		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("SkyboxShader"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("CubeMapMaterial"));
+		meshRendererComponent->EnableDepthMask(false);
+		meshRendererComponent->m_useViewMatrixWithoutTranslation = true;
+		meshRendererComponent->SetDepthTestFunc(DepthTestFunc::Lequal);
+		meshRendererComponent->EnableCullFace(false);
+		meshRendererComponent->SetGeometryRenderingPriority(100);
+		/*skyBoxEntity->SetRootComponent(meshRendererComponent);
 
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(-1);
-			meshRendererComponent->EnableCullFace(false);
-		}
-
-		//Down Up Face
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 2.5 - 0.05f, 0));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(180, 0, 0)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->EnableCullFace(false);
-
-			meshRendererComponent->SetGeometryRenderingPriority(-1);
-		}
-
-		//Left Mask
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5 + 0.05f, 0, 0));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0, 0, -90)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Never);
-			meshRendererComponent->SetStencilFailFrontAction(StencilTestAction::Replace);
-			meshRendererComponent->SetStencilTestFrontRef(0xFD);
-			meshRendererComponent->SetStencilBackMask(0x00);
-			meshRendererComponent->SetGeometryRenderingPriority(-1);
-		}
-
-		//Right Mask
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5 - 0.05f, 0, 0));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0, 0, 90)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Never);
-			meshRendererComponent->SetStencilFailFrontAction(StencilTestAction::Replace);
-			meshRendererComponent->SetStencilTestFrontRef(0xFC);
-			meshRendererComponent->SetStencilBackMask(0x00);
-			meshRendererComponent->SetGeometryRenderingPriority(-1);
-		}
-
-		//Back Mask
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, -2.5 + 0.05f));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(90, 0, 0)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Never);
-			meshRendererComponent->SetStencilFailFrontAction(StencilTestAction::Replace);
-			meshRendererComponent->SetStencilTestFrontRef(0xFB);
-			meshRendererComponent->SetStencilBackMask(0x00);
-			meshRendererComponent->SetGeometryRenderingPriority(-1);
-
-		}
-
-		//Front Mask
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 2.5 - 0.05f));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(-90, 0, 0)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Never);
-			meshRendererComponent->SetStencilFailFrontAction(StencilTestAction::Replace);
-			meshRendererComponent->SetStencilTestFrontRef(0xFA);
-			meshRendererComponent->SetStencilBackMask(0x00);
-			meshRendererComponent->SetGeometryRenderingPriority(-1);
-		}
-
-		//Left Object
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Red"));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Equal);
-
-			meshRendererComponent->SetStencilTestFrontRef(0xFD);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-		//Right Object
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Blue"));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Equal);
-			meshRendererComponent->SetStencilTestFrontRef(0xFC);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-		//Back Object
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Cyan"));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Equal);
-			meshRendererComponent->SetStencilTestFrontRef(0xFB);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-		//Front Object
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteM"));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(true);
-
-			meshRendererComponent->SetStencilTestFrontFunc(StencilTestFunc::Equal);
-			meshRendererComponent->SetStencilTestFrontRef(0xFA);
-			meshRendererComponent->SetGeometryRenderingPriority(0);
-		}
-
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, -2.5f + 0.05f, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(1);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, -2.5f + 0.05f, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, -2.5f + 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, -2.5f + 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 2.5f - 0.05f, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 2.5f - 0.05f, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, 2.5f - 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, 2.5f - 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, 0, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, 0, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, 0, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Red Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, 0, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
+		RotatorComponent* rotatorComponent = skyBoxEntity->AddComponent<RotatorComponent>(true);
+		rotatorComponent->m_speed = 1.0f;*/
 	}
 	
-	//Cull Face Example
-	if (exampleIndex == 4)
+
+	/*
+	Entity* skyDome = objLoaderScene.CreateEntity<Entity>(); //SkyDome
 	{
-		bool enableCullFace = true;
-		CullFace cullFace = CullFace::Front;
+		MeshRendererComponent* meshRendererComponent = skyDome->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
+		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
+//		meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(90,0,0)));
+		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("SphereMesh"));
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("SkydomeShader"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("SkydomeMaterial"));
 
-		//Down Face
-		Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, -2.5 + 0.05f, 0));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0, 0, 0)));
+		meshRendererComponent->m_useViewMatrixWithoutTranslation = true;
+		meshRendererComponent->SetDepthTestFunc(DepthTestFunc::Lequal);
+		meshRendererComponent->EnableDepthMask(false);
+		meshRendererComponent->EnableCullFace(false);
+		meshRendererComponent->SetGeometryRenderingPriority(1000);
 
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableCullFace(enableCullFace);
-			meshRendererComponent->SetCullFace(cullFace);
-		}
-
-		//Left Face
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5 + 0.05f, 0, 0));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0, 0, -90)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableCullFace(enableCullFace);
-			meshRendererComponent->SetCullFace(cullFace);
-		}
-
-		//Right Face
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5 - 0.05f, 0, 0));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0, 0, 90)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableCullFace(enableCullFace);
-			meshRendererComponent->SetCullFace(cullFace);
-		}
-
-		//Back Face
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, -2.5 + 0.05f));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(90, 0, 0)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableCullFace(enableCullFace);
-			meshRendererComponent->SetCullFace(cullFace);
-		}
-
-		//Front Face
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 2.5 - 0.05f));
-			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(-90, 0, 0)));
-
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("QuadMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(1)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableCullFace(enableCullFace);
-			meshRendererComponent->SetCullFace(cullFace);
-		}
-
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, -2.5f + 0.05f, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, -2.5f + 0.05f, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, -2.5f + 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, -2.5f + 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 2.5f - 0.05f, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(0, 2.5f - 0.05f, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(5, 0.1, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, 2.5f - 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, 2.5f - 0.05f, 0));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 0.1, 5));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, 0, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, 0, -2.5f + 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(2.5f - 0.05f, 0, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
-		//Border
-		cubeEntity = objLoaderScene.CreateEntity<Entity>();
-		{
-			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-			meshRendererComponent->SetWorldPosition(Vector3D(-2.5f + 0.05f, 0, 2.5f - 0.05f));
-			meshRendererComponent->SetWorldScale(Vector3D(0.1, 5, 0.1));
-			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("Material" + std::to_string(0)));
-			meshRendererComponent->EnableDepthTest(true);
-			meshRendererComponent->EnableStencilTest(false);
-			meshRendererComponent->SetGeometryRenderingPriority(2);
-		}
-
+		SkydomeCycleComponent* skydomeCycleComponent = skyDome->AddComponent<SkydomeCycleComponent>();
+		skydomeCycleComponent->skyDomeMaterial = AssetsManager::GetAsset<Material>("SkydomeMaterial");
+		skydomeCycleComponent->directionalLightComponent = dLightComponent;
 	}
-
-	
-	
-	
-	
-	
-	
-	//Initialise Directional Light entity
-	Entity* entity = objLoaderScene.CreateEntity<Entity>();
-	{
-		RenderingSwitchComponent* renderingSwitchComponent = entity->AddComponent<RenderingSwitchComponent>(true);
-		renderingSwitchComponent->m_cameraComponent = cameraComponent;
-	}
-
+	*/
 	SceneManager::Instance()->LoadScene(0);
 }
 

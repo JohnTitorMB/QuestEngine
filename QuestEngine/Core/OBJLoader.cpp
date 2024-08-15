@@ -51,21 +51,21 @@ Material* OBJLibrary::OBJLoader::CreateMaterial(std::string assetName,MaterialDa
 
 	if (!materialData.m_ambientMapPath.empty())
 	{
-		Texture* ambiantTexture = AssetsManager::CreateTexture(assetName + "ambientTexture", materialData.m_ambientMapPath, true);
+		Texture* ambiantTexture = AssetsManager::CreateTexture2D(assetName + "ambientTexture", materialData.m_ambientMapPath, true);
 		if (ambiantTexture)
 			material->SetTexture("material.ambiantTexture", ambiantTexture);
 	}
 
 	if (!materialData.m_diffuseMapPath.empty())
 	{
-		Texture* diffuseTexture = AssetsManager::CreateTexture(assetName + "diffuseTexture", materialData.m_diffuseMapPath, true);
+		Texture* diffuseTexture = AssetsManager::CreateTexture2D(assetName + "diffuseTexture", materialData.m_diffuseMapPath, true);
 		if (diffuseTexture)
 			material->SetTexture("material.diffuseTexture", diffuseTexture);
 	}
 
 	if (!materialData.m_specularMapPath.empty())
 	{
-		Texture* specularTexture = AssetsManager::CreateTexture(assetName + "specularTexture", materialData.m_specularMapPath, true);
+		Texture* specularTexture = AssetsManager::CreateTexture2D(assetName + "specularTexture", materialData.m_specularMapPath, true);
 		if (specularTexture)
 			material->SetTexture("material.specularTexture", specularTexture);
 	}
@@ -442,7 +442,7 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 				}
 
 				std::vector<Vector2D> facePolygonPoint = GeometryUtilities::Progect3DPointsToAveragePlan(facePoint);
-				std::vector<unsigned int> polygonsIndices = GeometryUtilities::TriangulatePolygonEarMethod(facePolygonPoint);
+				std::vector<unsigned int> polygonsIndices = GeometryUtilities::TriangulateConvexPolygonFanMethod(facePolygonPoint);
 
 				for (unsigned int indice : polygonsIndices)
 				{

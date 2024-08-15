@@ -14,12 +14,6 @@ InputSystem::~InputSystem()
 {
 	for (InputMap* inputMap : m_inputMaps)
 		delete inputMap;
-
-	if (m_inputSystem)
-	{
-		delete m_inputSystem;
-		m_inputSystem = nullptr;
-	}
 }
 
 InputSystem* InputSystem::Instance()
@@ -42,6 +36,8 @@ void InputSystem::DestroyInputMap(InputMap& inputMap)
 	std::vector<InputMap*>::iterator iterator = std::remove(m_inputMaps.begin(), m_inputMaps.end(), &inputMap);
 	inputMap.ClearMap();
 	m_inputMaps.erase(iterator, m_inputMaps.end());
+
+	delete (&inputMap);
 
 }
 

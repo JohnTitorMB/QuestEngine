@@ -10,7 +10,7 @@ class Scene
 	friend class SceneManager;
 private:
 	std::set<Entity*> m_entities;
-
+	~Scene();
 public:
 	template<class T>
 	T* CreateEntity()

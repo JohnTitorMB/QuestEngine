@@ -123,7 +123,13 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 	Matrix4x4 modelMatrix = GetTransform().TransformMatrix();
 	shader->SetUniformMatrix4x4("model", modelMatrix);
-	shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
+
+
+	if(!m_useViewMatrixWithoutTranslation)
+		shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
+	else
+		shader->SetUniformMatrix4x4("view", camera->ViewMatrixWithoutTranslation());
+
 	shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
 
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();

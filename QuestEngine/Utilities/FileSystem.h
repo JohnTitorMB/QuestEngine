@@ -8,7 +8,7 @@
 class FileSystem
 {
 public:
-	static std::string get_file_contents(std::string filename);
+	static std::string get_file_contents(const std::string& filename);
 };
 
 #endif

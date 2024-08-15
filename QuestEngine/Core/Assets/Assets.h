@@ -6,7 +6,7 @@ class Assets
 
 protected :
 	Assets() {}
-	~Assets() {}
+	virtual ~Assets() {}
 
 	friend class AssetsManager;
 };

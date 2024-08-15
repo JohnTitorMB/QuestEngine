@@ -6,10 +6,12 @@
 #include "InputCode.h"
 
 class InputMap;
+class QuestEngine;
 class Window;
 
 class InputSystem
 {
+	friend class QuestEngine;
 private:
 	std::unordered_map<InputCode, float> m_inputsCurrentState;
 	std::vector<std::pair<InputCode, float>> m_unhandledInput;

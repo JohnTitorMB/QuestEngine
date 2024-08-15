@@ -23,6 +23,11 @@ float Mathf::Repeat(float t, float length)
 	return Clamp(t - std::floorf(t / length) * length, 0.0f, length);
 }
 
+float Mathf::Lerp(float a, float b, float t)
+{
+	return a + (b - a) * t;
+}
+
 // PingPongs the value t, so that it is never larger than length and never smaller than 0.
 float Mathf::PingPong(float t, float length)
 {

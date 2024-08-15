@@ -1,5 +1,4 @@
 #include "Texture.h"
-#include "../../Library/stb_image.h"
 #include <iostream>
 #define GL_MIRROR_CLAMP_TO_EDGE_EXT 0x8743
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
@@ -8,15 +7,6 @@
 Texture::Texture(std::string filePath)
 {
 	GenereTextureID();
-	unsigned char * data = LoadTexture(filePath);
-	if (data)
-	{
-		UpdateTextureData(data);
-		stbi_image_free(data);
-		m_path = filePath;
-	}
-
-
 }
 
 Texture::~Texture()
@@ -34,71 +24,66 @@ unsigned char* Texture::LoadTexture(std::string filePath)
 	return data;
 }
 
+
+std::vector<unsigned char> Texture::GetSubData(const unsigned char* data, int srcWidth, int srcHeight, int x, int y, int subWidth, int subHeight, bool inversedX, bool inversedY)
+{
+	std::vector<unsigned char> subdata(subWidth * subHeight * 4);
+
+	for (int i = y; i < y + subHeight; ++i) {
+		for (int j = x; j < x + subWidth; ++j)
+		{
+			int src_index = i * srcWidth * 4 + j * 4;
+			int dst_index = (inversedY ? subHeight - 1 - (i - y) : (i - y)) * subWidth * 4 + (inversedX ? subWidth -1 - (j - x) : (j - x)) * 4;
+			subdata[dst_index] = data[src_index];
+			subdata[dst_index + 1] = data[src_index + 1];
+			subdata[dst_index + 2] = data[src_index + 2];
+			subdata[dst_index + 3] = data[src_index + 3];
+		}
+	}
+
+	return subdata;
+}
+
 void Texture::GenereTextureID()
 {
 	glGenTextures(1, &m_textureID);
 }
 
-void Texture::UpdateTextureData(const unsigned char* data)
-{
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)m_minificationFilter); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)m_magnificationFilter); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)m_wrapHorizontalParameter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)m_wrapVerticalParameter);
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, (GLint)m_mipmapBaseLevel);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, (GLint)m_mipmapMaxLevel);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, (GLint)m_mipmapMinLOD);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, (GLint)m_mipmapMaxLOD);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, (GLint)m_mipmapLODBias);
-	glGenerateMipmap(GL_TEXTURE_2D);
 
-	SetAnisotropy(m_anisotropyValue);
-
-}
-
-void Texture::SetMipmapTexture(int level, std::string filePath)
-{
-	int channel_in_file = 0;
-	int desired_channel = 4;
-
-	int width = 0;
-	int height = 0;
-	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &channel_in_file, desired_channel);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	stbi_image_free(data);
-
-}
 
 void Texture::Bind(int textureIndex)
 {
 	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	glBindTexture((int)m_textureType, m_textureID);
 }
 
 
 void Texture::Unbind(int textureIndex)
 {
 	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	glBindTexture((int)m_textureType, m_textureID);
 }
 
 void Texture::SetWrapHorizontalParameter(Wrap wrapHorizontalParameter)
 {
 	m_wrapHorizontalParameter = wrapHorizontalParameter;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)m_wrapHorizontalParameter);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)m_wrapHorizontalParameter);
 }
 
 void Texture::SetVerticalParameter(Wrap wrapVerticalParameter)
 {
 	m_wrapVerticalParameter = wrapVerticalParameter;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)m_wrapVerticalParameter);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)m_wrapVerticalParameter);
+}
+
+void Texture::SetDepthParameter(Wrap wrapDepthParameter)
+{
+	m_wrapDepthParameter = wrapDepthParameter;
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_R, (GLint)m_wrapDepthParameter);
 }
 
 Wrap Texture::GetHorizontalParameter()const
@@ -111,18 +96,24 @@ Wrap Texture::GetVerticalParameter()const
 	return m_wrapVerticalParameter;
 }
 
+Wrap Texture::GetDepthParameter()const
+{
+	return m_wrapDepthParameter;
+}
+
+
 void Texture::SetMinification(MinificationFilter minificationFilter)
 {
 	m_minificationFilter = minificationFilter;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)m_minificationFilter);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)m_minificationFilter);
 }
 
 void Texture::SetMagnification(MagnificationFilter magnificationFilter)
 {
 	m_magnificationFilter = magnificationFilter;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)m_magnificationFilter);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)m_magnificationFilter);
 }
 
 MinificationFilter Texture::SetMinification()const
@@ -138,36 +129,36 @@ MagnificationFilter Texture::SetMagnification()const
 void Texture::SetMipmapBaseLevel(int mipmapBaseLevel)
 {
 	m_mipmapBaseLevel = mipmapBaseLevel;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, (GLint)m_mipmapBaseLevel);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)m_mipmapBaseLevel);
 }
 
 void Texture::SetMipmapMaxLevel(int mipmapMaxLevel)
 {
 	m_mipmapMaxLevel = mipmapMaxLevel;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, (GLint)m_mipmapMaxLevel);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)m_mipmapMaxLevel);
 }
 
 void Texture::SetMipmapMinLOD(int mipmapMinLOD)
 {
 	m_mipmapMinLOD = mipmapMinLOD;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, (GLint)m_mipmapMinLOD);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)m_mipmapMinLOD);
 }
 
 void Texture::SetMipmapMaxLOD(int mipmapMaxLOD)
 {
 	m_mipmapMaxLOD = mipmapMaxLOD;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, (GLint)m_mipmapMaxLOD);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)m_mipmapMaxLOD);
 }
 
 void Texture::SetMipmapLODBias(int mipmapLODBias)
 {
 	m_mipmapLODBias = mipmapLODBias;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, (GLint)m_mipmapLODBias);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)m_mipmapLODBias);
 }
 
 int Texture::GetMipmapBaseLevel()const
@@ -199,8 +190,8 @@ void Texture::SetAnisotropy(float anisotropyValue)
 {
 	float maxAnisotropy = GetMaxGPUAnisotropy();
 	m_anisotropyValue = anisotropyValue > maxAnisotropy ? maxAnisotropy : anisotropyValue;
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropyValue);
+	glBindTexture((int)m_textureType, m_textureID);
+	glTexParameterf((int)m_textureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropyValue);
 
 }
 

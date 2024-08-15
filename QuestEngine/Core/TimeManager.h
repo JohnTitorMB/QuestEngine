@@ -13,11 +13,14 @@ public:
 	bool m_isPause = false;
 };
 
+class QuestEngine;
 class TimeManager
 {
 	friend class World;
+	friend class QuestEngine;
 
 	TimeManager(TimeManager& other) = delete;
+	~TimeManager();
 
 public :
 	float GetDeltaTime()const;
@@ -41,7 +44,6 @@ protected:
 
 	void UpdateTimers(); //To implement
 
-	void Destroy();
 };
 
 #endif // !_TIMEMANAGER_H_

@@ -10,6 +10,10 @@ struct Color
 
 	Color();
 	Color(float r, float g, float b, float a);
+
+	static Color Lerp(const Color& colorA, const Color& colorB, float t);
 };
+
+
 
 #endif

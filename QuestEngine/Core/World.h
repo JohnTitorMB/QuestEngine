@@ -18,10 +18,12 @@ enum class RenderingType
 };
 
 class Entity;
+class QuestEngine;
 class World
 {
 	friend class Entity;
 	friend class SceneManager;
+	friend class QuestEngine;
 
 private:
 	std::set<Entity*> m_entities;
@@ -67,7 +69,6 @@ public :
 	void Update();
 	void Display(Window* window);
 	void RefreshPriorityRenderingComponent(MeshRendererComponent* component);
-	
 };
 
 #include "Entity.h"

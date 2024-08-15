@@ -20,6 +20,19 @@ TimeManager* TimeManager::Instance()
 }
 
 
+TimeManager::~TimeManager()
+{
+	for (auto it = m_timers.begin(); it != m_timers.end(); ++it)
+	{
+		Timer* timer = *it;
+		delete timer;
+	}
+
+	m_timers.clear();
+
+	std::cout << "Destroy TimerManager" << std::endl;
+}
+
 float TimeManager::GetDeltaTime() const
 {
 	return m_deltaTime;
@@ -84,18 +97,6 @@ void TimeManager::UpdateTimers()
 	}
 }
 
-void TimeManager::Destroy()
-{
-	for (auto it = m_timers.begin(); it != m_timers.end(); ++it)
-	{
-		Timer* timer = *it;
-		delete timer;
-	}
-
-	m_timers.clear();
-
-	std::cout << "Destroy TimerManager" << std::endl;
-}
 
 Timer::Timer()
 {

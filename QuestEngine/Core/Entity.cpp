@@ -33,12 +33,16 @@ Entity::~Entity()
 	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
 		Component* component = *it;
-		if (isWorldEntity)
+		if (component != nullptr)
 		{
-			World::Instance()->UnRegisterComponent(component);
+			if (isWorldEntity)
+			{
+				World::Instance()->UnRegisterComponent(component);
 
+			}
+			delete component;
 		}
-		delete component;
+
 	}
 
 	m_components.clear();

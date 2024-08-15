@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Library\Glad\src\glad.c" />
+    <ClCompile Include="Core\Assets\CubeMap.cpp" />
     <ClCompile Include="Game\ComponentExample.cpp" />
     <ClCompile Include="Core\Assets\EntityGroupAsset.cpp" />
     <ClCompile Include="Core\tiny_obj_loader.cc" />
@@ -171,6 +172,10 @@
     <ClCompile Include="Core\Inputs\InputCode.cpp" />
     <ClCompile Include="Game\RenderingSwitchComponent.cpp" />
     <ClCompile Include="Core\TimeManager.cpp" />
+    <ClCompile Include="Core\Assets\Texture2D.cpp" />
+    <ClCompile Include="Game\SkydomeCycleComponent.cpp" />
+    <ClCompile Include="Game\RotatorComponent.cpp" />
+    <ClCompile Include="Core\QuestEngine.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -204,6 +209,7 @@
     <ClCompile Include="Math\Vector4D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Assets\CubeMap.h" />
     <ClInclude Include="Game\ComponentExample.h" />
     <ClInclude Include="Core\Assets\EntityGroupAsset.h" />
     <ClInclude Include="Core\tiny_obj_loader.h" />
@@ -226,6 +232,10 @@
     <ClInclude Include="Core\Inputs\InputCode.h" />
     <ClInclude Include="Game\RenderingSwitchComponent.h" />
     <ClInclude Include="Core\TimeManager.h" />
+    <ClInclude Include="Core\Assets\Texture2D.h" />
+    <ClInclude Include="Game\SkydomeCycleComponent.h" />
+    <ClInclude Include="Game\RotatorComponent.h" />
+    <ClInclude Include="Core\QuestEngine.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />

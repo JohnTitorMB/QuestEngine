@@ -35,6 +35,7 @@ CameraController::CameraController(const CameraController& cameraController)
 CameraController::~CameraController()
 {
 	InputSystem* inputSystem = InputSystem::Instance();
+	if(m_inputMap != nullptr)
 	inputSystem->DestroyInputMap(*m_inputMap);
 }
 
