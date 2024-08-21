@@ -430,7 +430,7 @@ void World::OrdoredOpaqueMeshRenderer()
 			int geometryRenderingPriorityA = a->GetGeometryRenderingPriority();
 			int geometryRenderingPriorityB = b->GetGeometryRenderingPriority();
 			
-			return a->GetGeometryRenderingPriority() <= b->GetGeometryRenderingPriority();
+			return a->GetGeometryRenderingPriority() < b->GetGeometryRenderingPriority();
 				
 		});
 
