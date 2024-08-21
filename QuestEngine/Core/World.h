@@ -29,18 +29,20 @@ private:
 	std::set<Entity*> m_entities;
 	std::set<LightComponent*> m_lights;
 	std::set<MeshRendererComponent*> m_meshRenderers;
-	std::vector<MeshRendererComponent*> m_meshRenderersStoredByPriority;
+	std::vector<MeshRendererComponent*> m_opaqueMeshRenderers;
+	std::vector<MeshRendererComponent*> m_transparentMeshRenderers;
 	std::set<Component*> m_components;
 	std::set<CameraComponent*> m_cameras;
 
-	bool m_isMeshRendererOrdored = false;
+	bool m_isOpaqueMeshRendererOrdered = false;
 
 private:
 	void DestroyWorldEntity();
 	void RegisterComponent(Component* component);
 	void UnRegisterComponent(Component* component);
-	void OrdoredMeshRenderer();
-
+	void OrdoredOpaqueMeshRenderer();
+	void OrdoredTransparenceMeshRenderer(CameraComponent* cameraComponent);
+	 
 protected:
 	static World* m_world;
 	World();
@@ -69,6 +71,7 @@ public :
 	void Update();
 	void Display(Window* window);
 	void RefreshPriorityRenderingComponent(MeshRendererComponent* component);
+	void RefreshBlendRenderingComponent(MeshRendererComponent* component, bool isBlendEnable);
 };
 
 #include "Entity.h"

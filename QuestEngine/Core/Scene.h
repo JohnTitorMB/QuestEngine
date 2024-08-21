@@ -24,6 +24,7 @@ public:
 	void RemoveEntity(Entity* entity);
 
 	std::set<Entity*>CloneGroupEntityToScene(EntityGroupAsset* entityGroupAsset);
+	std::set<Entity*> CloneGroupEntityToScene(EntityGroupAsset* entityGroupAsset, Entity*& firtEntity);
 };
 
 #endif // !_SCENE_H_

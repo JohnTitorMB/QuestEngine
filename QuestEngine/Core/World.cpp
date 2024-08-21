@@ -51,6 +51,11 @@ void World::InitAssets()
 	Shader* shader6 = AssetsManager::CreateShader("BlinnPhongShaderFog", "Assets/BlinnPhongShader.vert", "Assets/BlinnPhongShaderFog.frag");
 
 
+	Shader* shader7 = AssetsManager::CreateShader("BlinnPhongShaderAlphaPass1", "Assets/BlinnPhongShaderAlpha.vert", "Assets/BlinnPhongShaderAlphaPass1.frag");
+	Shader* shader8 = AssetsManager::CreateShader("BlinnPhongShaderAlphaPass2", "Assets/BlinnPhongShaderAlpha.vert", "Assets/BlinnPhongShaderAlphaPass2.frag");
+
+
+
 	Shader* cubeMapShader = AssetsManager::CreateShader("CubeMapShader", "Assets/CubeMapShader.vert", "Assets/CubeMapShader.frag");
 	Shader* skyboxShader = AssetsManager::CreateShader("SkyboxShader", "Assets/SkyboxShader.vert", "Assets/SkyboxShader.frag");
 	Shader* skydomeShader = AssetsManager::CreateShader("SkydomeShader", "Assets/SkydomeShader.vert", "Assets/SkydomeShader.frag");
@@ -60,9 +65,14 @@ void World::InitAssets()
 	Texture* cubeMap = AssetsManager::CreateCubeMap("CubeMapTexture","Assets/CubeMap.jpg");	
 	Texture* simpleTexture = AssetsManager::CreateTexture2D("SimpleTexture","Assets/Texture.png");
 	
+	
+	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture","Assets/Box/BoxDiffuse.png");
+	Texture* boxAlphaTexture = AssetsManager::CreateTexture2D("BoxAlphaTexture","Assets/Box/BoxAlpha.png");
+	
 	//Initialise Mesh
 	Mesh* cubeMesh = MeshUtilities::CreateCube("CubeMesh", 1.0f);
 	Mesh* sphereMesh = MeshUtilities::CreateUVSphere("SphereMesh", 0.5f,32,32);
+	Mesh* quadMesh = MeshUtilities::CreatePlane("QuadMesh", 1.0f);
 
 	//Initialise Materials
 	Material* cubeMapMaterial = AssetsManager::CreateMaterial("CubeMapMaterial");
@@ -78,6 +88,16 @@ void World::InitAssets()
 	skyDomeMaterial->SetFloat("exposure", 8);
 	skyDomeMaterial->SetFloat("sunSize", 2.0f * Mathf::DegToRad);
 	skyDomeMaterial->SetFloat("sunSmoothThreshold", 0.2f * Mathf::DegToRad);
+
+
+	Material* boxMaterial = AssetsManager::CreateBlinnPhongMaterial("BoxMaterial", boxDiffuseTexture, boxDiffuseTexture, whiteTexture, Color(1,1,1,1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), 32.0f);
+	boxMaterial->SetTexture("material.alphaTexture", boxAlphaTexture);
+
+
+	OBJLibrary::OBJLoader::LoadOBJ("OBJ2", "Assets/Stair/stair.obj");
+	OBJLibrary::OBJLoader::LoadOBJ("Table", "Assets/Table/mesa v27.obj");
+	OBJLibrary::OBJLoader::LoadOBJ("Bowl", "Assets/Bowl/Glass bowl.obj");
+
 }
 
 void World::InitWorld()
@@ -115,67 +135,81 @@ void World::InitWorld()
 		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 	}
-	
-	
-	
-	
-	
-	Entity* cubeEntity = objLoaderScene.CreateEntity<Entity>(); //CubeMap
-	{
-		MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
-		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-		meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0,0,0)));
-		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("CubeMapShader"));
-		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("CubeMapMaterial"));
-		meshRendererComponent->EnableCullFace(true);
 
+
+	Entity* boxMesh = objLoaderScene.CreateEntity<Entity>();
+	boxMesh->SetName("CubeMesh");
+	{
+		MeshRendererComponent* meshRendererComponent = boxMesh->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetWorldPosition(Vector3D(-7.0f, 0.51f, -3.0f));
+		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
+		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShaderAlphaPass1"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("BoxMaterial"));
 		meshRendererComponent->SetGeometryRenderingPriority(0);
+		meshRendererComponent->EnableCullFace(false);
 	}
 	
-	Entity* skyBoxEntity = objLoaderScene.CreateEntity<Entity>(); //SkyBox
+	boxMesh = objLoaderScene.CreateEntity<Entity>();
+	boxMesh->SetName("CubeMesh2");
 	{
-		MeshRendererComponent* meshRendererComponent = skyBoxEntity->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
+		MeshRendererComponent* meshRendererComponent = boxMesh->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetWorldPosition(Vector3D(-7.0f, 0.51f, -3.0f));
 		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
 		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("SkyboxShader"));
-		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("CubeMapMaterial"));
-		meshRendererComponent->EnableDepthMask(false);
-		meshRendererComponent->m_useViewMatrixWithoutTranslation = true;
-		meshRendererComponent->SetDepthTestFunc(DepthTestFunc::Lequal);
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShaderAlphaPass2"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("BoxMaterial"));
+		meshRendererComponent->SetGeometryRenderingPriority(0);
+		meshRendererComponent->EnableBlend(true);
 		meshRendererComponent->EnableCullFace(false);
-		meshRendererComponent->SetGeometryRenderingPriority(100);
-		/*skyBoxEntity->SetRootComponent(meshRendererComponent);
-
-		RotatorComponent* rotatorComponent = skyBoxEntity->AddComponent<RotatorComponent>(true);
-		rotatorComponent->m_speed = 1.0f;*/
+		meshRendererComponent->EnableDepthMask(false);
 	}
-	
-
 	/*
-	Entity* skyDome = objLoaderScene.CreateEntity<Entity>(); //SkyDome
+	boxMesh = objLoaderScene.CreateEntity<Entity>();
+	boxMesh->SetName("CubeMesh4");
 	{
-		MeshRendererComponent* meshRendererComponent = skyDome->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent->SetWorldPosition(Vector3D(0, 0, 0));
+		MeshRendererComponent* meshRendererComponent = boxMesh->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetWorldPosition(Vector3D(-9.0f, 1.0f, 0));
 		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-//		meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(90,0,0)));
-		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("SphereMesh"));
-		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("SkydomeShader"));
-		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("SkydomeMaterial"));
-
-		meshRendererComponent->m_useViewMatrixWithoutTranslation = true;
-		meshRendererComponent->SetDepthTestFunc(DepthTestFunc::Lequal);
-		meshRendererComponent->EnableDepthMask(false);
+		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("BoxMaterial"));
+		meshRendererComponent->SetGeometryRenderingPriority(0);
 		meshRendererComponent->EnableCullFace(false);
-		meshRendererComponent->SetGeometryRenderingPriority(1000);
-
-		SkydomeCycleComponent* skydomeCycleComponent = skyDome->AddComponent<SkydomeCycleComponent>();
-		skydomeCycleComponent->skyDomeMaterial = AssetsManager::GetAsset<Material>("SkydomeMaterial");
-		skydomeCycleComponent->directionalLightComponent = dLightComponent;
+		meshRendererComponent->EnableBlend(true);
 	}
 	*/
+
+
+	EntityGroupAsset* entityAssets = AssetsManager::GetAsset<EntityGroupAsset>("OBJ2");
+	objLoaderScene.CloneGroupEntityToScene(entityAssets);
+
+
+	
+	Entity* firstEntity = nullptr;
+	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Table"), firstEntity);
+
+	if (firstEntity)
+	{
+		SceneComponent* sceneComponent = firstEntity->GetComponent<SceneComponent>();
+		if (sceneComponent)
+		{
+			sceneComponent->SetWorldPosition(Vector3D(0, 0, -3.5f));
+			sceneComponent->SetWorldScale(Vector3D(0.15f, 0.15f, 0.15f));
+		}
+	}
+
+	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Bowl"), firstEntity);
+
+	if (firstEntity)
+	{
+		SceneComponent* sceneComponent = firstEntity->GetComponent<SceneComponent>();
+		if (sceneComponent)
+		{
+			sceneComponent->SetWorldPosition(Vector3D(-2.5, 0.89f, -3.0f));
+			sceneComponent->SetWorldScale(Vector3D(1.3f, 1.3f, 1.3f));
+		}
+	}
 	SceneManager::Instance()->LoadScene(0);
 }
 
@@ -233,19 +267,24 @@ void World::Display(Window* window)
 	if (window == nullptr)
 		std::cout << "Error" << std::endl;
 
-	if (!m_isMeshRendererOrdored)
-		OrdoredMeshRenderer();
+	if (!m_isOpaqueMeshRendererOrdered)
+		OrdoredOpaqueMeshRenderer();
 
 	for (auto it = m_cameras.begin(); it != m_cameras.end(); ++it)
 	{
 		CameraComponent* camera = *it;
-		
-		int count = 0; 
-		for (auto rendererIt = m_meshRenderersStoredByPriority.begin(); rendererIt != m_meshRenderersStoredByPriority.end(); ++rendererIt)
+
+		for (auto rendererIt = m_opaqueMeshRenderers.begin(); rendererIt != m_opaqueMeshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
 			meshRenderer->Draw(camera, m_lights, window);
-			count++;
+		}
+
+		OrdoredTransparenceMeshRenderer(camera);
+		for (auto rendererIt = m_transparentMeshRenderers.begin(); rendererIt != m_transparentMeshRenderers.end(); ++rendererIt)
+		{
+			MeshRendererComponent* meshRenderer = *rendererIt;
+			meshRenderer->Draw(camera, m_lights, window);
 		}
 	}
 }
@@ -254,7 +293,34 @@ void World::RefreshPriorityRenderingComponent(MeshRendererComponent* component)
 {
 	if (m_meshRenderers.find(component) != m_meshRenderers.end())
 	{
-		m_isMeshRendererOrdored = false;
+		if (!component->IsBlendEnabled())
+			m_isOpaqueMeshRendererOrdered = false;
+	}
+}
+
+void World::RefreshBlendRenderingComponent(MeshRendererComponent* component, bool isBlendEnable)
+{
+	if (m_meshRenderers.find(component) != m_meshRenderers.end())
+	{
+		if (isBlendEnable)
+		{
+			auto it = std::find(m_opaqueMeshRenderers.begin(), m_opaqueMeshRenderers.end(), component);
+			if (it != m_opaqueMeshRenderers.end()) {
+				m_opaqueMeshRenderers.erase(it);
+			}
+
+			m_transparentMeshRenderers.push_back(component);
+		}
+		else
+		{
+			auto it = std::find(m_transparentMeshRenderers.begin(), m_transparentMeshRenderers.end(), component);
+			if (it != m_transparentMeshRenderers.end()) {
+				m_transparentMeshRenderers.erase(it);
+			}
+			m_opaqueMeshRenderers.push_back(component);
+
+			m_isOpaqueMeshRendererOrdered = false;
+		}
 	}
 }
 
@@ -281,8 +347,15 @@ void World::RegisterComponent(Component* component)
 	if (m)
 	{
 		m_meshRenderers.insert(m);
-		m_meshRenderersStoredByPriority.push_back(m);
-		m_isMeshRendererOrdored = false;
+		if (m->IsBlendEnabled())
+		{
+			m_transparentMeshRenderers.push_back(m);
+		}
+		else
+		{
+			m_opaqueMeshRenderers.push_back(m);
+			m_isOpaqueMeshRendererOrdered = false;
+		}
 	}
 
 	LightComponent* l = dynamic_cast<LightComponent*>(component);
@@ -302,10 +375,20 @@ void World::UnRegisterComponent(Component* component)
 	{
 		m_meshRenderers.erase(m);
 
-		auto it = std::find(m_meshRenderersStoredByPriority.begin(), m_meshRenderersStoredByPriority.end(), m);
-		if (it != m_meshRenderersStoredByPriority.end()) {
-			m_meshRenderersStoredByPriority.erase(it);
-		}	
+		if (m->IsBlendEnabled())
+		{
+			auto it = std::find(m_transparentMeshRenderers.begin(), m_transparentMeshRenderers.end(), m);
+			if (it != m_transparentMeshRenderers.end()) {
+				m_transparentMeshRenderers.erase(it);
+			}
+		}
+		else
+		{
+			auto it = std::find(m_opaqueMeshRenderers.begin(), m_opaqueMeshRenderers.end(), m);
+			if (it != m_opaqueMeshRenderers.end()) {
+				m_opaqueMeshRenderers.erase(it);
+			}
+		}		
 	}
 
 	LightComponent* l = dynamic_cast<LightComponent*>(component);
@@ -317,12 +400,39 @@ void World::UnRegisterComponent(Component* component)
 		m_cameras.erase(c);
 }
 
-void World::OrdoredMeshRenderer()
+void World::OrdoredTransparenceMeshRenderer(CameraComponent* camera)
 {
-	std::sort(m_meshRenderersStoredByPriority.begin(), m_meshRenderersStoredByPriority.end(),
+	Vector3D cameraForward = camera->GetForwardVector();
+	Vector3D cameraPosition = camera->GetWorldPosition();
+	std::sort(m_transparentMeshRenderers.begin(), m_transparentMeshRenderers.end(),
+		[cameraPosition, cameraForward](MeshRendererComponent* a, MeshRendererComponent* b) {
+			int geometryRenderingPriorityA = a->GetGeometryRenderingPriority();
+			int geometryRenderingPriorityB = b->GetGeometryRenderingPriority();
+
+			if (geometryRenderingPriorityA == geometryRenderingPriorityB)
+			{
+				Vector3D positionA = a->GetWorldPosition();
+				Vector3D positionB = b->GetWorldPosition();
+				float distanceA = Vector3D::DotProduct((positionA - cameraPosition), cameraForward);
+				float distanceB = Vector3D::DotProduct((positionB - cameraPosition), cameraForward);
+
+				return distanceA > distanceB;
+			}
+			else
+				return a->GetGeometryRenderingPriority() < b->GetGeometryRenderingPriority();
+		});
+}
+
+void World::OrdoredOpaqueMeshRenderer()
+{
+	std::sort(m_opaqueMeshRenderers.begin(), m_opaqueMeshRenderers.end(),
 		[](MeshRendererComponent* a, MeshRendererComponent* b) {
-			return a->GetGeometryRenderingPriority() < b->GetGeometryRenderingPriority();
+			int geometryRenderingPriorityA = a->GetGeometryRenderingPriority();
+			int geometryRenderingPriorityB = b->GetGeometryRenderingPriority();
+			
+			return a->GetGeometryRenderingPriority() <= b->GetGeometryRenderingPriority();
+				
 		});
 
-	m_isMeshRendererOrdored = true;
+	m_isOpaqueMeshRendererOrdered = true;
 }

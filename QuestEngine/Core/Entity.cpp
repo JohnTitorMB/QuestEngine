@@ -12,6 +12,7 @@ Entity::Entity(const Entity& other, bool isAddedOnScene)
 {
 	m_rootSceneComponent = nullptr;
 
+	m_name = other.m_name;
 	for (auto it = other.m_components.begin(); it != other.m_components.end(); ++it)
 	{
 		Component* component = *it;

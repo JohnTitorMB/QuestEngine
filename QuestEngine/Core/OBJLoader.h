@@ -70,10 +70,12 @@ namespace OBJLibrary
         Color m_diffuseColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
         Color m_specularColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
         float m_shininess = 32;
+        float m_alpha = 1.0f;
 
         std::string m_ambientMapPath;
         std::string m_diffuseMapPath;
         std::string m_specularMapPath;
+        std::string m_alphaMapPath;
     };
 
     struct GeometryData

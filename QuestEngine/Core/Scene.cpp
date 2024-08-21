@@ -33,3 +33,16 @@ std::set<Entity*> Scene::CloneGroupEntityToScene(EntityGroupAsset* entityGroupAs
 
 	return clonnedEntities;
 }
+
+std::set<Entity*> Scene::CloneGroupEntityToScene(EntityGroupAsset* entityGroupAsset, Entity*& firtEntity)
+{
+	if (entityGroupAsset == nullptr)
+		return std::set<Entity*>();
+
+	std::set<Entity*> clonnedEntities = entityGroupAsset->CloneEntities(firtEntity, true);
+
+	for (Entity* entity : clonnedEntities)
+		m_entities.insert(entity);
+
+	return clonnedEntities;
+}

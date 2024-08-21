@@ -114,6 +114,22 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	glDepthMask(m_isDepthMaskEnable);
 	glDepthFunc((int)m_depthTestFunc);
 
+	//Blend Specification
+
+	//Blending Specification
+	if (m_isBlendEnable)
+		glEnable(GL_BLEND);
+	else
+		glDisable(GL_BLEND);
+
+	glBlendEquationSeparate((int)m_RGBBlendingMode, (int)m_AlphaBlendingMode);
+	glBlendFuncSeparate((int)m_sourceRGBBlendingFactor, (int)m_destinationRGBBlendingFactor, (int)m_sourceAlphaBlendingFactor, (int)m_destinationAlphaBlendingFactor);
+	glBlendColor(m_blendColor.m_r, m_blendColor.m_g, m_blendColor.m_b, m_blendColor.m_a);
+	
+	//Color Mask
+	glColorMask(m_isRedMaskEnable, m_isGreenMaskEnable, m_isBlueMaskEnable, m_isAlphaMaskEnable);
+
+
 	shader->UseShader();
 	
 
@@ -442,6 +458,70 @@ void MeshRendererComponent::EnableStencilTest(bool value)
 	m_isStencilTestEnable = value;
 }
 
+void MeshRendererComponent::EnableBlend(bool value)
+{
+	if(value != m_isBlendEnable)
+		World::Instance()->RefreshBlendRenderingComponent(this, value);
+
+	m_isBlendEnable = value;
+}
+
+void MeshRendererComponent::SetRGBBlendingMode(BlendingMode mode) 
+{
+	m_RGBBlendingMode = mode;
+}
+
+void MeshRendererComponent::SetAlphaBlendingMode(BlendingMode mode) 
+{
+	m_AlphaBlendingMode = mode;
+}
+
+void MeshRendererComponent::SetSourceRGBBlendingFactor(BlendingFactor factor) 
+{
+	m_sourceRGBBlendingFactor = factor;
+}
+
+void MeshRendererComponent::SetDestinationRGBBlendingFactor(BlendingFactor factor) 
+{
+	m_destinationRGBBlendingFactor = factor;
+}
+
+void MeshRendererComponent::SetSourceAlphaBlendingFactor(BlendingFactor factor) 
+{
+	m_sourceAlphaBlendingFactor = factor;
+}
+
+void MeshRendererComponent::SetDestinationAlphaBlendingFactor(BlendingFactor factor) 
+{
+	m_destinationAlphaBlendingFactor = factor;
+}
+
+void MeshRendererComponent::SetBlendColor(const Color& color) 
+{
+	m_blendColor = color;
+}
+
+void MeshRendererComponent::EnableRedMask(bool value)
+{
+	m_isRedMaskEnable = value;
+}
+
+void MeshRendererComponent::EnableGreenMask(bool value)
+{
+	m_isGreenMaskEnable = value;
+}
+
+void MeshRendererComponent::EnableBlueMask(bool value)
+{
+	m_isBlueMaskEnable = value;
+}
+
+void MeshRendererComponent::EnableAlphaMask(bool value)
+{
+	m_isAlphaMaskEnable = value;
+}
+
+
 bool MeshRendererComponent::IsStencilTestEnable()
 {
 	return m_isStencilTestEnable;
@@ -534,4 +614,64 @@ int MeshRendererComponent::GetStencilTestBackMask()
 Material* MeshRendererComponent::GetMaterial()const
 {
 	return m_material;
+}
+
+bool MeshRendererComponent::IsBlendEnabled() const 
+{
+	return m_isBlendEnable;
+}
+
+BlendingMode MeshRendererComponent::GetRGBBlendingMode() const
+{
+	return m_RGBBlendingMode;
+}
+
+BlendingMode MeshRendererComponent::GetAlphaBlendingMode() const 
+{
+	return m_AlphaBlendingMode;
+}
+
+BlendingFactor MeshRendererComponent::GetSourceRGBBlendingFactor() const 
+{
+	return m_sourceRGBBlendingFactor;
+}
+
+BlendingFactor MeshRendererComponent::GetDestinationRGBBlendingFactor() const 
+{
+	return m_destinationRGBBlendingFactor;
+}
+
+BlendingFactor MeshRendererComponent::GetSourceAlphaBlendingFactor() const 
+{
+	return m_sourceAlphaBlendingFactor;
+}
+
+BlendingFactor MeshRendererComponent::GetDestinationAlphaBlendingFactor() const 
+{
+	return m_destinationAlphaBlendingFactor;
+}
+
+Color MeshRendererComponent::GetBlendColor() const 
+{
+	return m_blendColor;
+}
+
+bool MeshRendererComponent::IsRedMaskEnable() const
+{
+	return m_isRedMaskEnable;
+}
+
+bool MeshRendererComponent::IsGreenMaskEnable() const
+{
+	return m_isGreenMaskEnable;
+}
+
+bool MeshRendererComponent::IsBlueMaskEnable() const
+{
+	return m_isBlueMaskEnable;
+}
+
+bool MeshRendererComponent::IsAlphaMaskEnable() const
+{
+	return m_isAlphaMaskEnable;
 }

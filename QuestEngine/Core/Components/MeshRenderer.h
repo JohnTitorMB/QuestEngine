@@ -67,6 +67,39 @@ enum class StencilTestAction
 	Invert = GL_INVERT
 };
 
+enum class BlendingMode
+{
+	FUNC_ADD = GL_FUNC_ADD,
+	FUNC_SUBTRACT = GL_FUNC_SUBTRACT,
+	FUNC_REVERSE_SUBTRACT = GL_FUNC_REVERSE_SUBTRACT,
+	MIN = GL_MIN,
+	MAX = GL_MAX,
+};
+
+
+enum class BlendingFactor
+{
+	Zero = GL_ZERO,
+	One = GL_ONE,
+	Src_Color = GL_SRC_COLOR,
+	ONE_MINUS_SRC_COLOR = GL_ONE_MINUS_SRC_COLOR,
+	DST_COLOR = GL_DST_COLOR,
+	ONE_MINUS_DST_COLOR = GL_ONE_MINUS_DST_COLOR,
+	SRC_ALPHA = GL_SRC_ALPHA,
+	ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA,
+	DST_ALPHA = GL_DST_ALPHA,
+	ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA,
+	CONSTANT_COLOR = GL_CONSTANT_COLOR,
+	ONE_MINUS_CONSTANT_COLOR = GL_ONE_MINUS_CONSTANT_COLOR,
+	CONSTANT_ALPHA = GL_CONSTANT_ALPHA,
+	ONE_MINUS_CONSTANT_ALPHA = GL_ONE_MINUS_CONSTANT_ALPHA,
+	SRC_ALPHA_SATURATE = GL_SRC_ALPHA_SATURATE,
+	SRC1_COLOR = GL_SRC1_COLOR,
+	ONE_MINUS_SRC1_COLOR = GL_ONE_MINUS_SRC1_COLOR,
+	SRC1_ALPHA = GL_SRC1_ALPHA,
+	ONE_MINUS_SRC1_ALPHA = GL_ONE_MINUS_SRC1_ALPHA,
+};
+
 class MeshRendererComponent : public SceneComponent
 {
 private:
@@ -113,6 +146,21 @@ private:
 	void SendMaterialToShader()const;
 	int m_geometryRenderingPriority = 0;
 
+	//Blending Specification
+	bool m_isBlendEnable = false;
+	BlendingMode m_RGBBlendingMode = BlendingMode::FUNC_ADD;
+	BlendingMode m_AlphaBlendingMode = BlendingMode::FUNC_ADD;
+	BlendingFactor m_sourceRGBBlendingFactor = BlendingFactor::SRC_ALPHA;
+	BlendingFactor m_destinationRGBBlendingFactor = BlendingFactor::ONE_MINUS_SRC_ALPHA;
+	BlendingFactor m_sourceAlphaBlendingFactor = BlendingFactor::SRC_ALPHA;
+	BlendingFactor m_destinationAlphaBlendingFactor = BlendingFactor::ONE_MINUS_SRC_ALPHA;
+	Color m_blendColor = Color(0.0f,0.0f,0.0f,0.0f);
+
+	//Color mask
+	bool m_isRedMaskEnable = true;
+	bool m_isBlueMaskEnable = true;
+	bool m_isGreenMaskEnable = true;
+	bool m_isAlphaMaskEnable = true;
 
 
 public:
@@ -144,12 +192,12 @@ public:
 
 	PolygonMode GetPolygonMode()const;
 
-	//Depth Specification Setter
+	//Depth Specification Setters
 	void EnableDepthMask(bool value);
 	void EnableDepthTest(bool value);
 	void SetDepthTestFunc(DepthTestFunc depthTestFunc);
 	
-	//Stencil Specification Setter
+	//Stencil Specification Setters
 	void EnableStencilTest(bool value);
 	void SetStencilBackMask(int mask);
 	void SetStencilFrontMask(int mask);
@@ -169,18 +217,34 @@ public:
 	void SetDepthFailFrontAction(StencilTestAction stencilTestAction);
 	void SetDepthPassFrontAction(StencilTestAction stencilTestAction);
 
-	//CullFace Specification Setter
+	//CullFace Specification Setters
 	void EnableCullFace(bool value);
 	void SetCullFace(CullFace cullFace);
 	void SetFrontFace(FrontFace frontFace);
 
 
-	//Depth Specification Getter
+	// Blending Specification Setters
+	void EnableBlend(bool value);
+	void SetRGBBlendingMode(BlendingMode mode);
+	void SetAlphaBlendingMode(BlendingMode mode);
+	void SetSourceRGBBlendingFactor(BlendingFactor factor);
+	void SetDestinationRGBBlendingFactor(BlendingFactor factor);
+	void SetSourceAlphaBlendingFactor(BlendingFactor factor);
+	void SetDestinationAlphaBlendingFactor(BlendingFactor factor);
+	void SetBlendColor(const Color & color);
+
+	//Color Mask Setters
+	void EnableRedMask(bool value);
+	void EnableGreenMask(bool value);
+	void EnableBlueMask(bool value);
+	void EnableAlphaMask(bool value);
+
+	//Depth Specification Getters
 	bool IsDepthMaskEnable();
 	bool IsDepthTestEnable();
 	DepthTestFunc GetDepthTestFunc();
 
-	//Stencil Specification Getter
+	//Stencil Specification Getters
 	int GetStencilBackMask();
 	int GetStencilFrontMask();
 	bool IsStencilTestEnable();
@@ -201,10 +265,27 @@ public:
 	StencilTestAction GetDepthPassFrontAction();
 
 
-	//CullFace Specification Getter
+	//CullFace Specification Getters
 	bool IsCullFaceEnable(bool value);
 	CullFace GetCullFace(CullFace cullFace);
 	FrontFace GetFrontFace(FrontFace frontFace);
+
+	//Blending Specification Getters
+	bool IsBlendEnabled() const;
+	BlendingMode GetRGBBlendingMode() const;
+	BlendingMode GetAlphaBlendingMode() const;
+	BlendingFactor GetSourceRGBBlendingFactor() const;
+	BlendingFactor GetDestinationRGBBlendingFactor() const;
+	BlendingFactor GetSourceAlphaBlendingFactor() const;
+	BlendingFactor GetDestinationAlphaBlendingFactor() const;
+	Color GetBlendColor() const;
+
+	//Color mask
+	bool IsRedMaskEnable()const;
+	bool IsGreenMaskEnable()const;
+	bool IsBlueMaskEnable()const;
+	bool IsAlphaMaskEnable()const;
+
 
 	Component* Clone()override;
 	void AssignPointerAndReference()override;

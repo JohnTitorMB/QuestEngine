@@ -22,6 +22,8 @@ public:
 	~EntityGroupAsset();
 
 	std::set<Entity*> CloneEntities(bool isAddedOnScene = false);
+	std::set<Entity*> CloneEntities(Entity*& firstEntity, bool isAddedOnScene = false);
+
 	Entity* GetEntityAt(int index)
 	{
 		if (index < 0 || index >= m_entitiesVector.size())

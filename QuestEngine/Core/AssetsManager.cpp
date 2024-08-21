@@ -135,6 +135,13 @@ Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, 
 	material->SetVector4D("material.ambiantTextureST", Vector4D(0, 0, 1, 1));
 	material->SetVector4D("material.specularTextureST", Vector4D(0, 0, 1, 1));
 
+	Texture* defaultTexture = AssetsManager::GetAsset<Texture>("White");
+
+	material->SetTexture("material.alphaTexture", defaultTexture);
+	material->SetVector4D("material.alphaTextureST", Vector4D(0, 0, 1, 1));
+
+	material->SetFloat("material.alpha", 1.0f);
+
 	assetsManager->m_assetsNameMap.emplace(newAssetName, material);
 	assetsManager->m_assets.insert(material);
 	return material;

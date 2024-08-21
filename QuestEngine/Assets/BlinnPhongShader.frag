@@ -73,7 +73,13 @@ struct Material
     sampler2D specularTexture;
     vec4 specularTextureST;
 
+    sampler2D alphaTexture;
+    vec4 alphaTextureST;
+
     float shininess;
+    float alpha;
+
+  
 }; 
 uniform Material material;
 
@@ -173,8 +179,9 @@ vec3 ComputeSpotLight(SpotLight sLight)
 }
 
 void main()
-{    
-    vec4 ambientColor = globalAmbiantColor * material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
+{   
+    vec4 mAmbiant = material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
+    vec4 ambientColor = globalAmbiantColor * mAmbiant;
     vec3 color = vec3(ambientColor.r, ambientColor.g, ambientColor.b);
 
     if(directionalLightCount > 0)
@@ -186,5 +193,6 @@ void main()
     for(int i = 0; i < spotLightCount; i++)
         color += ComputeSpotLight(spotLights[i]);
     
-    FdfragColor = vec4(color.r,color.g,color.b,1.0);
+    float alpha = material.alpha * texture(material.alphaTexture, uv * material.alphaTextureST.zw + material.alphaTextureST.xy).r;
+    FdfragColor = vec4(color.r,color.g,color.b,alpha);
 };

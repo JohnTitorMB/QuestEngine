@@ -70,9 +70,16 @@ Material* OBJLibrary::OBJLoader::CreateMaterial(std::string assetName,MaterialDa
 			material->SetTexture("material.specularTexture", specularTexture);
 	}
 
+	if (!materialData.m_alphaMapPath.empty())
+	{
+		Texture* alphaTexture = AssetsManager::CreateTexture2D(assetName + "alphaTexture", materialData.m_alphaMapPath, true);
+		if (alphaTexture)
+			material->SetTexture("material.alphaTexture", alphaTexture);
+	}
+
 	material->SetTexture("material.ambiantTexture", material->GetTexture("material.diffuseTexture"));
 	material->SetColor("material.ambientColor", material->GetColor("material.diffuseColor"));
-
+	material->SetFloat("material.alpha", materialData.m_alpha);
 	return material;
 }
 
@@ -542,21 +549,35 @@ EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& 
 				mesh->SetNormals(geometryData.normals);
 				mesh->SetIndices(geometryData.indices);
 
-				MeshRendererComponent* meshComponent = groupEntity->AddComponent<MeshRendererComponent>(true);
-				meshComponent->SetMesh(mesh);
-				meshComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+				MeshRendererComponent* meshRendererComponent = groupEntity->AddComponent<MeshRendererComponent>(true);
+				meshRendererComponent->SetMesh(mesh);
+				meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
 				int materialID = geometryData.materialID;
 				MaterialData defaultMaterialData = MaterialData();
+
+
+
 				MaterialData& materialData = materialID != -1 ? materialCollection.at(materialID) : defaultMaterialData;
+				float epsilon = Mathf::Epsilon7;
+				if (materialData.m_alpha <= 1.0f - epsilon)
+				{
+					std::cout << "Name : " << (objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k)) << " : " << materialData.m_alpha << std::endl;
+					meshRendererComponent->EnableBlend(true);
+					meshRendererComponent->EnableDepthMask(false);
+				}
+
+
+
 				Material* material = CreateMaterial(filePath + "_" + objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k) + "_Material", materialData);
-				meshComponent->SetMaterial(material);
+				meshRendererComponent->SetMaterial(material);
+								
 				if (k == 0)
 				{
-					groupEntity->SetRootComponent(meshComponent);
-					meshComponent->SetParent(objEntity->GetRootComponent());
+					groupEntity->SetRootComponent(meshRendererComponent);
+					meshRendererComponent->SetParent(objEntity->GetRootComponent());
 				}
 				else
-					meshComponent->SetParent(groupEntity->GetRootComponent());
+					meshRendererComponent->SetParent(groupEntity->GetRootComponent());
 			}
 		}
 	}
@@ -624,6 +645,12 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			currentMaterialData.m_shininess = ReadFloatFromBuffer(buffer, current_position);
 			SkipLine(buffer, current_position);
 		}
+		else if (current_position < buffer.size() && buffer[current_position] == 'd')
+		{
+			current_position += 2;
+			currentMaterialData.m_alpha = ReadFloatFromBuffer(buffer, current_position);
+			SkipLine(buffer, current_position);
+		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'm' &&
 			buffer[current_position + 1] == 'a' &&
 			buffer[current_position + 2] == 'p' &&
@@ -658,6 +685,17 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			current_position += 7;
 			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
 			currentMaterialData.m_specularMapPath = GetFullPath(p, texturePath);
+			SkipLine(buffer, current_position);
+		}
+		else if (current_position + 4 < buffer.size() && buffer[current_position] == 'm' &&
+			buffer[current_position + 1] == 'a' &&
+			buffer[current_position + 2] == 'p' &&
+			buffer[current_position + 3] == '_' &&
+			buffer[current_position + 4] == 'd')
+		{
+			current_position += 6;
+			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
+			currentMaterialData.m_alphaMapPath = GetFullPath(p, texturePath);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'n' &&
