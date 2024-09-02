@@ -36,6 +36,7 @@ class Material : public Assets
 	std::unordered_map<std::string, Vector3D> m_vector3DKeyValue;
 	std::unordered_map<std::string, Vector4D> m_vector4DKeyValue;
 	std::unordered_map<std::string, Texture*> m_textureKeyValue;
+	std::unordered_map<std::string,int> m_textureLayerKeyValue;
 
 public:
 	Material();
@@ -47,6 +48,7 @@ public:
 	const std::unordered_map<std::string, Vector3D>& GetVector3DMap();
 	const std::unordered_map<std::string, Vector4D>& GetVector4DMap();
 	const std::unordered_map<std::string, Texture*>& GetTextureMap();
+	const std::unordered_map<std::string, int>& GetTextureSubLayerMap();
 
 	void SetInt(std::string key, int value);
 	void SetFloat(std::string key, float value);
@@ -54,7 +56,7 @@ public:
 	void SetVector3D(std::string key, Vector3D value);
 	void SetVector4D(std::string key, Vector4D value);
 	void SetColor(std::string key, Color value);
-	void SetTexture(std::string key, Texture* value);
+	void SetTexture(std::string key, Texture* value, int subLayerIndex = 0);
 
 	int GetInt(const std::string& key)const;
 	float GetFloat(const std::string& key)const;
@@ -63,6 +65,7 @@ public:
 	Vector4D GetVector4D(const std::string& key)const;
 	Color GetColor(const std::string& key)const;
 	Texture* GetTexture(const std::string& key)const;
+	int GetTextureSubLayer(const std::string& key) const;
 };
 
 #endif

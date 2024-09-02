@@ -176,6 +176,8 @@
     <ClCompile Include="Game\SkydomeCycleComponent.cpp" />
     <ClCompile Include="Game\RotatorComponent.cpp" />
     <ClCompile Include="Core\QuestEngine.cpp" />
+    <ClCompile Include="Core\Assets\RenderTexture2D.cpp" />
+    <ClCompile Include="Library\stb_image_write.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -236,6 +238,8 @@
     <ClInclude Include="Game\SkydomeCycleComponent.h" />
     <ClInclude Include="Game\RotatorComponent.h" />
     <ClInclude Include="Core\QuestEngine.h" />
+    <ClInclude Include="Core\Assets\RenderTexture2D.h" />
+    <ClInclude Include="Library\stb_image_write.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />

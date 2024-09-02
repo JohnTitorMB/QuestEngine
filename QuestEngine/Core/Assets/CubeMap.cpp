@@ -3,15 +3,18 @@
 #include <iostream>
 CubeMap::CubeMap(std::string filePath) : Texture(filePath)
 {
+	m_layerTextureInfos.push_back(Texture::LayerTextureInfo());
+	glGenTextures(1, &m_layerTextureInfos[0].m_textureID);
+
 	unsigned char* data = LoadTexture(filePath);
 	m_textureType = TextureType::CUBEMAP;
 
-	m_minificationFilter = MinificationFilter::Trilinear;
-	m_magnificationFilter = MagnificationFilter::Bilinear;
+	m_layerTextureInfos[0].m_minificationFilter = MinificationFilter::Trilinear;
+	m_layerTextureInfos[0].m_magnificationFilter = MagnificationFilter::Bilinear;
 
-	m_wrapDepthParameter = Wrap::ClampToEdge;
-	m_wrapHorizontalParameter = Wrap::ClampToEdge;
-	m_wrapVerticalParameter = Wrap::ClampToEdge;
+	m_layerTextureInfos[0].m_wrapDepthParameter = Wrap::ClampToEdge;
+	m_layerTextureInfos[0].m_wrapHorizontalParameter = Wrap::ClampToEdge;
+	m_layerTextureInfos[0].m_wrapVerticalParameter = Wrap::ClampToEdge;
 
 	if (data)
 	{
@@ -28,7 +31,7 @@ void CubeMap::SetMipmapTexture(int level, std::string filePath, CubeMapFace cube
 	int width = 0;
 	int height = 0;
 	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &channel_in_file, desired_channel);
-	glBindTexture((int)m_textureType, m_textureID);
+	glBindTexture((int)m_textureType, m_layerTextureInfos[0].m_textureID);
 	glTexImage2D((int)cubeMapFace, level, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	stbi_image_free(data);
 }
@@ -36,7 +39,7 @@ void CubeMap::SetMipmapTexture(int level, std::string filePath, CubeMapFace cube
 
 void CubeMap::UpdateTextureData(const unsigned char* data)
 {
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_layerTextureInfos[0].m_textureID);
 
 	int subWidth = m_width/4;
 	int subHeight = m_height/3;
@@ -60,19 +63,19 @@ void CubeMap::UpdateTextureData(const unsigned char* data)
 	glTexImage2D((int)CubeMapFace::POSITIVE_Z, 0, GL_RGBA, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, frontSubData.data());
 
 	
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)m_minificationFilter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)m_magnificationFilter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)m_wrapHorizontalParameter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)m_wrapVerticalParameter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_R, (GLint)m_wrapDepthParameter);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)m_layerTextureInfos[0].m_minificationFilter);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)m_layerTextureInfos[0].m_magnificationFilter);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)m_layerTextureInfos[0].m_wrapHorizontalParameter);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)m_layerTextureInfos[0].m_wrapVerticalParameter);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_R, (GLint)m_layerTextureInfos[0].m_wrapDepthParameter);
 
-	glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)m_mipmapBaseLevel);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)m_mipmapMaxLevel);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)m_mipmapMinLOD);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)m_mipmapMaxLOD);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)m_mipmapLODBias);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)m_layerTextureInfos[0].m_mipmapBaseLevel);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)m_layerTextureInfos[0].m_mipmapMaxLevel);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)m_layerTextureInfos[0].m_mipmapMinLOD);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)m_layerTextureInfos[0].m_mipmapMaxLOD);
+	glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)m_layerTextureInfos[0].m_mipmapLODBias);
 	glGenerateMipmap((int)m_textureType);
 
-	SetAnisotropy(m_anisotropyValue);
+	SetAnisotropy(m_layerTextureInfos[0].m_anisotropyValue);
 
 }

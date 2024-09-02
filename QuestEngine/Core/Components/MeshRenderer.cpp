@@ -19,6 +19,7 @@ void MeshRendererComponent::SendMaterialToShader()const
 	const std::unordered_map<std::string, Vector3D> vector3DKeyValue = m_material->GetVector3DMap();
 	const std::unordered_map<std::string, Vector4D> vector4DKeyValue = m_material->GetVector4DMap();
 	const std::unordered_map<std::string, Texture*> textureKeyValue = m_material->GetTextureMap();
+	std::unordered_map<std::string, int> textureSubLayerKeyValue = m_material->GetTextureSubLayerMap();
 
 	for (auto pair : integerKeyValue)
 		m_shader->SetUniformInt(pair.first, pair.second);
@@ -41,7 +42,13 @@ void MeshRendererComponent::SendMaterialToShader()const
 		m_shader->SetUniformInt(pair.first, textureIndex);
 
 		if (pair.second)
-			pair.second->Bind(textureIndex);
+		{
+			std::string name = pair.first;
+			if(textureSubLayerKeyValue[name] < pair.second->GetSubLayerCount())
+				pair.second->Bind(textureIndex, textureSubLayerKeyValue[name]);
+			else
+				pair.second->Bind(textureIndex, 0);
+		}
 		textureIndex++;
 	}
 }
@@ -146,7 +153,11 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	else
 		shader->SetUniformMatrix4x4("view", camera->ViewMatrixWithoutTranslation());
 
-	shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
+	RenderTexture2D* rt = camera->GetRenderTexture();
+	if(rt != nullptr)
+		shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(rt->GetWidth(), rt->GetHeight()));
+	else
+		shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
 
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
 	shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);

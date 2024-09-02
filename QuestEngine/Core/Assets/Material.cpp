@@ -38,6 +38,11 @@ const std::unordered_map<std::string, Texture*>& Material::GetTextureMap()
 	return m_textureKeyValue;
 }
 
+const std::unordered_map<std::string, int>& Material::GetTextureSubLayerMap()
+{
+    return m_textureLayerKeyValue;
+}
+
 void Material::SetInt(std::string key, int value)
 {
 	m_integerKeyValue[key] = value;
@@ -68,9 +73,10 @@ void Material::SetColor(std::string key, Color value)
 	m_vector4DKeyValue[key] = Vector4D(value.m_r, value.m_g, value.m_b, value.m_a);
 }
 
-void Material::SetTexture(std::string key, Texture* value)
+void Material::SetTexture(std::string key, Texture* value, int subLayerIndex)
 {
 	m_textureKeyValue[key] = value;
+    m_textureLayerKeyValue[key] = subLayerIndex;
 }
 
 int Material::GetInt(const std::string& key) const {
@@ -127,6 +133,14 @@ Texture* Material::GetTexture(const std::string& key) const {
         return it->second;
     }
     return nullptr; 
+}
+
+int Material::GetTextureSubLayer(const std::string& key) const {
+    auto it = m_textureLayerKeyValue.find(key);
+    if (it != m_textureLayerKeyValue.end()) {
+        return it->second;
+    }
+    return 0;
 }
 
 /*

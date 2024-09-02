@@ -19,6 +19,7 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "TimeManager.h"
 #include "../Game/SkydomeCycleComponent.h"
 #include "../Game/RotatorComponent.h"
+#include "Assets/RenderTexture2D.h"
 
 World::World()
 {
@@ -50,31 +51,38 @@ void World::InitAssets()
 	Shader* shader5 = AssetsManager::CreateShader("LinearDepthShader", "Assets/BlinnPhongShader.vert", "Assets/LinearDepthShader.frag");
 	Shader* shader6 = AssetsManager::CreateShader("BlinnPhongShaderFog", "Assets/BlinnPhongShader.vert", "Assets/BlinnPhongShaderFog.frag");
 
-
+	//Double apha shader
 	Shader* shader7 = AssetsManager::CreateShader("BlinnPhongShaderAlphaPass1", "Assets/BlinnPhongShaderAlpha.vert", "Assets/BlinnPhongShaderAlphaPass1.frag");
 	Shader* shader8 = AssetsManager::CreateShader("BlinnPhongShaderAlphaPass2", "Assets/BlinnPhongShaderAlpha.vert", "Assets/BlinnPhongShaderAlphaPass2.frag");
-
-
-
+	
+	//Sky Shader
 	Shader* cubeMapShader = AssetsManager::CreateShader("CubeMapShader", "Assets/CubeMapShader.vert", "Assets/CubeMapShader.frag");
 	Shader* skyboxShader = AssetsManager::CreateShader("SkyboxShader", "Assets/SkyboxShader.vert", "Assets/SkyboxShader.frag");
 	Shader* skydomeShader = AssetsManager::CreateShader("SkydomeShader", "Assets/SkydomeShader.vert", "Assets/SkydomeShader.frag");
+
+
+	//Shader for display the renderTexture on the screen
+	Shader* renderShader = AssetsManager::CreateShader("RenderShader", "Assets/BlinnPhongShader.vert", "Assets/RenderShader.frag");
 
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
 	Texture* cubeMap = AssetsManager::CreateCubeMap("CubeMapTexture","Assets/CubeMap.jpg");	
 	Texture* simpleTexture = AssetsManager::CreateTexture2D("SimpleTexture","Assets/Texture.png");
-	
-	
 	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture","Assets/Box/BoxDiffuse.png");
 	Texture* boxAlphaTexture = AssetsManager::CreateTexture2D("BoxAlphaTexture","Assets/Box/BoxAlpha.png");
 	
-	//Initialise Mesh
-	Mesh* cubeMesh = MeshUtilities::CreateCube("CubeMesh", 1.0f);
-	Mesh* sphereMesh = MeshUtilities::CreateUVSphere("SphereMesh", 0.5f,32,32);
-	Mesh* quadMesh = MeshUtilities::CreatePlane("QuadMesh", 1.0f);
+	//Render Texture
+	RenderTexture2D* renderTexture = AssetsManager::CreateRenderTexture2D("RenderTexture", 1920, 1080);
+	Texture::LayerTextureInfo layerTextureInfo = Texture::LayerTextureInfo();
+	layerTextureInfo.m_minificationFilter = MinificationFilter::Bilinear;
+	layerTextureInfo.m_generateMimpap = false;
+
+	renderTexture->AttachColorBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RED, DataType::UNSIGNED_BYTE,0, layerTextureInfo, true);
+	renderTexture->AttachDepthStencilBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8, DataType::UNSIGNED_INT_24_8, true);
 
 	//Initialise Materials
+	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture,Color(1,1,1,1), Color(1, 1, 1, 1), Color(1, 1, 1, 1),32.0f);
+
 	Material* cubeMapMaterial = AssetsManager::CreateMaterial("CubeMapMaterial");
 	cubeMapMaterial->SetTexture("cubemap", cubeMap);
 
@@ -89,15 +97,28 @@ void World::InitAssets()
 	skyDomeMaterial->SetFloat("sunSize", 2.0f * Mathf::DegToRad);
 	skyDomeMaterial->SetFloat("sunSmoothThreshold", 0.2f * Mathf::DegToRad);
 
+	//Materaial for display the renderTexture on the screen
+	Material* renderMaterial = AssetsManager::CreateMaterial("RenderMaterial");
+	renderMaterial->SetColor("material.color", Color(1, 1, 1, 1));
+	renderMaterial->SetTexture("material.texture", renderTexture, 0);
+	renderMaterial->SetVector4D("material.textureST", Vector4D(0, 0, -1, 1));
 
-	Material* boxMaterial = AssetsManager::CreateBlinnPhongMaterial("BoxMaterial", boxDiffuseTexture, boxDiffuseTexture, whiteTexture, Color(1,1,1,1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), 32.0f);
-	boxMaterial->SetTexture("material.alphaTexture", boxAlphaTexture);
+	//Initialise Mesh And Obj
+	Mesh* cubeMesh = MeshUtilities::CreateCube("CubeMesh", 1.0f);
+	Mesh* sphereMesh = MeshUtilities::CreateUVSphere("SphereMesh", 0.5f, 32, 32);
+	Mesh* quadMesh = MeshUtilities::CreatePlane("QuadMesh", 1.0f);
 
-
-	OBJLibrary::OBJLoader::LoadOBJ("OBJ2", "Assets/Stair/stair.obj");
+	OBJLibrary::OBJLoader::LoadOBJ("Stair", "Assets/Stair/stair.obj");
 	OBJLibrary::OBJLoader::LoadOBJ("Table", "Assets/Table/mesa v27.obj");
 	OBJLibrary::OBJLoader::LoadOBJ("Bowl", "Assets/Bowl/Glass bowl.obj");
+	OBJLibrary::OBJLoader::LoadOBJ("Camera", "Assets/Camera/camera.obj");
+	OBJLibrary::OBJLoader::LoadOBJ("Wall", "Assets/Wall/wall.obj");
 
+	EntityGroupAsset* entityGroupAsset = OBJLibrary::OBJLoader::LoadOBJ("Desk", "Assets/Desk/desk.obj");
+	Entity* screenEntity = entityGroupAsset->GetEntityAt(4); // Get the screen entity of desk
+	MeshRendererComponent* meshRenderComponent = screenEntity->GetComponent<MeshRendererComponent>();
+	meshRenderComponent->SetMaterial(renderMaterial);
+	meshRenderComponent->SetShader(renderShader);	
 }
 
 void World::InitWorld()
@@ -106,10 +127,9 @@ void World::InitWorld()
 
 	LightingSettings::m_globalAmbiantColor = Color(0.2f,0.2f,0.2f,1);
 	Scene& objLoaderScene = SceneManager::Instance()->CreateScene();
-	CameraComponent* cameraComponent= nullptr;
 	Entity* cameraEntity = objLoaderScene.CreateEntity<Entity>();
 	{
-		cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
+		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
 		cameraComponent->SetNear(0.01f);
 		cameraComponent->SetFar(1000.0);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
@@ -118,6 +138,19 @@ void World::InitWorld()
 
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 		cameraComponent->SetWorldPosition(Vector3D(0, 1, -10));
+	}
+
+	CameraComponent* cameraComponent2 = nullptr;
+	Entity* cameraEntity2 = objLoaderScene.CreateEntity<Entity>();
+	{
+		cameraComponent2 = cameraEntity2->AddComponent<CameraComponent>(true);
+		cameraComponent2->SetNear(0.01f);
+		cameraComponent2->SetFar(1000.0);
+		cameraComponent2->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+		cameraComponent2->SetFov(60);
+		cameraEntity2->SetRootComponent(cameraComponent2);
+		cameraComponent2->SetWorldPosition(Vector3D(0, 1, -4.75));
+		cameraComponent2->SetRenderTexture(AssetsManager::GetAsset<RenderTexture2D>("RenderTexture"));
 	}
 
 	//Initialise Directional Light entity
@@ -136,55 +169,8 @@ void World::InitWorld()
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 	}
 
-
-	Entity* boxMesh = objLoaderScene.CreateEntity<Entity>();
-	boxMesh->SetName("CubeMesh");
-	{
-		MeshRendererComponent* meshRendererComponent = boxMesh->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent->SetWorldPosition(Vector3D(-7.0f, 0.51f, -3.0f));
-		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShaderAlphaPass1"));
-		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("BoxMaterial"));
-		meshRendererComponent->SetGeometryRenderingPriority(0);
-		meshRendererComponent->EnableCullFace(false);
-	}
-	
-	boxMesh = objLoaderScene.CreateEntity<Entity>();
-	boxMesh->SetName("CubeMesh2");
-	{
-		MeshRendererComponent* meshRendererComponent = boxMesh->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent->SetWorldPosition(Vector3D(-7.0f, 0.51f, -3.0f));
-		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShaderAlphaPass2"));
-		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("BoxMaterial"));
-		meshRendererComponent->SetGeometryRenderingPriority(0);
-		meshRendererComponent->EnableBlend(true);
-		meshRendererComponent->EnableCullFace(false);
-		meshRendererComponent->EnableDepthMask(false);
-	}
-	/*
-	boxMesh = objLoaderScene.CreateEntity<Entity>();
-	boxMesh->SetName("CubeMesh4");
-	{
-		MeshRendererComponent* meshRendererComponent = boxMesh->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent->SetWorldPosition(Vector3D(-9.0f, 1.0f, 0));
-		meshRendererComponent->SetWorldScale(Vector3D(1, 1, 1));
-		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("BoxMaterial"));
-		meshRendererComponent->SetGeometryRenderingPriority(0);
-		meshRendererComponent->EnableCullFace(false);
-		meshRendererComponent->EnableBlend(true);
-	}
-	*/
-
-
-	EntityGroupAsset* entityAssets = AssetsManager::GetAsset<EntityGroupAsset>("OBJ2");
+	EntityGroupAsset* entityAssets = AssetsManager::GetAsset<EntityGroupAsset>("Stair");
 	objLoaderScene.CloneGroupEntityToScene(entityAssets);
-
-
 	
 	Entity* firstEntity = nullptr;
 	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Table"), firstEntity);
@@ -210,6 +196,49 @@ void World::InitWorld()
 			sceneComponent->SetWorldScale(Vector3D(1.3f, 1.3f, 1.3f));
 		}
 	}
+
+	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Desk"), firstEntity);
+
+	if (firstEntity)
+	{
+		SceneComponent* sceneComponent = firstEntity->GetComponent<SceneComponent>();
+		if (sceneComponent)
+		{
+			sceneComponent->SetWorldPosition(Vector3D(0.0f, 0.0f, -2.0f));
+			sceneComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0,270,0)));
+			sceneComponent->SetWorldScale(Vector3D(1.0f, 1.0f, 1.0f));
+		}
+	}
+
+
+
+
+	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Camera"), firstEntity);
+
+	if (firstEntity)
+	{
+		SceneComponent* sceneComponent = firstEntity->GetComponent<SceneComponent>();
+		if (sceneComponent)
+		{
+			sceneComponent->SetWorldPosition(Vector3D(0.0f, 1.0f, -4.9f));
+			sceneComponent->SetWorldScale(Vector3D(0.001f, 0.001f, 0.001f));
+		}
+	}
+
+	
+	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Wall"), firstEntity);
+
+	if (firstEntity)
+	{
+		SceneComponent* sceneComponent = firstEntity->GetComponent<SceneComponent>();
+		if (sceneComponent)
+		{
+			sceneComponent->SetWorldPosition(Vector3D(-8.0f, 0.0f, -5.2f));
+			sceneComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0, 270, 0)));
+			sceneComponent->SetWorldScale(Vector3D(1.0f, 1.0f, 1.0f));
+		}
+	}
+
 	SceneManager::Instance()->LoadScene(0);
 }
 
@@ -274,6 +303,20 @@ void World::Display(Window* window)
 	{
 		CameraComponent* camera = *it;
 
+		RenderTexture2D* rt = camera->GetRenderTexture();
+
+		if (rt)
+		{	
+			rt->BindFramebuffer();
+
+			glStencilMask(0xFF);
+			glDepthMask(true);
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClearDepth(1.0f);
+			glClearStencil(0.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		}
+
 		for (auto rendererIt = m_opaqueMeshRenderers.begin(); rendererIt != m_opaqueMeshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
@@ -285,6 +328,13 @@ void World::Display(Window* window)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
 			meshRenderer->Draw(camera, m_lights, window);
+		}
+
+		if (rt)
+		{
+			rt->SwapBuffer();
+			rt->GenerateAllMipmap(false);
+			rt->UnBindFramebuffer();
 		}
 	}
 }

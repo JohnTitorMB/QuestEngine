@@ -567,10 +567,11 @@ EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& 
 				}
 
 
-
+				
 				Material* material = CreateMaterial(filePath + "_" + objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k) + "_Material", materialData);
 				meshRendererComponent->SetMaterial(material);
-								
+				material->name = materialData.m_materialName;
+
 				if (k == 0)
 				{
 					groupEntity->SetRootComponent(meshRendererComponent);

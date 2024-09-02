@@ -8,6 +8,7 @@
 #include "Assets/EntityGroupAsset.h"
 #include <unordered_map>
 #include <filesystem>
+#include "Assets/RenderTexture2D.h"
 
 class QuestEngine;
 class AssetsManager
@@ -30,6 +31,7 @@ public:
 
 	static Mesh* CreateMesh(const std::string& assetName, bool useOneVbo);
 	static Texture2D* CreateTexture2D(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
+	static RenderTexture2D* CreateRenderTexture2D(const std::string& assetName, const int width, const int height);
 	static CubeMap* CreateCubeMap(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
 	static Material* CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess);
 	static Material* CreateMaterial(const std::string& assetName);
