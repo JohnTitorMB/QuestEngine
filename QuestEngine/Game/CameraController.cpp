@@ -29,6 +29,7 @@ CameraController::CameraController(const CameraController& cameraController)
 	m_deltaX = cameraController.m_deltaX;
 	m_deltaY = cameraController.m_deltaY;
 	movementSpeed = cameraController.movementSpeed;
+	m_scrollMove = cameraController.m_scrollMove;
 	m_inputMap = nullptr;
 }
 
@@ -228,7 +229,7 @@ void CameraController::ScrollMove(InputCallbackData data)
 {
 	Vector3D cameraPos = m_cameraComponent->GetWorldPosition();
 	Vector3D cameraForward = m_cameraComponent->GetWorldRotation().GetForwardDirection();
-	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * data.m_value*10);
+	m_cameraComponent->SetWorldPosition(cameraPos + cameraForward * data.m_value* m_scrollMove);
 }
 
 void CameraController::RotateX(InputCallbackData data)

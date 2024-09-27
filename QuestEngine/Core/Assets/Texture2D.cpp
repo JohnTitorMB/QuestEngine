@@ -7,7 +7,7 @@ Texture2D::Texture2D(std::string filePath) : Texture(filePath)
 
 	
 	unsigned char* data = LoadTexture(filePath);
-	m_textureType = TextureType::DEFAULT;
+	m_textureType = TextureType::TEXTURE2D;
 	
 	if (data)
 	{

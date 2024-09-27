@@ -2,6 +2,7 @@
 #include <iostream>
 #include "World.h"
 #include "../Game/CameraController.h"
+#include "Graphics.h"
 
 Window::Window(int width, int height, char* title)
 {
@@ -13,7 +14,7 @@ Window::Window(int width, int height, char* title)
 	InitialiseGLAD();
 
 	glfwSetWindowUserPointer(m_window, this);
-	glfwSetFramebufferSizeCallback(m_window, SetTheFrameBufferSize); // works fine
+	glfwSetFramebufferSizeCallback(m_window, SetTheFrameBufferSize); 
 
 	if (glfwRawMouseMotionSupported())
 		glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -149,6 +150,8 @@ Window::Window(int width, int height, char* title, int glMajorVersion, int glMin
 
 Window::~Window()
 {
+	glfwDestroyWindow(m_window);
+
 	delete m_title;
 }
 
@@ -169,6 +172,7 @@ int Window::InitialiseGLFW()
 	glfwInitHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwInitHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	
 	return 1;
 }
 
@@ -185,20 +189,66 @@ int Window::InitialiseGLAD()
 	return 1;
 }
 
-int Window::CreateWindow()
+int Window::CreateWindow(GLFWwindow* sharedContext)
 {
 	int width = m_width;
 	int height = m_height;
-	const char* title = "First Opengl Window";
-	m_window = glfwCreateWindow(width, height, title, NULL, NULL);
-	if (!m_window)
-	{
-		std::cout << "GLFW Window creation FAILED !" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
+	const char* title = "First OpenGL Window";
 
-	glfwMakeContextCurrent(m_window);
+	if (sharedContext == nullptr)
+	{
+		if (m_window != nullptr)
+		{
+ 			Graphics::GetInstance()->RemoveGLFWContext(m_window);
+			glfwDestroyWindow(m_window);
+		}
+
+		glfwWindowHint(GLFW_SAMPLES, m_msaaSample);
+		m_window = glfwCreateWindow(width, height, title, NULL, NULL);
+		if (!m_window)
+		{
+			std::cout << "GLFW Window creation FAILED !" << std::endl;
+			glfwTerminate();
+			return -1;
+		}
+		Graphics::GetInstance()->AddGLFWContext(m_window);
+
+		return 1;
+	}
+	else
+	{
+		int xpos, ypos;
+		glfwGetWindowPos(m_window, &xpos, &ypos);
+
+		glfwWindowHint(GLFW_SAMPLES, m_msaaSample);
+		GLFWwindow* newWindow = glfwCreateWindow(width, height, title, NULL, sharedContext);
+		if (!newWindow)
+		{
+			std::cout << "GLFW Window creation FAILED !" << std::endl;
+			glfwTerminate();
+			return -1;
+		}
+
+		Graphics::GetInstance()->RemoveGLFWContext(m_window);
+		glfwDestroyWindow(m_window);
+
+
+		Graphics::GetInstance()->AddGLFWContext(newWindow);
+
+
+		
+		m_window = newWindow;
+		glfwSetWindowPos(m_window, xpos, ypos);
+
+		glfwSetWindowUserPointer(m_window, this);
+		glfwSetFramebufferSizeCallback(m_window, SetTheFrameBufferSize);
+
+		if (glfwRawMouseMotionSupported())
+			glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+		InitialiseGLFWCallback();
+		return 1;
+	}
 	return 1;
 }
 
@@ -207,12 +257,12 @@ GLFWwindow* Window::GetWindow() const
 	return m_window;
 }
 
-float Window::GetWidth()const
+int Window::GetWidth()const
 {
 	return m_width;
 }
 
-float Window::GetHeight()const
+int Window::GetHeight()const
 {
 	return m_height;
 }
@@ -220,4 +270,10 @@ float Window::GetHeight()const
 void Window::RefreshWidthAndHeight()
 {
 	glfwGetWindowSize(m_window, &m_width, &m_height);
+}
+
+void Window::SetMSAASample(unsigned int msaaSample)
+{
+	m_msaaSample = msaaSample;
+	CreateWindow(m_window);
 }

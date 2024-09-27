@@ -1,11 +1,14 @@
 #include "Mesh.h"
 #include <iostream>
+#include "../Graphics.h"
+
 Mesh::Mesh(bool useOneVbo)
 {
 	GenerateVAO();
 	m_useOneVbo = useOneVbo;
 	GenerateVBOs(m_useOneVbo == true ? 1 : 3);
 	GenerateEBO();
+	
 	if (m_useOneVbo)
 		ConfigureVertexAttributesBuffer();
 	else
@@ -14,6 +17,8 @@ Mesh::Mesh(bool useOneVbo)
 		ConfigureUvsBuffer();
 		ConfigureNormalsBuffer();
 	}
+
+	Graphics::GetInstance()->SetupVAO(m_sharedVao);
 }
 
 Mesh::~Mesh()
@@ -22,6 +27,15 @@ Mesh::~Mesh()
 	m_uvs.clear();
 	m_indices.clear();
 	m_normals.clear();
+
+	Graphics::GetInstance()->DeleteSharedVAO(m_sharedVao);
+
+	for (GLuint vbo : m_vbos)
+	{
+		glDeleteBuffers(1, &vbo);
+	}
+
+	glDeleteBuffers(1, &m_ebo);
 }
 
 void Mesh::SetVertices(std::vector<Vector3D> vertices)
@@ -31,6 +45,8 @@ void Mesh::SetVertices(std::vector<Vector3D> vertices)
 		ConfigureVertexAttributesBuffer();
 	else
 		ConfigureVerticesBuffer();
+
+	Graphics::GetInstance()->SetupVAO(m_sharedVao);
 }
 
 void Mesh::SetUvs(std::vector<Vector2D> uvs)
@@ -40,6 +56,8 @@ void Mesh::SetUvs(std::vector<Vector2D> uvs)
 		ConfigureVertexAttributesBuffer();
 	else
 		ConfigureUvsBuffer();
+
+	Graphics::GetInstance()->SetupVAO(m_sharedVao);
 }
 
 void Mesh::SetNormals(std::vector<Vector3D> normals)
@@ -49,6 +67,8 @@ void Mesh::SetNormals(std::vector<Vector3D> normals)
 		ConfigureVertexAttributesBuffer();
 	else
 		ConfigureNormalsBuffer();
+
+	Graphics::GetInstance()->SetupVAO(m_sharedVao);
 }
 
 void Mesh::SetIndices(std::vector<unsigned int> indices)
@@ -99,7 +119,7 @@ void Mesh::GenerateEBO()
 
 void Mesh::GenerateVAO()
 {
-	glGenVertexArrays(1, &m_vao);
+	Graphics::GetInstance()->GenSharedVAO(this, m_sharedVao);
 }
 
 std::vector<VertexAttribute> Mesh::CombineVertexBuffer()
@@ -122,63 +142,41 @@ std::vector<VertexAttribute> Mesh::CombineVertexBuffer()
 	}
 	return vertexAttributes;
 }
-void Mesh::SetupVertexAttribs(GLuint index, int vboIndex, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer)
-{
-	glBindVertexArray(m_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[vboIndex]);
-	glVertexAttribPointer(index, size, type, normalized, stride, pointer);
-	glEnableVertexAttribArray(index);
-}
 
 void Mesh::ConfigureVerticesBuffer()
 {
-	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3D) * m_vertices.size(), m_vertices.data(), (int)m_glDrawType);
-
-	SetupVertexAttribs(0,0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
 void Mesh::ConfigureUvsBuffer()
 {
-	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * m_uvs.size(), m_uvs.data(), (int)m_glDrawType);
-
-	SetupVertexAttribs(1,1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 }
 
 void Mesh::ConfigureNormalsBuffer()
 {
-	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[2]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3D) * m_normals.size(), m_normals.data(), (int)m_glDrawType);
-
-	SetupVertexAttribs(2, 2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
 void Mesh::ConfigureVertexAttributesBuffer()
 {
 	std::vector<VertexAttribute> verticesAttributes = CombineVertexBuffer();
-	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexAttribute) * verticesAttributes.size(), verticesAttributes.data(), (int)m_glDrawType);
-
-	SetupVertexAttribs(0, 0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttribute), (void*)0);
-	SetupVertexAttribs(1, 0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexAttribute), (void*)offsetof(VertexAttribute,m_uv));
-	SetupVertexAttribs(2, 0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttribute), (void*)offsetof(VertexAttribute, m_normal));
 }
 
 void Mesh::ConfigureEBO()
 {
-	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * m_indices.size(), m_indices.data(), (int)m_glDrawType);
 }
 
 void Mesh::UseMesh()
 {
-	glBindVertexArray(m_vao);
+	Graphics::GetInstance()->BindVAO(m_sharedVao);
 }
 
 void Mesh::ComputeNormals()
@@ -186,11 +184,11 @@ void Mesh::ComputeNormals()
 	if (m_shapeType == ShapeType::TRIANGLE)
 	{
 		m_normals = std::vector<Vector3D>(m_vertices.size());
-		for (int i = 0; i < m_indices.size(); i+=3)
+		for (int i = 0; i < m_indices.size(); i += 3)
 		{
 			int indice0 = i;
-			int indice1 = i+1;
-			int indice2 = i+2;
+			int indice1 = i + 1;
+			int indice2 = i + 2;
 
 			if (indice2 < m_indices.size())
 			{
@@ -203,13 +201,20 @@ void Mesh::ComputeNormals()
 				Vector3D vertex2 = m_vertices[vertexIndice2];
 				Vector3D v0v1 = (vertex1 - vertex0).Normalized();
 				Vector3D v1v2 = (vertex2 - vertex1).Normalized();
-				Vector3D normal = Vector3D::CrossProduct(v0v1, v1v2).Normalized()*-1;
+				Vector3D normal = Vector3D::CrossProduct(v0v1, v1v2).Normalized() * -1.0f;
 
-				m_normals[vertexIndice0] = normal;
-				m_normals[vertexIndice1] = normal;
-				m_normals[vertexIndice2] = normal;
+				if (normal.IsNaN())
+					normal = Vector3D::Up;
 
-			}	
+				m_normals[vertexIndice0] += normal;
+				m_normals[vertexIndice1] += normal;
+				m_normals[vertexIndice2] += normal;
+			}
+		}
+
+		for (size_t i = 0; i < m_normals.size(); ++i)
+		{
+			m_normals[i].Normalize();
 		}
 
 		SetNormals(m_normals);

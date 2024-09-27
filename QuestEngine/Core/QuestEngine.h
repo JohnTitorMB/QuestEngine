@@ -25,6 +25,16 @@ private :
 
     void Init();
     void Update();
+    void RefreshMSAASample(int msaaSample);
+
+    bool m_isOpaqueMeshRendererOrdered = false;
+    GLuint fbo, textureColorBuffer, rbo;
+    GLuint shaderProgram;
+    GLuint VAO;
+
+    int fboWidth = 1600;
+    int fboHeight = 1200;
+
 };
 
 #endif _QUESTENGINE_H_

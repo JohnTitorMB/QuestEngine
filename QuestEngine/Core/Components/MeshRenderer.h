@@ -163,6 +163,9 @@ private:
 	bool m_isAlphaMaskEnable = true;
 
 
+	bool m_ovverideMultiSamplingEnable = false;
+	bool m_enableMultiSampling = false;
+
 public:
 
 
@@ -239,6 +242,10 @@ public:
 	void EnableBlueMask(bool value);
 	void EnableAlphaMask(bool value);
 
+	//MultiSampling Setters
+	void SetOverrideMultiSamplingEnable(bool overrideMultiSamplingEnable);
+	void SetEnableMultiSampling(bool enableMultiSampling);
+
 	//Depth Specification Getters
 	bool IsDepthMaskEnable();
 	bool IsDepthTestEnable();
@@ -285,6 +292,11 @@ public:
 	bool IsGreenMaskEnable()const;
 	bool IsBlueMaskEnable()const;
 	bool IsAlphaMaskEnable()const;
+
+	//MultiSampling Getter
+	bool GetOverrideMultiSamplingEnable() const;
+	bool GetEnableMultiSampling() const;
+
 
 
 	Component* Clone()override;

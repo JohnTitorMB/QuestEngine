@@ -81,12 +81,24 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	if (m_mesh == nullptr|| shader == nullptr || m_material == nullptr)
 		return;
 	
+	if (m_ovverideMultiSamplingEnable)
+	{
+		if (m_enableMultiSampling)
+			glEnable(GL_MULTISAMPLE);
+		else
+			glDisable(GL_MULTISAMPLE);
+	}
+
 
 	glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
-	if (camera->GetUseDepthZeroToOneProjection())
-		glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-	else
-		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+
+	if (camera != nullptr)
+	{
+		if (camera->GetUseDepthZeroToOneProjection())
+			glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+		else
+			glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+	}
 
 	//Cull Face Specification
 	if (m_isCullFaceEnable)
@@ -137,31 +149,54 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	glColorMask(m_isRedMaskEnable, m_isGreenMaskEnable, m_isBlueMaskEnable, m_isAlphaMaskEnable);
 
 
+
+
 	shader->UseShader();
 	
+	if (camera != nullptr)
+	{
+		shader->SetUniformFloat("viewNear", camera->GetNear());
+		shader->SetUniformFloat("viewFar", camera->GetFar());
+		shader->SetUniformVector3D("viewDirection", camera->GetForwardVector());
 
-	shader->SetUniformFloat("viewNear", 0.01f);
-	shader->SetUniformFloat("viewFar", camera->GetFar());
-	shader->SetUniformVector3D("viewDirection", camera->GetForwardVector());
-
+	}
+	
 	Matrix4x4 modelMatrix = GetTransform().TransformMatrix();
 	shader->SetUniformMatrix4x4("model", modelMatrix);
 
+	if (camera != nullptr)
+	{
+		if (!m_useViewMatrixWithoutTranslation)
+			shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
+		else
+			shader->SetUniformMatrix4x4("view", camera->ViewMatrixWithoutTranslation());
 
-	if(!m_useViewMatrixWithoutTranslation)
-		shader->SetUniformMatrix4x4("view", camera->ViewMatrix());
-	else
-		shader->SetUniformMatrix4x4("view", camera->ViewMatrixWithoutTranslation());
+		RenderTexture2D* rt = camera->GetRenderTexture();
+		int width = window->GetWidth();
+		int height = window->GetHeight();
+		if (rt != nullptr)
+		{
+			width = rt->GetWidth();
+			height = rt->GetHeight();
+		}
 
-	RenderTexture2D* rt = camera->GetRenderTexture();
-	if(rt != nullptr)
-		shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(rt->GetWidth(), rt->GetHeight()));
-	else
-		shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(window->GetWidth(), window->GetHeight()));
+
+
+		float bCornerX = camera->m_viewportBottomCornerX * width;
+		float bCornerY = camera->m_viewportBottomCornerY * height;
+
+		float tCornerX = camera->m_viewportTopCornerX * width;
+		float tCornerY = camera->m_viewportTopCornerY * height;
+
+		shader->SetUniformMatrix4x4("projection", camera->ProjectionMatrix(tCornerX - bCornerX, tCornerY - bCornerY));
+
+		
+		shader->SetUniformVector3D("uViewPos", camera->GetTransform().GetPosition());
+	}
 
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
 	shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
-	shader->SetUniformVector3D("uViewPos", camera->GetTransform().GetPosition());
+
 
 
 	SendMaterialToShader();
@@ -685,4 +720,21 @@ bool MeshRendererComponent::IsBlueMaskEnable() const
 bool MeshRendererComponent::IsAlphaMaskEnable() const
 {
 	return m_isAlphaMaskEnable;
+}
+
+
+bool MeshRendererComponent::GetOverrideMultiSamplingEnable() const {
+	return m_ovverideMultiSamplingEnable;
+}
+
+void MeshRendererComponent::SetOverrideMultiSamplingEnable(bool overrideMultiSamplingEnable) {
+	m_ovverideMultiSamplingEnable = overrideMultiSamplingEnable;
+}
+
+bool MeshRendererComponent::GetEnableMultiSampling() const {
+	return m_enableMultiSampling;
+}
+
+void MeshRendererComponent::SetEnableMultiSampling(bool enableMultiSampling) {
+	m_enableMultiSampling = enableMultiSampling;
 }

@@ -35,6 +35,7 @@ struct Vector3D
 	Vector3D& operator/=(const float& value);
 	bool operator==(const Vector3D& value)const;
 	bool operator!=(const Vector3D& value)const;
+	bool IsNaN();
 
 	static Vector3D CrossProduct(const Vector3D& a, const Vector3D& b);
 	static float DotProduct(const Vector3D& a, const Vector3D& b);

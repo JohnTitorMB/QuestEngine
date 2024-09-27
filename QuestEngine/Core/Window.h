@@ -12,10 +12,10 @@ public :
 	~Window();
 	Window(int width, int height, char* title, int glMajorVersion, int glMinorVersion);
 	GLFWwindow* GetWindow() const;
-	float GetWidth()const;
-	float GetHeight()const;
+	int GetWidth()const;
+	int GetHeight()const;
 	void RefreshWidthAndHeight();
-
+	void SetMSAASample(unsigned int msaaSample);
 	static void SetTheFrameBufferSize(GLFWwindow* window, int width, int height);
 	static InputCode ConvertGLFWInputKeyCode(int keyCode);
 
@@ -31,20 +31,19 @@ private:
 	
 	int m_glMajorVersion = 3;
 	int m_glMinorVersion = 2;
-
+	int m_msaaSample = 0;
 	int m_width = 1280;
 	int m_height = 720;
 	char* m_title;
 	bool m_vsync = true;
 
+
 	GLFWwindow* m_window;
 	int InitialiseGLFW();
 	int InitialiseGLAD();
-	int CreateWindow();
+	int CreateWindow(GLFWwindow* sharedContext = nullptr);
 
 	void InitialiseGLFWCallback();
-
-	
 };
 
 #endif // !_WINDOW_H_

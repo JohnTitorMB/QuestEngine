@@ -43,6 +43,7 @@ public:
 	float m_sensibility = 0.2f;
 	float m_pitchMinValue = -89;
 	float m_pitchMaxValue = 89;
+	float m_scrollMove = 10.0f;
 	MovingAverage m_averageDeltaX;
 	MovingAverage m_averageDeltaY;
 

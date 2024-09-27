@@ -1,6 +1,7 @@
 #include "QuestEngine.h"
 #include "AssetsManager.h"
 #include "SceneManager.h"
+#include "Graphics.h"
 QuestEngine::QuestEngine()
 {
 }
@@ -11,9 +12,11 @@ QuestEngine::~QuestEngine()
 	m_window = nullptr;
 }
 
+
 void QuestEngine::Init()
 {
-	m_window = new Window(1920, 1080, new char[] {"Opengl Window"});
+	m_window = new Window(1280, 720, new char[] {"Opengl Window"});
+
 
 	//Init World
 	World* world = World::Instance();
@@ -28,7 +31,9 @@ void QuestEngine::Init()
 	bool vsync = true;
 	m_window->SetVsync(vsync);
 
-	
+	glDisable(GL_MULTISAMPLE);
+
+	Graphics::GetInstance()->RefreshMSAASampleEvent.AddListener(this, &QuestEngine::RefreshMSAASample);
 
 }
 
@@ -36,6 +41,9 @@ void QuestEngine::Update()
 {
 	InputSystem* inputSystem = InputSystem::Instance();
 	World* world = World::Instance();
+
+
+
 
 	while (!glfwWindowShouldClose(m_window->GetWindow()))
 	{
@@ -48,8 +56,8 @@ void QuestEngine::Update()
 		glClearDepth(1.0f);
 		glClearStencil(0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		world->Update();
+		
+	    world->Update();
 
 		world->Display(m_window);
 
@@ -61,4 +69,10 @@ void QuestEngine::Update()
 	delete AssetsManager::Instance();
 	delete InputSystem::Instance();
 	delete SceneManager::Instance();
+}
+
+void QuestEngine::RefreshMSAASample(int msaaSample)
+{
+	m_window->SetMSAASample(msaaSample);
+	std::cout << "Refresh " << msaaSample << std::endl;
 }

@@ -17,6 +17,7 @@ CameraComponent::CameraComponent(const CameraComponent& other) : SceneComponent(
 	m_near = other.m_near;
 	m_far = other.m_far;
 	m_renderTexture2D = other.m_renderTexture2D;
+	m_renderingPriority = other.m_renderingPriority;
 }
 
 Vector2D CameraComponent::GetVerticalAndHorizontalSize(float width, float height)const
@@ -87,6 +88,11 @@ void CameraComponent::SetRenderTexture(RenderTexture2D* renderTexture)
 	m_renderTexture2D = renderTexture;
 }
 
+void CameraComponent::SetRenderingPriority(const int renderingPriority)
+{
+	m_renderingPriority = renderingPriority;
+}
+
 float CameraComponent::GetSize()const
 {
 	return m_size;
@@ -115,6 +121,11 @@ bool CameraComponent::GetUseInfiniteProjection()
 float CameraComponent::GetInifiniteProjectionEpsilon()
 {
 	return m_infiniteEpisilon;
+}
+
+int CameraComponent::GetRenderingPriority() const
+{
+	return m_renderingPriority;
 }
 
 RenderTexture2D* CameraComponent::GetRenderTexture() const

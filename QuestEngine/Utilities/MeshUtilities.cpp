@@ -111,14 +111,14 @@ Mesh* MeshUtilities::CreateUVSphere(const std::string& assetName, float radius, 
 
 	for (int y = 0; y <= rings; y++)
 	{
-		for (int x = 0; x <= segments; x++)
+		for (int x = 0; x < segments; x++)
 		{
 			float xSegment = (float)x / (float)segments;
 			float yRing = (float)y / (float)rings;
 
-			float xPos = cosf(xSegment * 2.0f * M_PI) * sinf(yRing * M_PI);
-			float yPos = cosf(yRing * M_PI);
-			float zPos = sinf(xSegment * 2.0f * M_PI) * sinf(yRing * M_PI);
+			float xPos = cosf(xSegment * 2.0f * Mathf::PI) * sinf(yRing * Mathf::PI);
+			float yPos = cosf(yRing * Mathf::PI);
+			float zPos = sinf(xSegment * 2.0f * Mathf::PI) * sinf(yRing * Mathf::PI);
 
 			float u = xSegment;
 			float v = yRing;
@@ -132,16 +132,37 @@ Mesh* MeshUtilities::CreateUVSphere(const std::string& assetName, float radius, 
 	{
 		for (int x = 0; x < segments; x++)
 		{
-			int current = y * (segments + 1) + x;
-			int next = y * (segments + 1) + x + 1;
+			if (y == 0)
+			{
+				indices.push_back(x);
+				indices.push_back(x + segments);
+				indices.push_back(segments + Mathf::Repeat(x + 1, segments));
+			}
+			else if (y == rings - 1)
+			{
+				int current = y * segments + x;
+				int next = y * segments + Mathf::Repeat(x + 1, segments);
 
-			indices.push_back(current);
-			indices.push_back(current + segments + 1);
-			indices.push_back(next);
+				indices.push_back(current);
+				indices.push_back(current + segments);
+				indices.push_back(next);
+			}
+			else
+			{
+				int current = y * segments + x;
+				int next = y * segments + Mathf::Repeat(x + 1, segments);
 
-			indices.push_back(current + segments + 1);
-			indices.push_back(next + segments + 1);
-			indices.push_back(next);
+				int current2 = (y + 1) * segments + x;
+				int next2 = (y + 1) * segments + Mathf::Repeat(x + 1, segments);
+
+				indices.push_back(current);
+				indices.push_back(next2);
+				indices.push_back(next);
+
+				indices.push_back(current);
+				indices.push_back(current2);
+				indices.push_back(next2);
+			}
 		}
 	}
 
@@ -185,6 +206,41 @@ Mesh* MeshUtilities::CreatePlane(const std::string& assetName, float size)
 	mesh->SetIndices(indices);
 
 	std::cout << "Genere plane Normal : " << std::endl;
+	mesh->ComputeNormals();
+	return mesh;
+}
+
+Mesh* MeshUtilities::CreateQuad(const std::string& assetName, float size)
+{
+	Mesh* mesh = AssetsManager::CreateMesh(assetName, true);
+	float halSize = size / 2.0f;
+
+	std::vector<Vector3D> vertices =
+	{
+		{ -halSize, -halSize, 0 },
+		{ halSize, -halSize, 0 },
+		{ halSize, halSize, 0 },
+		{ -halSize, halSize, 0 }
+	};
+
+	std::vector<Vector2D> uvs =
+	{
+		{ 0, 0 },
+		{ 1, 0 },
+		{ 1, 1 },
+		{ 0, 1 }
+	};
+
+	std::vector<unsigned int> indices =
+	{
+		0, 1, 2,
+		0, 2, 3
+	};
+
+	mesh->SetVertices(vertices);
+	mesh->SetUvs(uvs);
+	mesh->SetIndices(indices);
+
 	mesh->ComputeNormals();
 	return mesh;
 }

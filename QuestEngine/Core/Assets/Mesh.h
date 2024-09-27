@@ -7,6 +7,7 @@
 
 #include "Assets.h"
 
+
 enum class GLDrawType
 {
 	GLSTREAM_DRAW = 0x88E0,
@@ -29,6 +30,8 @@ public:
 };
 class Mesh : public Assets
 {
+	friend class Graphics;
+
 public:
 
 	GLDrawType m_glDrawType = GLDrawType::GLDYNAMIC_DRAW;
@@ -51,7 +54,9 @@ private:
 	std::vector<unsigned int> m_indices;
 	std::vector<Vector2D> m_uvs;
 	std::vector<Vector3D> m_normals;
-	GLuint m_vao;
+	GLuint m_sharedVao;
+	
+	
 	std::vector<GLuint> m_vbos;
 	GLuint m_ebo;
 	bool m_useOneVbo = true;
@@ -59,13 +64,13 @@ private:
 	void GenerateVBOs(int vboCount);
 	void GenerateEBO();
 	void GenerateVAO();
-	void SetupVertexAttribs(GLuint index, int vboIndex, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
 	void ConfigureVerticesBuffer();
 	void ConfigureUvsBuffer();
 	void ConfigureNormalsBuffer();
 	void ConfigureVertexAttributesBuffer();
 	void ConfigureEBO();
 	std::vector<VertexAttribute> CombineVertexBuffer();
+
 
 };
 

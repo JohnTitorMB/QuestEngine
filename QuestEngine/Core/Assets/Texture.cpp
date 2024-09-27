@@ -10,6 +10,8 @@ Texture::Texture(std::string filePath)
 {
 }
 
+
+
 Texture::Texture()
 {
 }
@@ -54,10 +56,18 @@ std::vector<unsigned char> Texture::GetSubData(const unsigned char* data, int sr
 
 
 
+int Texture::GetTextureLayerType(int layer)
+{
+	if (m_layerTextureInfos[layer].m_useMultisampledTexture && m_textureType == TextureType::TEXTURE2D)
+		return (int)GL_TEXTURE_2D_MULTISAMPLE;
+	else
+		return (int)m_textureType;
+}
+
 void Texture::Bind(int textureIndex, int layer)
 {
 	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
+	glBindTexture(GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
 }
 
 
@@ -69,28 +79,28 @@ void Texture::Unbind(int textureIndex, int layer)
 void Texture::SetWrapHorizontalParameter(Wrap wrapHorizontalParameter, int layer)
 {
 	m_layerTextureInfos[layer].m_wrapHorizontalParameter = wrapHorizontalParameter;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)m_layerTextureInfos[layer].m_wrapHorizontalParameter);
+	glBindTexture(GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri(GetTextureLayerType(layer), GL_TEXTURE_WRAP_S, (GLint)m_layerTextureInfos[layer].m_wrapHorizontalParameter);
 }
 
 void Texture::SetVerticalParameter(Wrap wrapVerticalParameter, int layer)
 {
 	m_layerTextureInfos[layer].m_wrapVerticalParameter = wrapVerticalParameter;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)m_layerTextureInfos[layer].m_wrapVerticalParameter);
+	glBindTexture(GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri(GetTextureLayerType(layer), GL_TEXTURE_WRAP_T, (GLint)m_layerTextureInfos[layer].m_wrapVerticalParameter);
 }
 
 void Texture::SetDepthParameter(Wrap wrapDepthParameter, int layer)
 {
 	m_layerTextureInfos[layer].m_wrapDepthParameter = wrapDepthParameter;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_R, (GLint)m_layerTextureInfos[layer].m_wrapDepthParameter);
+	glBindTexture(GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri(GetTextureLayerType(layer), GL_TEXTURE_WRAP_R, (GLint)m_layerTextureInfos[layer].m_wrapDepthParameter);
 }
 
 void Texture::GenerateMipmap(int layer)
 {
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glGenerateMipmap((int)m_textureType);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glGenerateMipmap((int)GetTextureLayerType(layer));
 }
 
 void Texture::GenerateAllMipmap(bool forceGeneration)
@@ -121,15 +131,15 @@ Wrap Texture::GetDepthParameter(int layer)const
 void Texture::SetMinification(MinificationFilter minificationFilter, int layer)
 {
 	m_layerTextureInfos[layer].m_minificationFilter = minificationFilter;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)m_layerTextureInfos[layer].m_minificationFilter);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_MIN_FILTER, (GLint)m_layerTextureInfos[layer].m_minificationFilter);
 }
 
 void Texture::SetMagnification(MagnificationFilter magnificationFilter, int layer)
 {
 	m_layerTextureInfos[layer].m_magnificationFilter = magnificationFilter;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)m_layerTextureInfos[layer].m_magnificationFilter);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_MAG_FILTER, (GLint)m_layerTextureInfos[layer].m_magnificationFilter);
 }
 
 MinificationFilter Texture::GetMinification(int layer)const
@@ -145,36 +155,36 @@ MagnificationFilter Texture::GetMagnification(int layer)const
 void Texture::SetMipmapBaseLevel(int mipmapBaseLevel, int layer)
 {
 	m_layerTextureInfos[layer].m_mipmapBaseLevel = mipmapBaseLevel;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)m_layerTextureInfos[layer].m_mipmapBaseLevel);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_BASE_LEVEL, (GLint)m_layerTextureInfos[layer].m_mipmapBaseLevel);
 }
 
 void Texture::SetMipmapMaxLevel(int mipmapMaxLevel, int layer)
 {
 	m_layerTextureInfos[layer].m_mipmapMaxLevel = mipmapMaxLevel;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)m_layerTextureInfos[layer].m_mipmapMaxLevel);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_MAX_LEVEL, (GLint)m_layerTextureInfos[layer].m_mipmapMaxLevel);
 }
 
 void Texture::SetMipmapMinLOD(int mipmapMinLOD, int layer)
 {
 	m_layerTextureInfos[layer].m_mipmapMinLOD = mipmapMinLOD;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)m_layerTextureInfos[layer].m_mipmapMinLOD);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_MIN_LOD, (GLint)m_layerTextureInfos[layer].m_mipmapMinLOD);
 }
 
 void Texture::SetMipmapMaxLOD(int mipmapMaxLOD, int layer)
 {
 	m_layerTextureInfos[layer].m_mipmapMaxLOD = mipmapMaxLOD;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)m_layerTextureInfos[layer].m_mipmapMaxLOD);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_MAX_LOD, (GLint)m_layerTextureInfos[layer].m_mipmapMaxLOD);
 }
 
 void Texture::SetMipmapLODBias(int mipmapLODBias, int layer)
 {
 	m_layerTextureInfos[layer].m_mipmapLODBias = mipmapLODBias;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)m_layerTextureInfos[layer].m_mipmapLODBias);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_LOD_BIAS, (GLint)m_layerTextureInfos[layer].m_mipmapLODBias);
 }
 
 int Texture::GetMipmapBaseLevel(int layer)const
@@ -206,8 +216,8 @@ void Texture::SetAnisotropy(float anisotropyValue, int layer)
 {
 	float maxAnisotropy = GetMaxGPUAnisotropy();
 	m_layerTextureInfos[layer].m_anisotropyValue = anisotropyValue > maxAnisotropy ? maxAnisotropy : anisotropyValue;
-	glBindTexture((int)m_textureType, m_layerTextureInfos[layer].m_textureID);
-	glTexParameterf((int)m_textureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_layerTextureInfos[layer].m_anisotropyValue);
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	glTexParameterf((int)GetTextureLayerType(layer), GL_TEXTURE_MAX_ANISOTROPY_EXT, m_layerTextureInfos[layer].m_anisotropyValue);
 
 }
 

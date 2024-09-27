@@ -19,6 +19,7 @@ public:
 
 	static Mesh* CreateCube(const std::string& assetName, float size);
 	static Mesh* CreatePlane(const std::string& assetName, float size);
+	static Mesh* CreateQuad(const std::string& assetName, float size);
 	static Mesh* CreateUVSphere(const std::string& assetName, float radius, int segments, int rings);
 	static Mesh* CreateCylinder(const std::string& assetName, float radius, int segments, float height);
 	static Mesh* CreateCone(const std::string& assetName, float radius, float radius2, int segments, float height);

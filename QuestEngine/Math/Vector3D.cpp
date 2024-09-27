@@ -153,6 +153,11 @@ bool Vector3D::operator!=(const Vector3D& value) const
 	return (abs(m_x - value.m_x) > epsilon || abs(m_y - value.m_y) > epsilon || abs(m_z - value.m_z) > epsilon);
 }
 
+bool Vector3D::IsNaN()
+{
+	return std::isnan(m_x) || std::isnan(m_y) || std::isnan(m_z);
+}
+
 
 Vector3D Vector3D::Normalized() const
 {

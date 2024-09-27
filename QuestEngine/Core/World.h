@@ -72,6 +72,9 @@ public :
 	void Display(Window* window);
 	void RefreshPriorityRenderingComponent(MeshRendererComponent* component);
 	void RefreshBlendRenderingComponent(MeshRendererComponent* component, bool isBlendEnable);
+
+	int fboWidth = 1600;
+	int fboHeight = 1200;
 };
 
 #include "Entity.h"
