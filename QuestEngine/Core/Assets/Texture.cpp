@@ -83,7 +83,7 @@ void Texture::SetWrapHorizontalParameter(Wrap wrapHorizontalParameter, int layer
 	glTexParameteri(GetTextureLayerType(layer), GL_TEXTURE_WRAP_S, (GLint)m_layerTextureInfos[layer].m_wrapHorizontalParameter);
 }
 
-void Texture::SetVerticalParameter(Wrap wrapVerticalParameter, int layer)
+void Texture::SetWrapVerticalParameter(Wrap wrapVerticalParameter, int layer)
 {
 	m_layerTextureInfos[layer].m_wrapVerticalParameter = wrapVerticalParameter;
 	glBindTexture(GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);

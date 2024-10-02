@@ -13,9 +13,19 @@ const std::unordered_map<std::string, int>& Material::GetIntMap()
 	return m_integerKeyValue;
 }
 
+const std::unordered_map<std::string, unsigned int>& Material::GetUIntMap()
+{
+    return m_uIntegerKeyValue;
+}
+
 const std::unordered_map<std::string, float>& Material::GetFloatMap()
 {
 	return m_floatKeyValue;
+}
+
+const std::unordered_map<std::string, std::vector<float>>& Material::GetFloatArrayMap()
+{
+    return m_floatArrayKeyValue;
 }
 
 const std::unordered_map<std::string, Vector2D>& Material::GetVector2DMap()
@@ -48,9 +58,19 @@ void Material::SetInt(std::string key, int value)
 	m_integerKeyValue[key] = value;
 }
 
+void Material::SetUInt(std::string key, unsigned int value)
+{
+    m_uIntegerKeyValue[key] = value;
+}
+
 void Material::SetFloat(std::string key, float value)
 {
 	m_floatKeyValue[key] = value;
+}
+
+void Material::SetFloatArray(std::string key, const std::vector<float>& vector)
+{
+    m_floatArrayKeyValue[key] = vector;
 }
 
 void Material::SetVector2D(std::string key, Vector2D value)
@@ -87,12 +107,30 @@ int Material::GetInt(const std::string& key) const {
     return 0;
 }
 
+unsigned int Material::GetUInt(const std::string& key) const
+{
+    auto it = m_uIntegerKeyValue.find(key);
+    if (it != m_uIntegerKeyValue.end()) {
+        return it->second;
+    }
+    return 0;
+}
+
 float Material::GetFloat(const std::string& key) const {
     auto it = m_floatKeyValue.find(key);
     if (it != m_floatKeyValue.end()) {
         return it->second;
     }
     return 0.0f; 
+}
+
+std::vector<float> Material::GetFloatArray(const std::string& key) const
+{
+    auto it = m_floatArrayKeyValue.find(key);
+    if (it != m_floatArrayKeyValue.end()) {
+        return it->second;
+    }
+    return std::vector<float>();
 }
 
 Vector2D Material::GetVector2D(const std::string& key) const {

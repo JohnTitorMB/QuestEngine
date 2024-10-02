@@ -46,7 +46,7 @@ public:
 
 	void SetAntiAliasingType(AntiAliasingType antiAliasingType);
 	AntiAliasingType GetAntiAliasingType();
-	void Clear(CameraComponent* camera);
+	void Clear(CameraComponent* camera, int x, int y, int width, int height);
 	void BindMainFrameBuffer();
 	void SetMSAASample(int msaaSample);
 	int GetMSAASample();
@@ -66,6 +66,8 @@ public:
 	void SetupVAO(unsigned int sharedID);
 	unsigned int GetVAO(unsigned int sharedID);
 	void BindVAO(unsigned int sharedID);
+
+	void RenderImage(Window* window, RenderTexture2D* renderTextureTarget, Shader* shader, Material* material);
 };
 
 #endif

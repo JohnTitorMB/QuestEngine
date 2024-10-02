@@ -15,7 +15,7 @@ QuestEngine::~QuestEngine()
 
 void QuestEngine::Init()
 {
-	m_window = new Window(1280, 720, new char[] {"Opengl Window"});
+	m_window = new Window(720, 720, new char[] {"Opengl Window"});
 
 
 	//Init World

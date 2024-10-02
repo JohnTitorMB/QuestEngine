@@ -18,6 +18,11 @@ CameraComponent::CameraComponent(const CameraComponent& other) : SceneComponent(
 	m_far = other.m_far;
 	m_renderTexture2D = other.m_renderTexture2D;
 	m_renderingPriority = other.m_renderingPriority;
+
+	m_viewportBottomCornerX = other.m_viewportBottomCornerX;
+	m_viewportBottomCornerY = other.m_viewportBottomCornerY;
+	m_viewportTopCornerX = other.m_viewportTopCornerX;
+	m_viewportTopCornerY = other.m_viewportTopCornerY;
 }
 
 Vector2D CameraComponent::GetVerticalAndHorizontalSize(float width, float height)const

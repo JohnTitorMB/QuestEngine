@@ -180,6 +180,7 @@
     <ClCompile Include="Game\AntiAliasingTestComponent.cpp" />
     <ClCompile Include="Core\Graphics.cpp" />
     <ClCompile Include="Library\stb_image_write.cpp" />
+    <ClCompile Include="Core\Components\PostProcessComponent.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="Game\AntiAliasingTestComponent.h" />
     <ClInclude Include="Core\Graphics.h" />
     <ClInclude Include="Library\stb_image_write.h" />
+    <ClInclude Include="Core\Components\PostProcessComponent.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />

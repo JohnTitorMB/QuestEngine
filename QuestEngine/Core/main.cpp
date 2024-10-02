@@ -44,6 +44,5 @@ int main() {
     questEngine.Init();
     questEngine.Update();
 
- 
     return 0;
 }

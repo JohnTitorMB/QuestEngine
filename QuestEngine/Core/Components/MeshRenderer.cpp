@@ -14,7 +14,9 @@
 void MeshRendererComponent::SendMaterialToShader()const
 {
 	const std::unordered_map<std::string, int> integerKeyValue = m_material->GetIntMap();
+	const std::unordered_map<std::string, unsigned int> uIntegerKeyValue = m_material->GetUIntMap();
 	const std::unordered_map<std::string, float> floatKeyValue = m_material->GetFloatMap();
+	const std::unordered_map<std::string, std::vector<float>> floatArrayKeyValue = m_material->GetFloatArrayMap();
 	const std::unordered_map<std::string, Vector2D> vector2DKeyValue = m_material->GetVector2DMap();
 	const std::unordered_map<std::string, Vector3D> vector3DKeyValue = m_material->GetVector3DMap();
 	const std::unordered_map<std::string, Vector4D> vector4DKeyValue = m_material->GetVector4DMap();
@@ -24,8 +26,14 @@ void MeshRendererComponent::SendMaterialToShader()const
 	for (auto pair : integerKeyValue)
 		m_shader->SetUniformInt(pair.first, pair.second);
 
+	for (auto pair : uIntegerKeyValue)
+		m_shader->SetUniformUInt(pair.first, pair.second);
+
 	for (auto pair : floatKeyValue)
 		m_shader->SetUniformFloat(pair.first, pair.second);
+
+	for (auto pair : floatArrayKeyValue)
+		m_shader->SetUniformFloatArray(pair.first, pair.second);
 
 	for (auto pair : vector2DKeyValue)
 		m_shader->SetUniformVector2D(pair.first, pair.second);

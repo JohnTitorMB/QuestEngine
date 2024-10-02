@@ -75,6 +75,8 @@ public :
 
 	int fboWidth = 1600;
 	int fboHeight = 1200;
+
+	float radius = 1;
 };
 
 #include "Entity.h"

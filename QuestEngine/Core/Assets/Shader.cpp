@@ -133,10 +133,22 @@ void Shader::SetUniformFloat(std::string name, float value)
 	glUniform1f(location, value);
 }
 
+void Shader::SetUniformFloatArray(std::string name, std::vector<float> array)
+{
+	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
+	glUniform1fv(location, array.size(), array.data());
+}
+
 void Shader::SetUniformInt(std::string name, int value)
 {
 	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
 	glUniform1i(location, value);
+}
+
+void Shader::SetUniformUInt(std::string name, unsigned int value)
+{
+	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
+	glUniform1ui(location, value);
 }
 
 void Shader::SetUniformMatrix3x3(std::string name, Matrix3x3 value)

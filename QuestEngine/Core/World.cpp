@@ -22,6 +22,7 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "Assets/RenderTexture2D.h"
 #include "../Game/AntiAliasingTestComponent.h"
 #include "Graphics.h"
+#include "Components/PostProcessComponent.h"
 
 World::World()
 {
@@ -50,10 +51,16 @@ void World::InitAssets()
 	Shader* ssaaShader = AssetsManager::CreateShader("SSAAShader", "Assets/SSAAShader.vert", "Assets/SSAAShader.frag");
 	Shader* msaaShader = AssetsManager::CreateShader("MSAAShader", "Assets/MSAAShader.vert", "Assets/MSAAShader.frag");
 
+	Shader* blurShader = AssetsManager::CreateShader("Blur", "Assets/ScreenRect.vert", "Assets/Blur.frag");
+	Shader* horizontalBlurShader = AssetsManager::CreateShader("HorizontalBlurShader", "Assets/ScreenRect.vert", "Assets/HorizontalBlur.frag");
+	Shader* verticalBlurShader = AssetsManager::CreateShader("VerticalBlurShader", "Assets/ScreenRect.vert", "Assets/VerticalBlur.frag");
+
+	Shader* tintShader = AssetsManager::CreateShader("TintShader", "Assets/ScreenRect.vert", "Assets/TintShader.frag");
+
 	//Double apha shader
 	Shader* shader7 = AssetsManager::CreateShader("BlinnPhongShaderAlphaPass1", "Assets/BlinnPhongShaderAlpha.vert", "Assets/BlinnPhongShaderAlphaPass1.frag");
 	Shader* shader8 = AssetsManager::CreateShader("BlinnPhongShaderAlphaPass2", "Assets/BlinnPhongShaderAlpha.vert", "Assets/BlinnPhongShaderAlphaPass2.frag");
-	
+
 	//Sky Shader
 	Shader* cubeMapShader = AssetsManager::CreateShader("CubeMapShader", "Assets/CubeMapShader.vert", "Assets/CubeMapShader.frag");
 	Shader* skyboxShader = AssetsManager::CreateShader("SkyboxShader", "Assets/SkyboxShader.vert", "Assets/SkyboxShader.frag");
@@ -64,19 +71,19 @@ void World::InitAssets()
 	Shader* renderShader = AssetsManager::CreateShader("RenderShader", "Assets/BlinnPhongShader.vert", "Assets/RenderShader.frag");
 
 	//Initialise Textures
-	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
-	Texture* cubeMap = AssetsManager::CreateCubeMap("CubeMapTexture","Assets/CubeMap.jpg");	
-	Texture* simpleTexture = AssetsManager::CreateTexture2D("SimpleTexture","Assets/Texture.png");
-	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture","Assets/Box/BoxDiffuse.png");
-	Texture* boxAlphaTexture = AssetsManager::CreateTexture2D("BoxAlphaTexture","Assets/Box/BoxAlpha.png");
-	
+	Texture* whiteTexture = AssetsManager::CreateTexture2D("White", "Assets/WhiteTexture.png");
+	Texture* cubeMap = AssetsManager::CreateCubeMap("CubeMapTexture", "Assets/CubeMap.jpg");
+	Texture* simpleTexture = AssetsManager::CreateTexture2D("SimpleTexture", "Assets/Texture.png");
+	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture", "Assets/Box/BoxDiffuse.png");
+	Texture* boxAlphaTexture = AssetsManager::CreateTexture2D("BoxAlphaTexture", "Assets/Box/BoxAlpha.png");
+
 	//Render Texture
 	RenderTexture2D* renderTexture = AssetsManager::CreateRenderTexture2D("RenderTexture", 1920, 1080);
 	Texture::LayerTextureInfo layerTextureInfo = Texture::LayerTextureInfo();
 	layerTextureInfo.m_minificationFilter = MinificationFilter::Bilinear;
 	layerTextureInfo.m_generateMimpap = false;
 	layerTextureInfo.m_enableDoubleBuffering = true;
-	renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE,0, layerTextureInfo);
+	renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE, 0, layerTextureInfo);
 	renderTexture->AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8);
 
 
@@ -95,7 +102,7 @@ void World::InitAssets()
 	layerTextureInfo.m_generateMimpap = false;
 	layerTextureInfo.m_useMultisampledTexture = true;
 
-	MSAARenderTextureTemp->AttachColorTextureBufferMS(ColorRenderableFormat::RGBA8,0 , layerTextureInfo);
+	MSAARenderTextureTemp->AttachColorTextureBufferMS(ColorRenderableFormat::RGBA8, 0, layerTextureInfo);
 	RenderTexture2D::RenderBufferInfo renderBufferInfo = RenderTexture2D::RenderBufferInfo();
 	renderBufferInfo.m_useMultisampledRenderBuffer = true;
 	MSAARenderTextureTemp->AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8, renderBufferInfo);
@@ -109,10 +116,14 @@ void World::InitAssets()
 
 	MSAARenderTextureTarget->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE, 0, layerTextureInfo);
 
+
+
+
+
 	///Initialise Materials
 
 	//White Material
-	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture,Color(1,1,1,1), Color(1, 1, 1, 1), Color(1, 1, 1, 1),32.0f);
+	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture, Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), 32.0f);
 
 	// CubeMap Material
 	Material* cubeMapMaterial = AssetsManager::CreateMaterial("CubeMapMaterial");
@@ -120,7 +131,7 @@ void World::InitAssets()
 
 	//SkyDome Material
 	Material* skyDomeMaterial = AssetsManager::CreateMaterial("SkydomeMaterial");
-	skyDomeMaterial->SetVector3D("lightDirection", Vector3D(0,-1,0));
+	skyDomeMaterial->SetVector3D("lightDirection", Vector3D(0, -1, 0));
 	skyDomeMaterial->SetColor("colorA", Color(60 / 255.0f, 127 / 255.0f, 170 / 255.0f, 1.0f));
 	skyDomeMaterial->SetColor("colorB", Color(112 / 255.0f, 188 / 255.0f, 220 / 255.0f, 1.0f));
 	skyDomeMaterial->SetColor("sunColor", Color(255 / 255.0f, 223 / 255.0f, 79 / 255.0f, 1.0f));
@@ -156,18 +167,19 @@ void World::InitAssets()
 	OBJLibrary::OBJLoader::LoadOBJ("Bowl", "Assets/Bowl/Glass bowl.obj");
 	OBJLibrary::OBJLoader::LoadOBJ("Camera", "Assets/Camera/camera.obj");
 	OBJLibrary::OBJLoader::LoadOBJ("Wall", "Assets/Wall/wall.obj");
+	//OBJLibrary::OBJLoader::LoadOBJ("Rungholt", "Assets/OBJ/35.Rungholt/rungholt.obj");
 
 	EntityGroupAsset* entityGroupAsset = OBJLibrary::OBJLoader::LoadOBJ("Desk", "Assets/Desk/desk.obj");
 	Entity* screenEntity = entityGroupAsset->GetEntityAt(4); // Get the screen entity of desk
 	MeshRendererComponent* meshRenderComponent = screenEntity->GetComponent<MeshRendererComponent>();
 	meshRenderComponent->SetMaterial(renderMaterial);
-	meshRenderComponent->SetShader(renderShader);	
+	meshRenderComponent->SetShader(renderShader);
 
 	//Initialis Enitty for display SSAA Render Texture
 	EntityGroupAsset* ssAATest = AssetsManager::CreateEntityGroup("SSAAEntityGroup");
 
-	Entity* entity =  ssAATest->CreateEntity<Entity>();
-	MeshRendererComponent * meshRendererComponent = entity->AddComponent<MeshRendererComponent>(true);
+	Entity* entity = ssAATest->CreateEntity<Entity>();
+	MeshRendererComponent* meshRendererComponent = entity->AddComponent<MeshRendererComponent>(true);
 	meshRendererComponent->SetMesh(quadScreenMesh);
 	meshRendererComponent->SetShader(ssaaShader);
 	meshRendererComponent->SetMaterial(SSAAMaterial);
@@ -188,17 +200,64 @@ void World::InitAssets()
 	meshRendererComponent->EnableDepthTest(false);
 	meshRendererComponent->EnableStencilTest(false);
 	meshRendererComponent->EnableBlend(false);
+
+	/*
+	//PostProcess Material
+	Material* postProcessMaterial = AssetsManager::CreateMaterial("PostProcessMaterial");
+	postProcessMaterial->SetTexture("texture2D", postProcessRenderTextureTarget);
+
+	int KERNEL_MAX_SIZE = 2048;
+
+
+	int kernelWidth = radius*2+1;
+	kernelWidth = Mathf::Clamp(kernelWidth, 0,KERNEL_MAX_SIZE);
+	int kernelHalfWidth = kernelWidth * 0.5f;
+	float sigma = radius/3.0f;
+	float sigmaSquared = sigma * sigma;
+	std::vector<float> kernel;
+	float sum = 0;
+	float E = 2.71828f;
+	for (int i = -kernelHalfWidth; i <= kernelHalfWidth; i++)
+	{
+		float gaussian = 1.0f / (sqrtf(2.0f * Mathf::PI) * sigma) * powf(E,-(i * i) / (2.0f * sigmaSquared));
+
+		kernel.push_back(gaussian);
+		sum += gaussian;
+	}
+
+	float divideCoeef = 1.0f / sum;
+	for (int i = 0; i < kernel.size(); i++)
+	{
+		kernel[i] *= divideCoeef;
+	}
+	postProcessMaterial->SetFloatArray("kernel", kernel);
+	postProcessMaterial->SetInt("kernelHalfWidth", kernelHalfWidth);
+	postProcessMaterial->SetInt("kernelWidth", kernelWidth);
+	*/
+	//Initialise Entity for display Post-Process effect;
+	EntityGroupAsset* postProcessEG = AssetsManager::CreateEntityGroup("PostProcessEntityGroup");
+
+	entity = postProcessEG->CreateEntity<Entity>();
+	meshRendererComponent = entity->AddComponent<MeshRendererComponent>(true);
+	meshRendererComponent->SetMesh(quadScreenMesh);
+	//	meshRendererComponent->SetShader(horizontalBlurShader);
+		//meshRendererComponent->SetMaterial(postProcessMaterial);
+	meshRendererComponent->EnableCullFace(false);
+	meshRendererComponent->EnableDepthTest(false);
+	meshRendererComponent->EnableStencilTest(false);
+	meshRendererComponent->EnableBlend(false);
 }
 
 void World::InitWorld()
 {
 	InitAssets();
 
-	LightingSettings::m_globalAmbiantColor = Color(0.2f,0.2f,0.2f,1);
+	LightingSettings::m_globalAmbiantColor = Color(0.2f, 0.2f, 0.2f, 1);
 	Scene& objLoaderScene = SceneManager::Instance()->CreateScene();
+	
 	Entity* cameraEntity = objLoaderScene.CreateEntity<Entity>();
 	{
-		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);	
+		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
 		cameraEntity->SetRootComponent(cameraComponent);
 		cameraComponent->SetNear(0.01f);
 		cameraComponent->SetFar(1000.0);
@@ -206,14 +265,40 @@ void World::InitWorld()
 		cameraComponent->SetFov(60);
 		cameraComponent->SetWorldPosition(Vector3D(0, 1, -10));
 		cameraComponent->SetRenderingPriority(1);
-
+		cameraComponent->m_viewportTopCornerX = 0.5;
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 
 		cameraController->m_scrollMove = 0;
-		AntiAliasingTestComponent* antiAliasingTestComponent = cameraEntity->AddComponent<AntiAliasingTestComponent>(true);
-		antiAliasingTestComponent->m_cameraComponent = cameraComponent;
+
+		PostProcessComponent* postProcessComponent = cameraEntity->AddComponent<PostProcessComponent>(true);
+		std::shared_ptr<GaussianBlurEffect> gaussianBlurEffect = std::make_shared<GaussianBlurEffect>();
+		gaussianBlurEffect->m_data.radius = 25;
+		postProcessComponent->AddEffect(std::make_shared<TintEffect>());
+		postProcessComponent->AddEffect(gaussianBlurEffect);
 	}
-	/*
+	
+	Entity* cameraEntity3 = objLoaderScene.CreateEntity<Entity>();
+	{
+		CameraComponent* cameraComponent = cameraEntity3->AddComponent<CameraComponent>(true);
+		cameraEntity3->SetRootComponent(cameraComponent);
+		cameraComponent->SetNear(0.01f);
+		cameraComponent->SetFar(1000.0);
+		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+		cameraComponent->SetFov(60);
+		cameraComponent->SetWorldPosition(Vector3D(0, 1, -10));
+		cameraComponent->SetRenderingPriority(2);
+		cameraComponent->m_viewportBottomCornerX = 0.5;
+		CameraController* cameraController = cameraEntity3->AddComponent<CameraController>(true);
+
+		cameraController->m_scrollMove = 0;
+
+
+		PostProcessComponent* postProcessComponent = cameraEntity3->AddComponent<PostProcessComponent>(true);
+		std::shared_ptr<GaussianBlurEffect> gaussianBlurEffect = std::make_shared<GaussianBlurEffect>();
+		gaussianBlurEffect->m_data.radius = 25;
+		postProcessComponent->AddEffect(gaussianBlurEffect);
+	}
+	
 	CameraComponent* cameraComponent2 = nullptr;
 	Entity* cameraEntity2 = objLoaderScene.CreateEntity<Entity>();
 	{
@@ -225,8 +310,13 @@ void World::InitWorld()
 		cameraEntity2->SetRootComponent(cameraComponent2);
 		cameraComponent2->SetWorldPosition(Vector3D(0, 1, -4.75));
 		cameraComponent2->SetRenderTexture(AssetsManager::GetAsset<RenderTexture2D>("RenderTexture"));
+
+		PostProcessComponent* postProcessComponent = cameraEntity2->AddComponent<PostProcessComponent>(true);
+		std::shared_ptr<GaussianBlurEffect> gaussianBlurEffect = std::make_shared<GaussianBlurEffect>();
+		gaussianBlurEffect->m_data.radius = 50;
+		postProcessComponent->AddEffect(gaussianBlurEffect);
 	}
-	*/
+	
 	//Initialise Directional Light entity
 	DirectionalLightComponent* dLightComponent = nullptr;
 	Entity* lightEntity = objLoaderScene.CreateEntity<Entity>();
@@ -245,7 +335,7 @@ void World::InitWorld()
 
 	EntityGroupAsset* entityAssets = AssetsManager::GetAsset<EntityGroupAsset>("Stair");
 	objLoaderScene.CloneGroupEntityToScene(entityAssets);
-	
+
 	Entity* firstEntity = nullptr;
 	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Table"), firstEntity);
 
@@ -272,14 +362,13 @@ void World::InitWorld()
 	}
 
 	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Desk"), firstEntity);
-
 	if (firstEntity)
 	{
 		SceneComponent* sceneComponent = firstEntity->GetComponent<SceneComponent>();
 		if (sceneComponent)
 		{
 			sceneComponent->SetWorldPosition(Vector3D(0.0f, 0.0f, -2.0f));
-			sceneComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0,270,0)));
+			sceneComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0, 270, 0)));
 			sceneComponent->SetWorldScale(Vector3D(1.0f, 1.0f, 1.0f));
 		}
 	}
@@ -299,7 +388,7 @@ void World::InitWorld()
 		}
 	}
 
-	
+
 	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Wall"), firstEntity);
 
 	if (firstEntity)
@@ -314,6 +403,7 @@ void World::InitWorld()
 	}
 
 
+	//objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Rungholt"));
 
 	SceneManager::Instance()->LoadScene(0);
 }
@@ -343,7 +433,7 @@ void World::DestroyEntity(Entity* entity)
 	{
 		std::cout << "this entity cannot be destroyed from the world, it is not an entity born on the world!" << std::endl;
 	}
-	
+
 }
 
 void World::Update()
@@ -369,26 +459,6 @@ void World::Update()
 
 void World::Display(Window* window)
 {
-	/*
-	// Rendu vers le framebuffer hors écran
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glEnable(GL_DEPTH_TEST);  // Activer le test de profondeur
-	glViewport(0, 0, 1600, 1200);
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Dessiner le triangle
-	glUseProgram(shaderProgram);
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	// Blit vers le framebuffer principal (fenêtre)
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBlitFramebuffer(0, 0, 1600, 1200, 0, 0, 800, 600, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-	return;*/
-
 	if (window == nullptr)
 	{
 		std::cout << "Error" << std::endl;
@@ -408,28 +478,9 @@ void World::Display(Window* window)
 	for (auto it = sortCamera.begin(); it != sortCamera.end(); ++it)
 	{
 		CameraComponent* camera = *it;
-
 		RenderTexture2D* cameraRT = camera->GetRenderTexture();
 
 		RenderTexture2D* renderTexture = cameraRT;
-		
-		if (renderTexture == nullptr)
-		{
-			if (Graphics::GetInstance()->GetAntiAliasingType() == Graphics::AntiAliasingType::SSAA)
-			{
-				renderTexture = AssetsManager::GetAsset<RenderTexture2D>("SSAA RenderTexture");
-				int ssaaMultiplier = Graphics::GetInstance()->GetSSAAMultiplier();
-				renderTexture->Resize(window->GetWidth() * ssaaMultiplier, window->GetHeight() * ssaaMultiplier);
-				camera->SetRenderTexture(renderTexture);
-			}
-			else if (Graphics::GetInstance()->GetAntiAliasingType() == Graphics::AntiAliasingType::MSAA_RT)
-			{
-				renderTexture = AssetsManager::GetAsset<RenderTexture2D>("MSAA RenderTexture Temp");
-				renderTexture->Resize(window->GetWidth(), window->GetHeight());
-				camera->SetRenderTexture(renderTexture);
-			}
-		}
-		
 
 		int viewportWidth = window->GetWidth();
 		int viewportHeight = window->GetHeight();
@@ -441,39 +492,38 @@ void World::Display(Window* window)
 		}
 		else
 			Graphics::GetInstance()->BindMainFrameBuffer();
-			
-	
 
 		float bCornerX = camera->m_viewportBottomCornerX * viewportWidth;
-		float bCornerY = camera->m_viewportBottomCornerY * viewportHeight;
+		float bCornerY = camera->m_viewportBottomCornerY * viewportHeight;	
 
 		float tCornerX = camera->m_viewportTopCornerX * viewportWidth;
 		float tCornerY = camera->m_viewportTopCornerY * viewportHeight;
 
 		glViewport(bCornerX, bCornerY, tCornerX - bCornerX, tCornerY - bCornerY);
 
-		Graphics::GetInstance()->Clear(camera);
+		Graphics::GetInstance()->Clear(camera, bCornerX, bCornerY, tCornerX - bCornerX, tCornerY - bCornerY);
 		if (camera->m_enableMultiSampling)
 			glEnable(GL_MULTISAMPLE);
 		else
 			glDisable(GL_MULTISAMPLE);
 
-
-		
-		
 		for (auto rendererIt = m_opaqueMeshRenderers.begin(); rendererIt != m_opaqueMeshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
 			meshRenderer->Draw(camera, m_lights, window);
 		}
-		
+
 		OrdoredTransparenceMeshRenderer(camera);
 		for (auto rendererIt = m_transparentMeshRenderers.begin(); rendererIt != m_transparentMeshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
 			meshRenderer->Draw(camera, m_lights, window);
 		}
-		
+
+		PostProcessComponent* postProcessComponent = camera->GetOwnEntity()->GetComponent<PostProcessComponent>();
+		if(postProcessComponent)
+			postProcessComponent->Display(window, camera, renderTexture);
+
 		if (renderTexture)
 		{
 			renderTexture->SwapBuffer();
@@ -486,41 +536,6 @@ void World::Display(Window* window)
 		if (cameraRT != renderTexture)
 		{
 			camera->SetRenderTexture(cameraRT);
-		}
-	}
-
-	
-
-
-	if (Graphics::GetInstance()->GetAntiAliasingType() == Graphics::AntiAliasingType::SSAA)
-	{
-		EntityGroupAsset* entityGroupAsset = AssetsManager::GetAsset<EntityGroupAsset>("SSAAEntityGroup");
-		Entity* entity = entityGroupAsset->GetEntityAt(0);
-
-		MeshRendererComponent* renderer = entity->GetComponent<MeshRendererComponent>();
-		renderer->Draw(nullptr, std::set<LightComponent*>(), window);	
-	}
-	else if(Graphics::GetInstance()->GetAntiAliasingType() == Graphics::AntiAliasingType::MSAA_RT)
-	{
-		RenderTexture2D* temp = AssetsManager::GetAsset<RenderTexture2D>("MSAA RenderTexture Temp");
-		
-
-		bool blitToScreen = true;
-
-		if(blitToScreen)
-			RenderTexture2D::Blit(temp, nullptr, 0, 0, temp->GetWidth(), temp->GetHeight(), 0, 0, window->GetWidth(), window->GetHeight(), BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
-		else
-		{
-			RenderTexture2D* target = AssetsManager::GetAsset<RenderTexture2D>("MSAA RenderTexture Target");
-			target->Resize(window->GetWidth(), window->GetHeight());
-
-			RenderTexture2D::Blit(temp, target, 0, 0, temp->GetWidth(), temp->GetHeight(), 0, 0, target->GetWidth(), target->GetHeight(), BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
-
-			EntityGroupAsset* entityGroupAsset = AssetsManager::GetAsset<EntityGroupAsset>("MSAAEntityGroup");
-			Entity* entity = entityGroupAsset->GetEntityAt(0);
-
-			MeshRendererComponent* renderer = entity->GetComponent<MeshRendererComponent>();
-			renderer->Draw(nullptr, std::set<LightComponent*>(), window);
 		}
 	}
 }
@@ -624,7 +639,7 @@ void World::UnRegisterComponent(Component* component)
 			if (it != m_opaqueMeshRenderers.end()) {
 				m_opaqueMeshRenderers.erase(it);
 			}
-		}		
+		}
 	}
 
 	LightComponent* l = dynamic_cast<LightComponent*>(component);
@@ -665,9 +680,9 @@ void World::OrdoredOpaqueMeshRenderer()
 		[](MeshRendererComponent* a, MeshRendererComponent* b) {
 			int geometryRenderingPriorityA = a->GetGeometryRenderingPriority();
 			int geometryRenderingPriorityB = b->GetGeometryRenderingPriority();
-			
+
 			return a->GetGeometryRenderingPriority() < b->GetGeometryRenderingPriority();
-				
+
 		});
 
 	m_isOpaqueMeshRendererOrdered = true;

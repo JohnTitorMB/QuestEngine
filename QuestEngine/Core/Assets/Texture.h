@@ -335,7 +335,7 @@ public:
 	void Unbind(int textureIndex, int layer = 0);
 
 	void SetWrapHorizontalParameter(Wrap wrapHorizontalParameter, int layer = 0);
-	void SetVerticalParameter(Wrap wrapVerticalParameter, int layer = 0);
+	void SetWrapVerticalParameter(Wrap wrapVerticalParameter, int layer = 0);
 	void SetDepthParameter(Wrap wrapVerticalParameter, int layer = 0);
 	void GenerateMipmap(int layer = 0);
 	void GenerateAllMipmap(bool forceGeneration = true);

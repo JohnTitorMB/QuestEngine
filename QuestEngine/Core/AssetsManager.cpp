@@ -91,7 +91,12 @@ RenderTexture2D* AssetsManager::CreateRenderTexture2D(const std::string& assetNa
 {
 	AssetsManager* assetsManager = AssetsManager::Instance();
 	RenderTexture2D* renderTexture = new RenderTexture2D(width, height);
-	assetsManager->m_assetsNameMap.emplace(assetName, renderTexture);
+	
+	std::string newAssetName = assetName;
+	if (assetsManager->m_assetsNameMap.find(assetName) != assetsManager->m_assetsNameMap.end())
+		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
+
+	assetsManager->m_assetsNameMap.emplace(newAssetName, renderTexture);
 	assetsManager->m_assets.insert(renderTexture);
 	return renderTexture;
 }
