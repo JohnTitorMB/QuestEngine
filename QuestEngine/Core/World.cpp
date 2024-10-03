@@ -72,7 +72,8 @@ void World::InitAssets()
 
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White", "Assets/WhiteTexture.png");
-	Texture* cubeMap = AssetsManager::CreateCubeMap("CubeMapTexture", "Assets/CubeMap.jpg");
+	Texture* skyboxTexture = AssetsManager::CreateCubeMap("SkyboxTexture", "Assets/Skybox.png");
+	Texture* skybox2Texture = AssetsManager::CreateCubeMap("SkyboxTexture2", "Assets/Skybox2.jpg");
 	Texture* simpleTexture = AssetsManager::CreateTexture2D("SimpleTexture", "Assets/Texture.png");
 	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture", "Assets/Box/BoxDiffuse.png");
 	Texture* boxAlphaTexture = AssetsManager::CreateTexture2D("BoxAlphaTexture", "Assets/Box/BoxAlpha.png");
@@ -126,8 +127,8 @@ void World::InitAssets()
 	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture, Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), 32.0f);
 
 	// CubeMap Material
-	Material* cubeMapMaterial = AssetsManager::CreateMaterial("CubeMapMaterial");
-	cubeMapMaterial->SetTexture("cubemap", cubeMap);
+	Material* skyboxMaterial = AssetsManager::CreateMaterial("SkyboxMaterial");
+	skyboxMaterial->SetTexture("cubemap", skyboxTexture);
 
 	//SkyDome Material
 	Material* skyDomeMaterial = AssetsManager::CreateMaterial("SkydomeMaterial");
@@ -139,6 +140,9 @@ void World::InitAssets()
 	skyDomeMaterial->SetFloat("exposure", 8);
 	skyDomeMaterial->SetFloat("sunSize", 2.0f * Mathf::DegToRad);
 	skyDomeMaterial->SetFloat("sunSmoothThreshold", 0.2f * Mathf::DegToRad);
+
+
+
 
 	//SSAA Material
 	Material* SSAAMaterial = AssetsManager::CreateMaterial("SSAAMaterial");
@@ -167,7 +171,7 @@ void World::InitAssets()
 	OBJLibrary::OBJLoader::LoadOBJ("Bowl", "Assets/Bowl/Glass bowl.obj");
 	OBJLibrary::OBJLoader::LoadOBJ("Camera", "Assets/Camera/camera.obj");
 	OBJLibrary::OBJLoader::LoadOBJ("Wall", "Assets/Wall/wall.obj");
-	//OBJLibrary::OBJLoader::LoadOBJ("Rungholt", "Assets/OBJ/35.Rungholt/rungholt.obj");
+	OBJLibrary::OBJLoader::LoadOBJ("Rungholt", "Assets/OBJ/35.Rungholt/rungholt.obj");
 
 	EntityGroupAsset* entityGroupAsset = OBJLibrary::OBJLoader::LoadOBJ("Desk", "Assets/Desk/desk.obj");
 	Entity* screenEntity = entityGroupAsset->GetEntityAt(4); // Get the screen entity of desk
@@ -253,9 +257,9 @@ void World::InitWorld()
 	InitAssets();
 
 	LightingSettings::m_globalAmbiantColor = Color(0.2f, 0.2f, 0.2f, 1);
-	Scene& objLoaderScene = SceneManager::Instance()->CreateScene();
+	Scene& scene = SceneManager::Instance()->CreateScene();
 	
-	Entity* cameraEntity = objLoaderScene.CreateEntity<Entity>();
+	Entity* cameraEntity = scene.CreateEntity<Entity>();
 	{
 		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
 		cameraEntity->SetRootComponent(cameraComponent);
@@ -265,19 +269,22 @@ void World::InitWorld()
 		cameraComponent->SetFov(60);
 		cameraComponent->SetWorldPosition(Vector3D(0, 1, -10));
 		cameraComponent->SetRenderingPriority(1);
-		cameraComponent->m_viewportTopCornerX = 0.5;
+		cameraComponent->m_enableMultiSampling = true;
+	//	cameraComponent->m_viewportTopCornerX = 0.5;
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 
 		cameraController->m_scrollMove = 0;
 
 		PostProcessComponent* postProcessComponent = cameraEntity->AddComponent<PostProcessComponent>(true);
 		std::shared_ptr<GaussianBlurEffect> gaussianBlurEffect = std::make_shared<GaussianBlurEffect>();
-		gaussianBlurEffect->m_data.radius = 25;
-		postProcessComponent->AddEffect(std::make_shared<TintEffect>());
-		postProcessComponent->AddEffect(gaussianBlurEffect);
+		gaussianBlurEffect->m_data.radius = 10;
+//		postProcessComponent->AddEffect(std::make_shared<TintEffect>());
+	//	postProcessComponent->AddEffect(gaussianBlurEffect);
 	}
-	
-	Entity* cameraEntity3 = objLoaderScene.CreateEntity<Entity>();
+	Graphics::GetInstance()->SetAntiAliasingType(Graphics::AntiAliasingType::MSAA);
+	Graphics::GetInstance()->SetMSAASample(32);
+
+/*	Entity* cameraEntity3 = objLoaderScene.CreateEntity<Entity>();
 	{
 		CameraComponent* cameraComponent = cameraEntity3->AddComponent<CameraComponent>(true);
 		cameraEntity3->SetRootComponent(cameraComponent);
@@ -297,10 +304,10 @@ void World::InitWorld()
 		std::shared_ptr<GaussianBlurEffect> gaussianBlurEffect = std::make_shared<GaussianBlurEffect>();
 		gaussianBlurEffect->m_data.radius = 25;
 		postProcessComponent->AddEffect(gaussianBlurEffect);
-	}
+	}*/
 	
 	CameraComponent* cameraComponent2 = nullptr;
-	Entity* cameraEntity2 = objLoaderScene.CreateEntity<Entity>();
+	Entity* cameraEntity2 = scene.CreateEntity<Entity>();
 	{
 		cameraComponent2 = cameraEntity2->AddComponent<CameraComponent>(true);
 		cameraComponent2->SetNear(0.01f);
@@ -314,12 +321,13 @@ void World::InitWorld()
 		PostProcessComponent* postProcessComponent = cameraEntity2->AddComponent<PostProcessComponent>(true);
 		std::shared_ptr<GaussianBlurEffect> gaussianBlurEffect = std::make_shared<GaussianBlurEffect>();
 		gaussianBlurEffect->m_data.radius = 50;
-		postProcessComponent->AddEffect(gaussianBlurEffect);
+		
+	//	postProcessComponent->AddEffect(gaussianBlurEffect);
 	}
 	
 	//Initialise Directional Light entity
 	DirectionalLightComponent* dLightComponent = nullptr;
-	Entity* lightEntity = objLoaderScene.CreateEntity<Entity>();
+	Entity* lightEntity = scene.CreateEntity<Entity>();
 	{
 		dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
 		dLightComponent->m_ambiantColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
@@ -333,11 +341,25 @@ void World::InitWorld()
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 	}
 
+
+	Entity* skyboxEntity = scene.CreateEntity<Entity>();
+	{
+		MeshRendererComponent* meshRendererComponent = skyboxEntity->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("SkyboxShader"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("SkyboxMaterial"));
+		meshRendererComponent->EnableCullFace(false);
+		meshRendererComponent->m_useViewMatrixWithoutTranslation = true;
+		meshRendererComponent->SetDepthTestFunc(DepthTestFunc::Lequal);
+		meshRendererComponent->SetGeometryRenderingPriority(10000);
+	}
+
+
 	EntityGroupAsset* entityAssets = AssetsManager::GetAsset<EntityGroupAsset>("Stair");
-	objLoaderScene.CloneGroupEntityToScene(entityAssets);
+	scene.CloneGroupEntityToScene(entityAssets);
 
 	Entity* firstEntity = nullptr;
-	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Table"), firstEntity);
+	scene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Table"), firstEntity);
 
 	if (firstEntity)
 	{
@@ -349,7 +371,7 @@ void World::InitWorld()
 		}
 	}
 
-	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Bowl"), firstEntity);
+	scene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Bowl"), firstEntity);
 
 	if (firstEntity)
 	{
@@ -361,7 +383,7 @@ void World::InitWorld()
 		}
 	}
 
-	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Desk"), firstEntity);
+	scene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Desk"), firstEntity);
 	if (firstEntity)
 	{
 		SceneComponent* sceneComponent = firstEntity->GetComponent<SceneComponent>();
@@ -376,7 +398,7 @@ void World::InitWorld()
 
 
 
-	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Camera"), firstEntity);
+	scene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Camera"), firstEntity);
 
 	if (firstEntity)
 	{
@@ -389,7 +411,7 @@ void World::InitWorld()
 	}
 
 
-	objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Wall"), firstEntity);
+	scene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Wall"), firstEntity);
 
 	if (firstEntity)
 	{
@@ -401,9 +423,9 @@ void World::InitWorld()
 			sceneComponent->SetWorldScale(Vector3D(1.0f, 1.0f, 1.0f));
 		}
 	}
+	
 
-
-	//objLoaderScene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Rungholt"));
+	//scene.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Rungholt"));
 
 	SceneManager::Instance()->LoadScene(0);
 }
