@@ -180,6 +180,8 @@
     <ClCompile Include="Game\AntiAliasingTestComponent.cpp" />
     <ClCompile Include="Core\Graphics.cpp" />
     <ClCompile Include="Library\stb_image_write.cpp" />
+    <ClCompile Include="Core\Components\PostProcessing.cpp" />
+    <ClCompile Include="Core\PostProcessing\TintEffect.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -244,6 +246,8 @@
     <ClInclude Include="Game\AntiAliasingTestComponent.h" />
     <ClInclude Include="Core\Graphics.h" />
     <ClInclude Include="Library\stb_image_write.h" />
+    <ClInclude Include="Core\Components\PostProcessing.h" />
+    <ClInclude Include="Core\PostProcessing\TintEffect.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />

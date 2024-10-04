@@ -17,6 +17,7 @@ void QuestEngine::Init()
 {
 	m_window = new Window(1280, 720, new char[] {"Opengl Window"});
 
+	Graphics::GetInstance()->RefreshMSAASampleEvent.AddListener(this, &QuestEngine::RefreshMSAASample);
 
 	//Init World
 	World* world = World::Instance();
@@ -33,7 +34,6 @@ void QuestEngine::Init()
 
 	glDisable(GL_MULTISAMPLE);
 
-	Graphics::GetInstance()->RefreshMSAASampleEvent.AddListener(this, &QuestEngine::RefreshMSAASample);
 
 }
 

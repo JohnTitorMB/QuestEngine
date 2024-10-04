@@ -37,8 +37,10 @@ Graphics::AntiAliasingType Graphics::GetAntiAliasingType()
 	return m_antiAliasingType;
 }
 
-void Graphics::Clear(CameraComponent* camera)
+void Graphics::Clear(CameraComponent* camera, int x, int y, int width, int height)
 {
+	glEnable(GL_SCISSOR_TEST);
+	glScissor(x, y, width, height);
 	glStencilMask(camera->m_clearStencilMask);
 	glDepthMask(camera->m_isClearDepthMaskEnable);
 	glClearColor(camera->m_clearColor.m_r, camera->m_clearColor.m_g, camera->m_clearColor.m_b, camera->m_clearColor.m_a);
@@ -46,6 +48,7 @@ void Graphics::Clear(CameraComponent* camera)
 	glClearStencil(camera->m_clearStencilValue);
 	glColorMask(camera->m_isClearRedMaskEnable, camera->m_isClearGreenMaskEnable, camera->m_isClearBlueMaskEnable, camera->m_isClearAlphaMaskEnable);
 	glClear(camera->m_clearBufferMask);
+	glDisable(GL_SCISSOR_TEST);
 }
 
 void Graphics::BindMainFrameBuffer()
@@ -221,4 +224,20 @@ void Graphics::BindVAO(unsigned int sharedID)
 	glBindVertexArray(GetVAO(sharedID));
 }
 
+void Graphics::RenderImage(Window* window, RenderTexture2D* renderTextureTarget, Shader* shader, Material* material)
+{
+	if (renderTextureTarget == nullptr)
+	{
+		BindMainFrameBuffer();
+	}
+	else
+		renderTextureTarget->BindFramebuffer();
 
+	EntityGroupAsset* postProcessEG = AssetsManager::GetAsset<EntityGroupAsset>("PostProcessEntityGroup");
+	Entity* entity = postProcessEG->GetEntityAt(0);
+
+	MeshRendererComponent* renderer = entity->GetComponent<MeshRendererComponent>();
+	renderer->SetShader(shader);
+	renderer->SetMaterial(material);
+	renderer->Draw(nullptr, std::set<LightComponent*>(), window);
+}
