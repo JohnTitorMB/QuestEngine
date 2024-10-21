@@ -2,7 +2,7 @@
 
 void TintEffect::Init()
 {
-	m_shader = AssetsManager::CreateShader("TintShader", "Assets/ScreenShader.vert", "Assets/TintShader.frag");
+	m_shader = AssetsManager::GetAsset<Shader>("TintShader");
 	m_material = AssetsManager::CreateMaterial("TintMaterial");
 	m_material->SetColor("tintColor", m_color);
 }

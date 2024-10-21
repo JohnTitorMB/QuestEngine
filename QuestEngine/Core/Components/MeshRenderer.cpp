@@ -20,6 +20,7 @@ void MeshRendererComponent::SendMaterialToShader()const
 	const std::unordered_map<std::string, Vector4D> vector4DKeyValue = m_material->GetVector4DMap();
 	const std::unordered_map<std::string, Texture*> textureKeyValue = m_material->GetTextureMap();
 	std::unordered_map<std::string, int> textureSubLayerKeyValue = m_material->GetTextureSubLayerMap();
+	const std::unordered_map<std::string, std::vector<float>> floatArrayKeyValue = m_material->GetFloatArrayMap();
 
 	for (auto pair : integerKeyValue)
 		m_shader->SetUniformInt(pair.first, pair.second);
@@ -35,6 +36,9 @@ void MeshRendererComponent::SendMaterialToShader()const
 
 	for (auto pair : vector4DKeyValue)
 		m_shader->SetUniformVector4D(pair.first, pair.second);
+
+	for (auto pair : floatArrayKeyValue)
+		m_shader->SetUniformFloatArray(pair.first, pair.second);
 
 	int textureIndex = 0;
 	for (auto pair : textureKeyValue)

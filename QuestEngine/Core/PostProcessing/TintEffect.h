@@ -18,7 +18,6 @@ public:
 	Color m_color = Color(1, 0, 0, 1);
 	void Init() override;
 	void DisplayEffect(Window* window, RenderTexture2D* renderTextureSource, RenderTexture2D* renderTextureTarget, CameraComponent* cameraComponent) override;
-
 };
 
 #endif

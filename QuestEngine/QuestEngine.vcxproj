@@ -179,6 +179,7 @@
     <ClCompile Include="Core\Assets\RenderTexture2D.cpp" />
     <ClCompile Include="Game\AntiAliasingTestComponent.cpp" />
     <ClCompile Include="Core\Graphics.cpp" />
+    <ClCompile Include="Core\PostProcessing\GaussianBlur.cpp" />
     <ClCompile Include="Library\stb_image_write.cpp" />
     <ClCompile Include="Core\Components\PostProcessing.cpp" />
     <ClCompile Include="Core\PostProcessing\TintEffect.cpp" />
@@ -245,6 +246,7 @@
     <ClInclude Include="Core\Assets\RenderTexture2D.h" />
     <ClInclude Include="Game\AntiAliasingTestComponent.h" />
     <ClInclude Include="Core\Graphics.h" />
+    <ClInclude Include="Core\PostProcessing\GaussianBlur.h" />
     <ClInclude Include="Library\stb_image_write.h" />
     <ClInclude Include="Core\Components\PostProcessing.h" />
     <ClInclude Include="Core\PostProcessing\TintEffect.h" />

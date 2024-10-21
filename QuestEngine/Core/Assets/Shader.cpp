@@ -139,6 +139,12 @@ void Shader::SetUniformInt(std::string name, int value)
 	glUniform1i(location, value);
 }
 
+void Shader::SetUniformFloatArray(std::string name, std::vector<float> value)
+{
+	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
+	glUniform1fv(location, value.size(), value.data());
+}
+
 void Shader::SetUniformMatrix3x3(std::string name, Matrix3x3 value)
 {
 	int location = glGetUniformLocation(m_shaderProgram, name.c_str());

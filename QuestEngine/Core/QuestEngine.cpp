@@ -15,7 +15,7 @@ QuestEngine::~QuestEngine()
 
 void QuestEngine::Init()
 {
-	m_window = new Window(1280, 720, new char[] {"Opengl Window"});
+	m_window = new Window(1920, 1080, new char[] {"Opengl Window"});
 
 	Graphics::GetInstance()->RefreshMSAASampleEvent.AddListener(this, &QuestEngine::RefreshMSAASample);
 
@@ -29,7 +29,7 @@ void QuestEngine::Init()
 	float cameraAngle = 0.0f;
 	float stepLight = 1.0f;
 
-	bool vsync = true;
+	bool vsync = false;
 	m_window->SetVsync(vsync);
 
 	glDisable(GL_MULTISAMPLE);

@@ -4,30 +4,13 @@
 #include "../Color.h"
 #include "Assets.h"
 #include <unordered_map>
+#include <vector>
 #include "../../Math/Vector2D.h"
 #include "../../Math/Vector3D.h"
 #include "../../Math/Vector4D.h"
 #include "Texture.h"
 #include "../Color.h"
 
-/*
-class Material : public Assets
-{
-public:
-	Material();
-	Material(Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess = 32);
-
-	Color m_ambientColor;
-	Color m_diffuseColor;
-	Color m_specularColor;
-
-	Texture* m_ambientTexture;
-	Texture* m_diffuseTexture;
-	Texture* m_specularTexture;
-	float m_shininess = 32;
-	std::string name = "";
-};
-*/
 class Material : public Assets
 {
 	std::unordered_map<std::string, int> m_integerKeyValue;
@@ -37,6 +20,7 @@ class Material : public Assets
 	std::unordered_map<std::string, Vector4D> m_vector4DKeyValue;
 	std::unordered_map<std::string, Texture*> m_textureKeyValue;
 	std::unordered_map<std::string,int> m_textureLayerKeyValue;
+	std::unordered_map<std::string, std::vector<float>> m_floatArrayKeyValue;
 
 public:
 	Material();
@@ -49,6 +33,7 @@ public:
 	const std::unordered_map<std::string, Vector4D>& GetVector4DMap();
 	const std::unordered_map<std::string, Texture*>& GetTextureMap();
 	const std::unordered_map<std::string, int>& GetTextureSubLayerMap();
+	const std::unordered_map<std::string, std::vector<float>>& GetFloatArrayMap();
 
 	void SetInt(std::string key, int value);
 	void SetFloat(std::string key, float value);
@@ -58,6 +43,8 @@ public:
 	void SetColor(std::string key, Color value);
 	void SetTexture(std::string key, Texture* value, int subLayerIndex = 0);
 
+	void SetFloatArray(std::string key, std::vector<float> floatArray);
+
 	int GetInt(const std::string& key)const;
 	float GetFloat(const std::string& key)const;
 	Vector2D GetVector2D(const std::string& key)const;
@@ -66,6 +53,8 @@ public:
 	Color GetColor(const std::string& key)const;
 	Texture* GetTexture(const std::string& key)const;
 	int GetTextureSubLayer(const std::string& key) const;
+	std::vector<float> GetFloatArray(const std::string& key)const;
+
 };
 
 #endif

@@ -24,6 +24,7 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "Graphics.h"
 #include "Components/PostProcessing.h"
 #include "PostProcessing/TintEffect.h"
+#include "PostProcessing/GaussianBlur.h"
 
 World::World()
 {
@@ -59,6 +60,11 @@ void World::InitAssets()
 
 	//Shader for display the renderTexture on the screen
 	Shader* renderShader = AssetsManager::CreateShader("RenderShader", "Assets/BlinnPhongShader.vert", "Assets/RenderShader.frag");
+
+
+	//PostProcessShader
+	Shader* tintShader = AssetsManager::CreateShader("TintShader", "Assets/ScreenShader.vert", "Assets/TintShader.frag");
+	Shader* gaussianBlurShader = AssetsManager::CreateShader("GaussianBlurShader", "Assets/ScreenShader.vert", "Assets/GaussianBlurShader.frag");
 
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
@@ -126,8 +132,8 @@ void World::InitWorld()
 {
 	InitAssets();
 
-	Graphics::GetInstance()->SetAntiAliasingType(Graphics::AntiAliasingType::MSAA);
-	Graphics::GetInstance()->SetMSAASample(32);
+//	Graphics::GetInstance()->SetAntiAliasingType(Graphics::AntiAliasingType::MSAA);
+//	Graphics::GetInstance()->SetMSAASample(32);
 
 	LightingSettings::m_globalAmbiantColor = Color(0.2f,0.2f,0.2f,1);
 	Scene& scene1 = SceneManager::Instance()->CreateScene();
@@ -144,13 +150,12 @@ void World::InitWorld()
 		cameraComponent->m_enableMultiSampling = true;
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 		cameraController->m_scrollMove = 10;
-
+		cameraController->movementSpeed = 0.5f;
 		PostProcessing* postProcessing = cameraEntity->AddComponent<PostProcessing>(true);
-		std::shared_ptr<TintEffect> tintEffect = std::make_shared<TintEffect>();
-		tintEffect->m_color = Color(0, 0, 1, 1);
-		postProcessing->AddEffect(tintEffect);
+		std::shared_ptr<GaussianBlur> gaussianBlurEffect = std::make_shared<GaussianBlur>();
+		gaussianBlurEffect->SetRadius(15);
+		postProcessing->AddEffect(gaussianBlurEffect);
 	}
-
 
 	CameraComponent* cameraComponent2 = nullptr;
 	Entity* cameraEntity2 = scene1.CreateEntity<Entity>();

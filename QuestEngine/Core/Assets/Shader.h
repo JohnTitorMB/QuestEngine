@@ -2,11 +2,13 @@
 #define _SHADER_H_
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include "../../Math/Vector2D.h"
 #include "../../Math/Matrix3x3.h"
 #include "../../Math/Matrix4x4.h"
 #include "../Color.h"
 #include <string>
+#include <vector>
 #include "Assets.h"
 
 class Shader : public Assets
@@ -23,6 +25,9 @@ public :
 	void SetUniformMatrix4x4(std::string name, Matrix4x4 value);
 	void SetUniformColor(std::string name, Color value);
 	void SetUniformInt(std::string name, int value);
+
+	void SetUniformFloatArray(std::string name, std::vector<float> value);
+
 
 private:
 	int m_shaderProgram;

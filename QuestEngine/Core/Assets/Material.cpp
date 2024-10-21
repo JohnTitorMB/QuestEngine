@@ -43,6 +43,11 @@ const std::unordered_map<std::string, int>& Material::GetTextureSubLayerMap()
     return m_textureLayerKeyValue;
 }
 
+const std::unordered_map<std::string, std::vector<float>>& Material::GetFloatArrayMap()
+{
+    return m_floatArrayKeyValue;
+}
+
 void Material::SetInt(std::string key, int value)
 {
 	m_integerKeyValue[key] = value;
@@ -77,6 +82,11 @@ void Material::SetTexture(std::string key, Texture* value, int subLayerIndex)
 {
 	m_textureKeyValue[key] = value;
     m_textureLayerKeyValue[key] = subLayerIndex;
+}
+
+void Material::SetFloatArray(std::string key, std::vector<float> floatArray)
+{
+    m_floatArrayKeyValue[key] = floatArray;
 }
 
 int Material::GetInt(const std::string& key) const {
@@ -143,14 +153,11 @@ int Material::GetTextureSubLayer(const std::string& key) const {
     return 0;
 }
 
-/*
-Material::Material(Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess)
+std::vector<float> Material::GetFloatArray(const std::string& key) const
 {
-	m_ambientColor = ambientColor;
-	m_diffuseColor = diffuseColor;
-	m_specularColor = specularColor;
-	m_ambientTexture = ambientTexture;
-	m_diffuseTexture = diffuseTexture;
-	m_specularTexture = specularTexture;
-	m_shininess = shininess;
-}*/
+    auto it = m_floatArrayKeyValue.find(key);
+    if (it != m_floatArrayKeyValue.end()) {
+        return it->second;
+    }
+    return std::vector<float>();
+}
