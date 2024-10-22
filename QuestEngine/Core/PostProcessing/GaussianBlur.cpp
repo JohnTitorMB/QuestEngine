@@ -23,8 +23,21 @@ void GaussianBlur::DisplayEffect(Window* window, RenderTexture2D* rtSource, Rend
 	rtSource->SetWrapHorizontalParameter(Wrap::MirrorRepeat);
 	rtSource->SetWrapVerticalParameter(Wrap::MirrorRepeat);
 
+	rtSource->SetMagnification(MagnificationFilter::Bilinear); //GL_LINEAR
+	rtSource->SetMinification(MinificationFilter::Bilinear); //GL_LINEAR
+
+
 	m_material->SetTexture("texture2D", rtSource);
-	m_material->SetVector2D("pixelSpacement", Vector2D(1.0f / rtWidth, 1.0f / rtHeight));
+	
+	//Horizontal Pass
+	m_material->SetVector2D("pixelSpacement", Vector2D(1.0f / rtWidth, 0));
+	Graphics::GetInstance()->RenderImage(window, rtTarget, m_shader, m_material);
+
+	//Copy target Framebuffer to postProcess Framebuffer (rtSource)
+	Blit(window, rtTarget, rtSource, camera);
+
+	//Vertical Pass
+	m_material->SetVector2D("pixelSpacement", Vector2D(0, 1.0f / rtHeight));
 	Graphics::GetInstance()->RenderImage(window, rtTarget, m_shader, m_material);
 
 	rtSource->SetWrapHorizontalParameter(hWrap);
@@ -40,21 +53,17 @@ void GaussianBlur::UpdateKernel()
 	m_material->SetFloatArray("kernel", kernel);
 	int radius = (int)m_radius;
 	m_material->SetInt("radius", radius);
-	m_material->SetInt("kernelWidth", radius * 2 + 1);
 }
 
 std::vector<float> GaussianBlur::ComputeKernal(int radius, float sigma)
 {
 	std::vector<float> kernel;
 	float sum = 0.0f;
-	for (int j = -radius; j <= radius; j++)
+	for (int i = -radius; i <= radius; i++)
 	{
-		for (int i = -radius; i <= radius; i++)
-		{
-			float value = Gauss(i, j, sigma);
-			kernel.push_back(value);
-			sum += value;
-		}
+		float value = Gauss(i, sigma);
+		kernel.push_back(value);
+		sum += value;
 	}
 
 	float factor = 1.0f / sum;
@@ -64,10 +73,10 @@ std::vector<float> GaussianBlur::ComputeKernal(int radius, float sigma)
 	return kernel;
 }
 
-float GaussianBlur::Gauss(float x, float y, float sigma)
+float GaussianBlur::Gauss(float x, float sigma)
 {
 	float sigmaSQ = sigma * sigma;
-	return expf(-(x * x + y * y) / (2.0f * sigmaSQ)) / (2.0f * Mathf::PI * sigmaSQ);
+	return expf(-(x * x) / (2.0f * sigmaSQ)) / (sqrtf(2.0f * Mathf::PI) * sigma);
 }
 
 float GaussianBlur::GetRadius()

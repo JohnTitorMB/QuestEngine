@@ -4,24 +4,24 @@ uniform sampler2D texture2D;
 in vec2 uv;
 uniform vec2 pixelSpacement;
 
-#define KERNEL_MAX_SIZE 961
+#define KERNEL_MAX_SIZE 1021
 uniform int radius;
-uniform int kernelWidth;
 uniform float kernel[KERNEL_MAX_SIZE];
 
 out vec4 fragColor;
 
 void main()
 {
-	vec4 color = vec4(0,0,0,0); 
+	vec4 color = texture(texture2D, uv -radius * pixelSpacement) * kernel[0]; 
 
-	for(int j = -radius; j <= radius; j++)
+	for(int i = -radius + 1; i <= radius; i += 2)
 	{
-		for(int i = -radius; i <= radius; i++)
-		{
-			int kernelIndex = (j+radius) * kernelWidth + i+radius;
-			color += texture(texture2D, uv + vec2(i, j) * pixelSpacement) * kernel[kernelIndex];	
-		}
+		int kernelIndex = radius + i;
+		float w0 = kernel[kernelIndex];
+		float w1 = kernel[kernelIndex+1];
+		float wSum = w0 + w1;
+		float t = w1 / wSum;
+		color += texture(texture2D, uv + (i+t) * pixelSpacement) * wSum;	
 	}
 
 	fragColor = color;

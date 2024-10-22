@@ -31,7 +31,7 @@ private:
 	
 	int m_glMajorVersion = 3;
 	int m_glMinorVersion = 2;
-	int m_msaaSample = 0;
+	int m_msaaSample = 16;
 	int m_width = 1280;
 	int m_height = 720;
 	char* m_title;

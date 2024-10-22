@@ -7,6 +7,14 @@
 #include "SceneComponent.h"
 #include "../Assets/RenderTexture2D.h"
 #include "../Color.h"
+struct ViewportRect
+{
+	int leftBottom;
+	int rightBottom;
+	int leftTop;
+	int rightTop;
+};
+
 class CameraComponent : public SceneComponent
 {
 public :

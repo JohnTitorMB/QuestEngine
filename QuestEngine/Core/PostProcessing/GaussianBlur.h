@@ -15,7 +15,7 @@ class GaussianBlur : public Effect
 	float m_radius = 1.0f;
 	bool autoSigma = true;
 	float m_sigma = 1.0f / 3.0f;
-	const float MaxRadius = 15;
+	const float MaxRadius = 1021;
 	
 	bool updateKernel = false;
 	float m_sigmaFactor = 1.0f/3.0f;
@@ -26,7 +26,7 @@ public:
 	void DisplayEffect(Window* window, RenderTexture2D* renderTextureSource, RenderTexture2D* renderTextureTarget, CameraComponent* cameraComponent) override;
 
 	std::vector<float> ComputeKernal(int radius, float sigma);
-	float Gauss(float x, float y, float sigma);
+	float Gauss(float x, float sigma);
 
 	float GetRadius();
 	void SetRadius(float radius);

@@ -34,8 +34,8 @@ public:
 	};
 
 private:
-	AntiAliasingType m_antiAliasingType;
-	int m_MSAASample = 4;
+	AntiAliasingType m_antiAliasingType = AntiAliasingType::MSAA;
+	int m_MSAASample = 32;
 	int m_SSAAMultiplier = 1;
 
 	static Graphics* instance;

@@ -132,9 +132,6 @@ void World::InitWorld()
 {
 	InitAssets();
 
-//	Graphics::GetInstance()->SetAntiAliasingType(Graphics::AntiAliasingType::MSAA);
-//	Graphics::GetInstance()->SetMSAASample(32);
-
 	LightingSettings::m_globalAmbiantColor = Color(0.2f,0.2f,0.2f,1);
 	Scene& scene1 = SceneManager::Instance()->CreateScene();
 	Entity* cameraEntity = scene1.CreateEntity<Entity>();

@@ -92,3 +92,19 @@ void PostProcessing::AddEffect(std::shared_ptr<Effect> effect)
 	effect->Init();
 	m_effects.push_back(effect);
 }
+
+void Effect::Blit(Window* window, RenderTexture2D* rtFrom, RenderTexture2D* rtTo, CameraComponent* camera)
+{
+	int viewportWidth = rtFrom ? rtFrom->GetWidth() : window->GetWidth();
+	int viewportHeight = rtFrom ? rtFrom->GetHeight() : window->GetHeight();
+
+	float bCornerX = camera->m_viewportBottomCornerX * viewportWidth;
+	float bCornerY = camera->m_viewportBottomCornerY * viewportHeight;
+
+	float tCornerX = camera->m_viewportTopCornerX * viewportWidth;
+	float tCornerY = camera->m_viewportTopCornerY * viewportHeight;
+
+	RenderTexture2D::Blit(rtFrom, rtTo, bCornerX, bCornerY, tCornerX, tCornerY,
+		0, 0, rtTo->GetWidth(), rtTo->GetHeight(),
+		BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
+}

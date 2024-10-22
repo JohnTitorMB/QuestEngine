@@ -11,8 +11,10 @@
 
 class Effect
 {
+protected:
+	void Blit(Window* window, RenderTexture2D* rtSource, RenderTexture2D* rtTarget, CameraComponent* camera);
 public:
-	virtual void DisplayEffect(Window* window, RenderTexture2D* renderTextureSource, RenderTexture2D* renderTextureTarget, CameraComponent* cameraComponent) = 0;
+	virtual void DisplayEffect(Window* window, RenderTexture2D* rtFrom, RenderTexture2D* rtTo, CameraComponent* camera) = 0;
 	virtual void Init() = 0;
 
 	bool m_enable = true;
