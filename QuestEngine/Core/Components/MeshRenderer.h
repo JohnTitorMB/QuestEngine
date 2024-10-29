@@ -1,6 +1,7 @@
 #ifndef _MESH_RENDERER_H_
 #define _MESH_RENDERER_H_
 #include "Camera.h"
+#include "../Events/Event.h"
 #include "Light.h"
 #include "../Window.h"
 #include "Transform.h"
@@ -168,13 +169,14 @@ private:
 
 public:
 
+	Event<Window*, CameraComponent*> OnRenderEvent;
 
 	bool m_useViewMatrixWithoutTranslation = false;
 	MeshRendererComponent() = default;
 	MeshRendererComponent& operator=(const MeshRendererComponent& other) = default;
 
 
-	void Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)const;
+	void Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window);
 	void SetDrawPartialMesh(bool drawPartialMesh);
 	void SetPartialMeshElementCount(int partialMeshElementCount);
 	void SetPartialMeshStartIndex(int partialMeshStartIndex);

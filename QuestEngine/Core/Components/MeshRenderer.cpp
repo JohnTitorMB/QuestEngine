@@ -57,8 +57,9 @@ void MeshRendererComponent::SendMaterialToShader()const
 	}
 }
 
-void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)const
+void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)
 {
+	OnRenderEvent.Trigger(window, camera);
 	Shader* shader = m_shader;
 
 	switch (World::m_renderingType)
