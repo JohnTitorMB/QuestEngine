@@ -70,7 +70,7 @@ enum class DataType
 
 
 // General enum class for all renderable internal formats
-enum class InternalRenderableFormat
+enum class InternalFormat
 {
     // Internal color-renderable formats
     R8 = GL_R8,
@@ -158,69 +158,69 @@ enum class InternalRenderableFormat
 // Enum class for Internal color-renderable formats
 enum class ColorRenderableFormat
 {
-    R8 = (int)InternalRenderableFormat::R8,
-    R8_SNORM = (int)InternalRenderableFormat::R8_SNORM,
-    R16 = (int)InternalRenderableFormat::R16,
-    R16_SNORM = (int)InternalRenderableFormat::R16_SNORM,
-    RG8 = (int)InternalRenderableFormat::RG8,
-    RG8_SNORM = (int)InternalRenderableFormat::RG8_SNORM,
-    RG16 = (int)InternalRenderableFormat::RG16,
-    RG16_SNORM = (int)InternalRenderableFormat::RG16_SNORM,
-    R3_G3_B2 = (int)InternalRenderableFormat::R3_G3_B2,
-    RGB4 = (int)InternalRenderableFormat::RGB4,
-    RGB5 = (int)InternalRenderableFormat::RGB5,
-    RGB565 = (int)InternalRenderableFormat::RGB565,
-    RGB8 = (int)InternalRenderableFormat::RGB8,
-    RGB8_SNORM = (int)InternalRenderableFormat::RGB8_SNORM,
-    RGB10 = (int)InternalRenderableFormat::RGB10,
-    RGB12 = (int)InternalRenderableFormat::RGB12,
-    RGB16 = (int)InternalRenderableFormat::RGB16,
-    RGB16_SNORM = (int)InternalRenderableFormat::RGB16_SNORM,
-    RGBA2 = (int)InternalRenderableFormat::RGBA2,
-    RGBA4 = (int)InternalRenderableFormat::RGBA4,
-    RGB5_A1 = (int)InternalRenderableFormat::RGB5_A1,
-    RGBA8 = (int)InternalRenderableFormat::RGBA8,
-    RGBA8_SNORM = (int)InternalRenderableFormat::RGBA8_SNORM,
-    RGB10_A2 = (int)InternalRenderableFormat::RGB10_A2,
-    RGB10_A2UI = (int)InternalRenderableFormat::RGB10_A2UI,
-    RGBA12 = (int)InternalRenderableFormat::RGBA12,
-    RGBA16 = (int)InternalRenderableFormat::RGBA16,
-    RGBA16_SNORM = (int)InternalRenderableFormat::RGBA16_SNORM,
-    SRGB8 = (int)InternalRenderableFormat::SRGB8,
-    SRGB8_ALPHA8 = (int)InternalRenderableFormat::SRGB8_ALPHA8,
-    R16F = (int)InternalRenderableFormat::R16F,
-    RG16F = (int)InternalRenderableFormat::RG16F,
-    RGB16F = (int)InternalRenderableFormat::RGB16F,
-    RGBA16F = (int)InternalRenderableFormat::RGBA16F,
-    R32F = (int)InternalRenderableFormat::R32F,
-    RG32F = (int)InternalRenderableFormat::RG32F,
-    RGB32F = (int)InternalRenderableFormat::RGB32F,
-    RGBA32F = (int)InternalRenderableFormat::RGBA32F,
-    R11F_G11F_B10F = (int)InternalRenderableFormat::R11F_G11F_B10F,
-    R8I = (int)InternalRenderableFormat::R8I,
-    R8UI = (int)InternalRenderableFormat::R8UI,
-    R16I = (int)InternalRenderableFormat::R16I,
-    R16UI = (int)InternalRenderableFormat::R16UI,
-    R32I = (int)InternalRenderableFormat::R32I,
-    R32UI = (int)InternalRenderableFormat::R32UI,
-    RG8I = (int)InternalRenderableFormat::RG8I,
-    RG8UI = (int)InternalRenderableFormat::RG8UI,
-    RG16I = (int)InternalRenderableFormat::RG16I,
-    RG16UI = (int)InternalRenderableFormat::RG16UI,
-    RG32I = (int)InternalRenderableFormat::RG32I,
-    RG32UI = (int)InternalRenderableFormat::RG32UI,
-    RGB8I = (int)InternalRenderableFormat::RGB8I,
-    RGB8UI = (int)InternalRenderableFormat::RGB8UI,
-    RGB16I = (int)InternalRenderableFormat::RGB16I,
-    RGB16UI = (int)InternalRenderableFormat::RGB16UI,
-    RGB32I = (int)InternalRenderableFormat::RGB32I,
-    RGB32UI = (int)InternalRenderableFormat::RGB32UI,
-    RGBA8I = (int)InternalRenderableFormat::RGBA8I,
-    RGBA8UI = (int)InternalRenderableFormat::RGBA8UI,
-    RGBA16I = (int)InternalRenderableFormat::RGBA16I,
-    RGBA16UI = (int)InternalRenderableFormat::RGBA16UI,
-    RGBA32I = (int)InternalRenderableFormat::RGBA32I,
-    RGBA32UI = (int)InternalRenderableFormat::RGBA32UI,
+    R8 = (int)InternalFormat::R8,
+    R8_SNORM = (int)InternalFormat::R8_SNORM,
+    R16 = (int)InternalFormat::R16,
+    R16_SNORM = (int)InternalFormat::R16_SNORM,
+    RG8 = (int)InternalFormat::RG8,
+    RG8_SNORM = (int)InternalFormat::RG8_SNORM,
+    RG16 = (int)InternalFormat::RG16,
+    RG16_SNORM = (int)InternalFormat::RG16_SNORM,
+    R3_G3_B2 = (int)InternalFormat::R3_G3_B2,
+    RGB4 = (int)InternalFormat::RGB4,
+    RGB5 = (int)InternalFormat::RGB5,
+    RGB565 = (int)InternalFormat::RGB565,
+    RGB8 = (int)InternalFormat::RGB8,
+    RGB8_SNORM = (int)InternalFormat::RGB8_SNORM,
+    RGB10 = (int)InternalFormat::RGB10,
+    RGB12 = (int)InternalFormat::RGB12,
+    RGB16 = (int)InternalFormat::RGB16,
+    RGB16_SNORM = (int)InternalFormat::RGB16_SNORM,
+    RGBA2 = (int)InternalFormat::RGBA2,
+    RGBA4 = (int)InternalFormat::RGBA4,
+    RGB5_A1 = (int)InternalFormat::RGB5_A1,
+    RGBA8 = (int)InternalFormat::RGBA8,
+    RGBA8_SNORM = (int)InternalFormat::RGBA8_SNORM,
+    RGB10_A2 = (int)InternalFormat::RGB10_A2,
+    RGB10_A2UI = (int)InternalFormat::RGB10_A2UI,
+    RGBA12 = (int)InternalFormat::RGBA12,
+    RGBA16 = (int)InternalFormat::RGBA16,
+    RGBA16_SNORM = (int)InternalFormat::RGBA16_SNORM,
+    SRGB8 = (int)InternalFormat::SRGB8,
+    SRGB8_ALPHA8 = (int)InternalFormat::SRGB8_ALPHA8,
+    R16F = (int)InternalFormat::R16F,
+    RG16F = (int)InternalFormat::RG16F,
+    RGB16F = (int)InternalFormat::RGB16F,
+    RGBA16F = (int)InternalFormat::RGBA16F,
+    R32F = (int)InternalFormat::R32F,
+    RG32F = (int)InternalFormat::RG32F,
+    RGB32F = (int)InternalFormat::RGB32F,
+    RGBA32F = (int)InternalFormat::RGBA32F,
+    R11F_G11F_B10F = (int)InternalFormat::R11F_G11F_B10F,
+    R8I = (int)InternalFormat::R8I,
+    R8UI = (int)InternalFormat::R8UI,
+    R16I = (int)InternalFormat::R16I,
+    R16UI = (int)InternalFormat::R16UI,
+    R32I = (int)InternalFormat::R32I,
+    R32UI = (int)InternalFormat::R32UI,
+    RG8I = (int)InternalFormat::RG8I,
+    RG8UI = (int)InternalFormat::RG8UI,
+    RG16I = (int)InternalFormat::RG16I,
+    RG16UI = (int)InternalFormat::RG16UI,
+    RG32I = (int)InternalFormat::RG32I,
+    RG32UI = (int)InternalFormat::RG32UI,
+    RGB8I = (int)InternalFormat::RGB8I,
+    RGB8UI = (int)InternalFormat::RGB8UI,
+    RGB16I = (int)InternalFormat::RGB16I,
+    RGB16UI = (int)InternalFormat::RGB16UI,
+    RGB32I = (int)InternalFormat::RGB32I,
+    RGB32UI = (int)InternalFormat::RGB32UI,
+    RGBA8I = (int)InternalFormat::RGBA8I,
+    RGBA8UI = (int)InternalFormat::RGBA8UI,
+    RGBA16I = (int)InternalFormat::RGBA16I,
+    RGBA16UI = (int)InternalFormat::RGBA16UI,
+    RGBA32I = (int)InternalFormat::RGBA32I,
+    RGBA32UI = (int)InternalFormat::RGBA32UI,
 };
 
 //Enum class for formats
@@ -271,27 +271,27 @@ enum class ColorFormat
 // Enum class Internal depth-renderable formats
 enum class DepthRenderableFormat
 {
-    DEPTH_COMPONENT = (int)InternalRenderableFormat::DEPTH_COMPONENT,
-    DEPTH_COMPONENT16 = (int)InternalRenderableFormat::DEPTH_COMPONENT16,
-    DEPTH_COMPONENT24 = (int)InternalRenderableFormat::DEPTH_COMPONENT24,
-    DEPTH_COMPONENT32 = (int)InternalRenderableFormat::DEPTH_COMPONENT32,
-    DEPTH_COMPONENT32F = (int)InternalRenderableFormat::DEPTH_COMPONENT32F,
+    DEPTH_COMPONENT = (int)InternalFormat::DEPTH_COMPONENT,
+    DEPTH_COMPONENT16 = (int)InternalFormat::DEPTH_COMPONENT16,
+    DEPTH_COMPONENT24 = (int)InternalFormat::DEPTH_COMPONENT24,
+    DEPTH_COMPONENT32 = (int)InternalFormat::DEPTH_COMPONENT32,
+    DEPTH_COMPONENT32F = (int)InternalFormat::DEPTH_COMPONENT32F,
 };
 
 // Enum class for Internal stencil-renderable formats
 enum class StencilRenderableFormat
 {
-    STENCIL_INDEX1 = (int)InternalRenderableFormat::STENCIL_INDEX1,
-    STENCIL_INDEX4 = (int)InternalRenderableFormat::STENCIL_INDEX4,
-    STENCIL_INDEX8 = (int)InternalRenderableFormat::STENCIL_INDEX8,
-    STENCIL_INDEX16 = (int)InternalRenderableFormat::STENCIL_INDEX16,
+    STENCIL_INDEX1 = (int)InternalFormat::STENCIL_INDEX1,
+    STENCIL_INDEX4 = (int)InternalFormat::STENCIL_INDEX4,
+    STENCIL_INDEX8 = (int)InternalFormat::STENCIL_INDEX8,
+    STENCIL_INDEX16 = (int)InternalFormat::STENCIL_INDEX16,
 };
 
 // Enum class for combined Depth + Stencil Internalformats
 enum class DepthStencilRenderableFormat
 {
-    DEPTH24_STENCIL8 = (int)InternalRenderableFormat::DEPTH24_STENCIL8,
-    DEPTH32F_STENCIL8 = (int)InternalRenderableFormat::DEPTH32F_STENCIL8
+    DEPTH24_STENCIL8 = (int)InternalFormat::DEPTH24_STENCIL8,
+    DEPTH32F_STENCIL8 = (int)InternalFormat::DEPTH32F_STENCIL8
 };
 
 class Texture : public Assets
@@ -321,7 +321,7 @@ public:
 
         DataType m_dataType = (DataType)0;
         Format m_format = (Format)0;
-        InternalRenderableFormat m_internalFormat = (InternalRenderableFormat)0;
+        InternalFormat m_internalFormat = InternalFormat::SRGB8_ALPHA8;
     };
     int GetTextureLayerType(int layer = 0);
 
@@ -339,6 +339,7 @@ public:
 	void SetWrapDepthParameter(Wrap wrapVerticalParameter, int layer = 0);
 	void GenerateMipmap(int layer = 0);
 	void GenerateAllMipmap(bool forceGeneration = true);
+
 	Wrap GetHorizontalParameter(int layer = 0)const;
 	Wrap GetVerticalParameter(int layer = 0)const;
 	Wrap GetDepthParameter(int layer = 0)const;

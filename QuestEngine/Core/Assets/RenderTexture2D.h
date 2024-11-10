@@ -65,7 +65,7 @@ public :
 
         //Internal Value
         GLuint m_renderBufferID = 0;
-        InternalRenderableFormat m_interRerableFormat = InternalRenderableFormat::DEPTH24_STENCIL8;
+        InternalFormat m_interRerableFormat = InternalFormat::DEPTH24_STENCIL8;
     };
 
 private:
@@ -76,8 +76,8 @@ private:
     std::vector<GLuint> m_backBuffer;
 
 
-	void AttachTextureBuffer(BufferAttachment bufferAttachement, InternalRenderableFormat internalRenderableFormat, Format format, DataType dataTye, LayerTextureInfo layerTextureInfo = LayerTextureInfo());
-	void AttachRenderBuffer(BufferAttachment bufferAttachement, InternalRenderableFormat internalRenderableFormat, RenderBufferInfo renderBufferInfo = RenderBufferInfo());
+	void AttachTextureBuffer(BufferAttachment bufferAttachement, InternalFormat internalRenderableFormat, Format format, DataType dataTye, LayerTextureInfo layerTextureInfo = LayerTextureInfo());
+	void AttachRenderBuffer(BufferAttachment bufferAttachement, InternalFormat internalRenderableFormat, RenderBufferInfo renderBufferInfo = RenderBufferInfo());
 
 public:
 

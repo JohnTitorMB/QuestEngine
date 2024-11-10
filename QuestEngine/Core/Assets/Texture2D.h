@@ -9,6 +9,7 @@ private:
 public:
 	Texture2D(std::string filePath);
 	void SetMipmapTexture(int level, std::string filePath);
+	void SetTextureInternalFormat(InternalFormat internalFormat);
 
 };
 

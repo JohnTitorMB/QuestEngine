@@ -105,6 +105,10 @@ void CameraController::Update()
 		Quaternion rotation = Quaternion::FromEulerAngle(Vector3D(m_pitch, m_yaw, 0.0f));
 		m_cameraComponent->SetWorldRotation(rotation);
 		
+
+		std::cout << "WorldPosition : " << m_cameraComponent->GetWorldPosition() << std::endl;
+		std::cout << "WorldRotation : " << m_cameraComponent->GetWorldRotation() << std::endl;
+
 		m_deltaX = 0;
 		m_deltaY = 0;
 	}

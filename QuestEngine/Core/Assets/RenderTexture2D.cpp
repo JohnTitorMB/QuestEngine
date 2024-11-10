@@ -202,7 +202,7 @@ void RenderTexture2D::AttachColorTextureBuffer(ColorRenderableFormat colorRender
 		return;
 	}
 
-	AttachTextureBuffer((BufferAttachment)bufferAttachmentIndex, (InternalRenderableFormat)colorRenderableFormat, (Format)colorFormat, dataTye, layerTextureInfo);
+	AttachTextureBuffer((BufferAttachment)bufferAttachmentIndex, (InternalFormat)colorRenderableFormat, (Format)colorFormat, dataTye, layerTextureInfo);
 }
 
 void RenderTexture2D::AttachColorTextureBufferMS(ColorRenderableFormat colorRenderableFormat, unsigned int colorAttachementIndex, LayerTextureInfo layerTextureInfo)
@@ -219,59 +219,59 @@ void RenderTexture2D::AttachColorRenderBuffer(ColorRenderableFormat colorRendera
 		return;
 	}
 
-	AttachRenderBuffer((BufferAttachment)bufferAttachmentIndex, (InternalRenderableFormat)colorRenderableFormat, renderBufferInfo);
+	AttachRenderBuffer((BufferAttachment)bufferAttachmentIndex, (InternalFormat)colorRenderableFormat, renderBufferInfo);
 }
 
 void RenderTexture2D::AttachDepthTextureBuffer(DepthRenderableFormat depthRenderableFormat, DataType dataTye, LayerTextureInfo layerTextureInfo)
 {
-	AttachTextureBuffer(BufferAttachment::DepthAttachment, (InternalRenderableFormat)depthRenderableFormat, Format::DEPTH_COMPONENT, dataTye, layerTextureInfo);
+	AttachTextureBuffer(BufferAttachment::DepthAttachment, (InternalFormat)depthRenderableFormat, Format::DEPTH_COMPONENT, dataTye, layerTextureInfo);
 }
 
 void RenderTexture2D::AttachDepthTextureBufferMS(DepthRenderableFormat depthRenderableFormat, LayerTextureInfo layerTextureInfo)
 {
 	layerTextureInfo.m_useMultisampledTexture = true;
-	AttachTextureBuffer(BufferAttachment::DepthAttachment, (InternalRenderableFormat)depthRenderableFormat, Format::DEPTH_COMPONENT, (DataType)0, layerTextureInfo);
+	AttachTextureBuffer(BufferAttachment::DepthAttachment, (InternalFormat)depthRenderableFormat, Format::DEPTH_COMPONENT, (DataType)0, layerTextureInfo);
 }
 
 void RenderTexture2D::AttachDepthRenderBuffer(DepthRenderableFormat depthRenderableFormat, RenderBufferInfo renderBufferInfo)
 {
-	AttachRenderBuffer(BufferAttachment::DepthAttachment, (InternalRenderableFormat)depthRenderableFormat, renderBufferInfo);
+	AttachRenderBuffer(BufferAttachment::DepthAttachment, (InternalFormat)depthRenderableFormat, renderBufferInfo);
 }
 
 void RenderTexture2D::AttachStencilTextureBuffer(StencilRenderableFormat stencilRenderableFormat, DataType dataTye, LayerTextureInfo layerTextureInfo)
 {
-	AttachTextureBuffer(BufferAttachment::StencilAttachment, (InternalRenderableFormat)stencilRenderableFormat, Format::STENCIL_INDEX, dataTye, layerTextureInfo);
+	AttachTextureBuffer(BufferAttachment::StencilAttachment, (InternalFormat)stencilRenderableFormat, Format::STENCIL_INDEX, dataTye, layerTextureInfo);
 }
 
 void RenderTexture2D::AttachStencilTextureBufferMS(StencilRenderableFormat stencilRenderableFormat, LayerTextureInfo layerTextureInfo)
 {
 	layerTextureInfo.m_useMultisampledTexture = true;
-	AttachTextureBuffer(BufferAttachment::StencilAttachment, (InternalRenderableFormat)stencilRenderableFormat, Format::STENCIL_INDEX, (DataType)0, layerTextureInfo);
+	AttachTextureBuffer(BufferAttachment::StencilAttachment, (InternalFormat)stencilRenderableFormat, Format::STENCIL_INDEX, (DataType)0, layerTextureInfo);
 }
 
 void RenderTexture2D::AttachStencilRenderBuffer(StencilRenderableFormat stencilRenderableFormat, RenderBufferInfo renderBufferInfo)
 {
-	AttachRenderBuffer(BufferAttachment::StencilAttachment, (InternalRenderableFormat)stencilRenderableFormat, renderBufferInfo);
+	AttachRenderBuffer(BufferAttachment::StencilAttachment, (InternalFormat)stencilRenderableFormat, renderBufferInfo);
 }
 
 void RenderTexture2D::AttachDepthStencilTextureBuffer(DepthStencilRenderableFormat depthStencilRenderableFormat, DataType dataTye, LayerTextureInfo layerTextureInfo)
 {
-	AttachTextureBuffer(BufferAttachment::Depth_Stencil_Attachment, (InternalRenderableFormat)depthStencilRenderableFormat, Format::DEPTH_STENCIL, dataTye, layerTextureInfo);
+	AttachTextureBuffer(BufferAttachment::Depth_Stencil_Attachment, (InternalFormat)depthStencilRenderableFormat, Format::DEPTH_STENCIL, dataTye, layerTextureInfo);
 }
 
 void RenderTexture2D::AttachDepthStencilTextureBufferMS(DepthStencilRenderableFormat depthStencilRenderableFormat, LayerTextureInfo layerTextureInfo)
 {
 	layerTextureInfo.m_useMultisampledTexture = true;
-	AttachTextureBuffer(BufferAttachment::Depth_Stencil_Attachment, (InternalRenderableFormat)depthStencilRenderableFormat, Format::DEPTH_STENCIL,(DataType)0, layerTextureInfo);
+	AttachTextureBuffer(BufferAttachment::Depth_Stencil_Attachment, (InternalFormat)depthStencilRenderableFormat, Format::DEPTH_STENCIL,(DataType)0, layerTextureInfo);
 }
 
 void RenderTexture2D::AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat depthStencilRenderableFormat, RenderBufferInfo renderBufferInfo)
 {
-	AttachRenderBuffer(BufferAttachment::Depth_Stencil_Attachment, (InternalRenderableFormat)depthStencilRenderableFormat, renderBufferInfo);
+	AttachRenderBuffer(BufferAttachment::Depth_Stencil_Attachment, (InternalFormat)depthStencilRenderableFormat, renderBufferInfo);
 }
 
 
-void RenderTexture2D::AttachRenderBuffer(BufferAttachment bufferAttachement, InternalRenderableFormat internalRenderableFormat, RenderBufferInfo renderBufferInfo)
+void RenderTexture2D::AttachRenderBuffer(BufferAttachment bufferAttachement, InternalFormat internalRenderableFormat, RenderBufferInfo renderBufferInfo)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferID);
 
@@ -304,7 +304,7 @@ void RenderTexture2D::AttachRenderBuffer(BufferAttachment bufferAttachement, Int
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderTexture2D::AttachTextureBuffer(BufferAttachment bufferAttachement, InternalRenderableFormat internalRenderableFormat, Format format, DataType dataTye, LayerTextureInfo layerTextureInfo)
+void RenderTexture2D::AttachTextureBuffer(BufferAttachment bufferAttachement, InternalFormat internalRenderableFormat, Format format, DataType dataTye, LayerTextureInfo layerTextureInfo)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferID);
 

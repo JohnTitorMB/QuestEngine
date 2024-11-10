@@ -5,6 +5,7 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "AssetsManager.h"
 #include "../Utilities/MeshUtilities.h"
 #include "Components/DirectionalLight.h"
+#include "Components/SpotLight.h"
 #include "../Game/DirectionalLightEntity.h"
 #include "../Game/DirectionalLightController.h"
 #include "../Game/CameraController.h"
@@ -25,6 +26,7 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "Components/PostProcessing.h"
 #include "PostProcessing/TintEffect.h"
 #include "PostProcessing/GaussianBlur.h"
+#include "PostProcessing/ColorGrading.h"
 
 World::World()
 {
@@ -65,6 +67,7 @@ void World::InitAssets()
 	//PostProcessShader
 	Shader* tintShader = AssetsManager::CreateShader("TintShader", "Assets/ScreenShader.vert", "Assets/TintShader.frag");
 	Shader* gaussianBlurShader = AssetsManager::CreateShader("GaussianBlurShader", "Assets/ScreenShader.vert", "Assets/GaussianBlurShader.frag");
+	Shader* colorGradingShader = AssetsManager::CreateShader("ColorGradingShader", "Assets/ScreenShader.vert", "Assets/ColorGradingShader.frag");
 
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
@@ -72,14 +75,11 @@ void World::InitAssets()
 	Texture* tileTexture = AssetsManager::CreateTexture2D("TileTexture", "Assets/Texture.png");
 	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture","Assets/Box/BoxDiffuse.png");
 	Texture* boxAlphaTexture = AssetsManager::CreateTexture2D("BoxAlphaTexture","Assets/Box/BoxAlpha.png");
+	Texture* gradiant = AssetsManager::CreateTexture2D("Gradiant","Assets/Gradiant.png");
 	
 	//Render Texture
 	RenderTexture2D* renderTexture = AssetsManager::CreateRenderTexture2D("RenderTexture", 1920, 1080);
-	Texture::LayerTextureInfo layerTextureInfo = Texture::LayerTextureInfo();
-	layerTextureInfo.m_minificationFilter = MinificationFilter::Bilinear;
-	layerTextureInfo.m_generateMimpap = false;
-	layerTextureInfo.m_enableDoubleBuffering = true;
-	renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE,0, layerTextureInfo);
+	renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::SRGB8_ALPHA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE,0);
 	renderTexture->AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8);
 
 	///Initialise Materials
@@ -130,9 +130,12 @@ void World::InitAssets()
 
 void World::InitWorld()
 {
+
+	glEnable(GL_FRAMEBUFFER_SRGB);
+
 	InitAssets();
 
-	LightingSettings::m_globalAmbiantColor = Color(0.2f,0.2f,0.2f,1);
+	LightingSettings::m_globalAmbiantColor = Color(0.1f, 0.1f, 0.1f,1);
 	Scene& scene1 = SceneManager::Instance()->CreateScene();
 	Entity* cameraEntity = scene1.CreateEntity<Entity>();
 	{
@@ -142,16 +145,15 @@ void World::InitWorld()
 		cameraComponent->SetFar(1000.0);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
 		cameraComponent->SetFov(60);
-		cameraComponent->SetWorldPosition(Vector3D(0, 1, -10));
+		cameraComponent->SetWorldPosition(Vector3D(-0.33, 1, -6.6));
 		cameraComponent->SetRenderingPriority(1);
 		cameraComponent->m_enableMultiSampling = true;
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 		cameraController->m_scrollMove = 10;
 		cameraController->movementSpeed = 0.5f;
 		PostProcessing* postProcessing = cameraEntity->AddComponent<PostProcessing>(true);
-		std::shared_ptr<GaussianBlur> gaussianBlurEffect = std::make_shared<GaussianBlur>();
-		gaussianBlurEffect->SetRadius(15);
-		postProcessing->AddEffect(gaussianBlurEffect);
+		std::shared_ptr<ColorGrading> colorGradingEffect = std::make_shared<ColorGrading>();
+		postProcessing->AddEffect(colorGradingEffect);
 	}
 
 	CameraComponent* cameraComponent2 = nullptr;
@@ -168,22 +170,21 @@ void World::InitWorld()
 	}
 	
 	//Initialise Directional Light entity
+	
 	DirectionalLightComponent* dLightComponent = nullptr;
 	Entity* lightEntity = scene1.CreateEntity<Entity>();
 	{
 		dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
 		dLightComponent->m_ambiantColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
 		dLightComponent->m_diffuseColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-		dLightComponent->m_specularColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+		dLightComponent->m_specularColor = Color(1.0f, 1.0f, 1.0f, 0.0f);
 		dLightComponent->m_intensity = 1.0f;
-
-		dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50, -30, 0)));
-
+		 
+		dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, 0.0f, 0)));
 		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 	}
-
-
+	
 	Entity* skyboxEntity = scene1.CreateEntity<Entity>();
 	{
 		MeshRendererComponent* meshRendererComponent = skyboxEntity->AddComponent<MeshRendererComponent>(true);
@@ -367,6 +368,7 @@ void World::Display(Window* window)
 		else
 			glDisable(GL_MULTISAMPLE);
 		
+
 		for (auto rendererIt = m_opaqueMeshRenderers.begin(); rendererIt != m_opaqueMeshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;

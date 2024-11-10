@@ -220,6 +220,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
 			shader->SetUniformVector3D("directionalLight.direction", directionalLight->GetForwardVector());
 			shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
+
 			directionalLightCounter++;
 		}
 		else if (light->m_lightType == LightComponent::LightType::Point)
@@ -269,7 +270,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			shader->SetUniformColor(specular, spotLight->m_specularColor);
 			shader->SetUniformVector3D(position, spotLight->GetWorldPosition());
 			shader->SetUniformVector3D(direction, spotLight->GetForwardVector());
-
+			std::cout << spotLight->GetForwardVector() << std::endl;
 			float spotCosAngle = cosf(spotLight->m_spotAngle * M_PI/180.0f);
 			float spotCosSmoothValue = cosf((spotLight->m_spotAngle - spotLight->m_spotAngle * spotLight->m_spotSmoothValue) * M_PI/180.0f);
 			shader->SetUniformFloat(spotCosAngleName, spotCosAngle);

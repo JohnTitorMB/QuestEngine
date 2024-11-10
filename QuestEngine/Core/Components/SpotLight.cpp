@@ -11,7 +11,7 @@ SpotLightComponent::SpotLightComponent() :LightComponent()
 	m_spotSmoothValue = 0.1f;
 }
 
-SpotLightComponent::SpotLightComponent(const SpotLightComponent& other)
+SpotLightComponent::SpotLightComponent(const SpotLightComponent& other) : LightComponent(other)
 {
 	m_spotAngle = other.m_spotAngle;
 	m_spotSmoothValue = other.m_spotSmoothValue;

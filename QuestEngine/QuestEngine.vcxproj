@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Library\Glad\src\glad.c" />
+    <ClCompile Include="Core\PostProcessing\ColorGrading.cpp" />
     <ClCompile Include="Core\Assets\CubeMap.cpp" />
     <ClCompile Include="Game\ComponentExample.cpp" />
     <ClCompile Include="Core\Assets\EntityGroupAsset.cpp" />
@@ -216,6 +217,7 @@
     <ClCompile Include="Math\Vector4D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\PostProcessing\ColorGrading.h" />
     <ClInclude Include="Core\Assets\CubeMap.h" />
     <ClInclude Include="Game\ComponentExample.h" />
     <ClInclude Include="Core\Assets\EntityGroupAsset.h" />

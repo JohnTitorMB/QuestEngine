@@ -17,6 +17,18 @@ Texture2D::Texture2D(std::string filePath) : Texture(filePath)
 	}
 }
 
+void Texture2D::SetTextureInternalFormat(InternalFormat internalFormat)
+{
+	m_layerTextureInfos[0].m_internalFormat = internalFormat;
+	unsigned char* data = LoadTexture(m_path);
+	
+	if (data)
+	{
+		UpdateTextureData(data);
+		stbi_image_free(data);
+	}
+}
+
 void Texture2D::SetMipmapTexture(int level, std::string filePath)
 {
 	int channel_in_file = 0;
@@ -25,7 +37,7 @@ void Texture2D::SetMipmapTexture(int level, std::string filePath)
 	int height = 0;
 	unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &channel_in_file, desired_channel);
 	glBindTexture((int)m_textureType, m_layerTextureInfos[0].m_textureID);
-	glTexImage2D((int)m_textureType, level, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexImage2D((int)m_textureType, level, (int)m_layerTextureInfos[0].m_internalFormat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	stbi_image_free(data);
 }
 
@@ -33,7 +45,7 @@ void Texture2D::UpdateTextureData(const unsigned char* data)
 {
 
 	glBindTexture((int)m_textureType, m_layerTextureInfos[0].m_textureID);
-	glTexImage2D((int)m_textureType, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexImage2D((int)m_textureType, 0, (int)m_layerTextureInfos[0].m_internalFormat, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)m_layerTextureInfos[0].m_minificationFilter);
 	glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)m_layerTextureInfos[0].m_magnificationFilter);
