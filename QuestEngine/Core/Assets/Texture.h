@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include "Assets.h"
 #include "../../Library/stb_image.h"
-
+#include "../ColorManagement/ColorManagement.h"
 
 
 #include <vector>
@@ -297,6 +297,14 @@ enum class DepthStencilRenderableFormat
 class Texture : public Assets
 {
 public:
+
+    enum class TextureConversionMode {
+        None,       
+        CPUConvert, 
+        GPUConvert 
+    };
+
+
 	struct LayerTextureInfo
 	{
 		GLuint m_textureID = 0;
@@ -321,7 +329,10 @@ public:
 
         DataType m_dataType = (DataType)0;
         Format m_format = (Format)0;
-        InternalFormat m_internalFormat = InternalFormat::SRGB8_ALPHA8;
+        InternalFormat m_internalFormat = InternalFormat::RGBA8;
+
+        TextureConversionMode m_textureConversionMode = TextureConversionMode::GPUConvert;
+        ColorManagement::RGBColorSpaceType m_colorSpace = ColorManagement::RGBColorSpaceType::SRGB;
     };
     int GetTextureLayerType(int layer = 0);
 
@@ -347,6 +358,12 @@ public:
 	void SetMinification(MinificationFilter minificationFilter, int layer = 0);
 	void SetMagnification(MagnificationFilter magnificationFilter, int layer = 0);
 
+    void SetTextureConversionMode(TextureConversionMode textureConversionMode, int layer = 0);
+    void SetTextureColorSpace(ColorManagement::RGBColorSpaceType colorSpace, int layer = 0);
+    void SetTextureColorManagementParam(ColorManagement::RGBColorSpaceType colorSpace, TextureConversionMode textureConversionMode, int layer = 0);
+
+    virtual void RefreshTextureData(int layer);
+
 	MinificationFilter GetMinification(int layer = 0)const;
 	MagnificationFilter GetMagnification(int layer = 0)const;
 
@@ -368,6 +385,7 @@ public:
 	float GetWidth()const;
 	float GetHeight()const;
 	int GetSubLayerCount()const;
+    const LayerTextureInfo GetTextureLayerInfo(int layer = 0)const;
 	std::string m_path;
 
 protected:

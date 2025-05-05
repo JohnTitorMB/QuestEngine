@@ -1,7 +1,12 @@
-#include "QuestEngine.h"
+﻿#include "QuestEngine.h"
 #include "AssetsManager.h"
 #include "SceneManager.h"
 #include "Graphics.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "../Editor/SimpleEditor.h"
+
 QuestEngine::QuestEngine()
 {
 }
@@ -15,7 +20,7 @@ QuestEngine::~QuestEngine()
 
 void QuestEngine::Init()
 {
-	m_window = new Window(1920, 1080, new char[] {"Opengl Window"});
+	m_window = new Window(1280, 720, new char[] {"Opengl Window"});
 
 	Graphics::GetInstance()->RefreshMSAASampleEvent.AddListener(this, &QuestEngine::RefreshMSAASample);
 
@@ -34,6 +39,17 @@ void QuestEngine::Init()
 
 	glDisable(GL_MULTISAMPLE);
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // optional
+
+	ImGui::StyleColorsDark(); // ou Light / Classic
+
+	// Backend binding
+	ImGui_ImplGlfw_InitForOpenGL(m_window->GetWindow(), true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
 
 }
 
@@ -48,6 +64,11 @@ void QuestEngine::Update()
 	while (!glfwWindowShouldClose(m_window->GetWindow()))
 	{
 		glfwPollEvents();
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		inputSystem->ProcessInput(m_window);
 
 		glStencilMask(0xFF);
@@ -59,16 +80,28 @@ void QuestEngine::Update()
 		
 	    world->Update();
 
+		SimpleEditor::Instance()->Display();
+
 		world->Display(m_window);
+
+
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(m_window->GetWindow());
 	}
 
-	delete World::Instance();
-	delete TimeManager::Instance();
-	delete AssetsManager::Instance();
-	delete InputSystem::Instance();
-	delete SceneManager::Instance();
+	World::Destroy();
+	TimeManager::Destroy();
+	AssetsManager::Destroy();
+	InputSystem::Destroy();
+	SceneManager::Destroy();
+	SimpleEditor::Destroy();
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 void QuestEngine::RefreshMSAASample(int msaaSample)

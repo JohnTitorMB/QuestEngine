@@ -1,4 +1,5 @@
 #version 330 core
+#include "ColorManagement.glsl"
 in vec2 uv;
 in vec3 normal;
 in vec3 pos;
@@ -66,12 +67,15 @@ struct Material
   
     sampler2D ambiantTexture;
     vec4 ambiantTextureST;
+    int ambiantTextureColorSpace;
 
     sampler2D diffuseTexture;
     vec4 diffuseTextureST;
-    
+    int diffuseTextureColorSpace;
+
     sampler2D specularTexture;
     vec4 specularTextureST;
+    int specularTextureColorSpace;
 
     sampler2D alphaTexture;
     vec4 alphaTextureST;
@@ -84,21 +88,22 @@ struct Material
 uniform Material material;
 
 
+
 vec3 ComputeDirectionalLightColor(DirectionalLight dLight)
 {
     vec3 lightDirection = dLight.direction;
-    vec4 ambientColor = dLight.ambientColor * material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
-    vec4 diffuseColor = dLight.diffuseColor * material.diffuseColor * texture(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy);
+    vec4 ambientColor = dLight.ambientColor * material.ambientColor * textureCs(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy, material.ambiantTextureColorSpace);
+    vec4 diffuseColor = dLight.diffuseColor * material.diffuseColor * textureCs(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy, material.diffuseTextureColorSpace);
     float NdotL = dot(normal, -lightDirection); 
     diffuseColor*= max(NdotL,0);
 
     vec3 viewDir = normalize(viewPos - pos);
     vec3 halfwayDir = normalize(-lightDirection + viewDir);
 
-    vec4 specularColor;
+    vec4 specularColor = vec4(0,0,0,1);
     if(NdotL >= 0.001)
     {
-        specularColor = dLight.specularColor * material.specularColor * texture(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy);
+        specularColor = dLight.specularColor * material.specularColor * textureCs(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy, material.specularTextureColorSpace);
         specularColor*= pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     }
   
@@ -106,6 +111,7 @@ vec3 ComputeDirectionalLightColor(DirectionalLight dLight)
 
     return vec3(color.r, color.g, color.b) * dLight.intensity;
 }
+
 
 vec3 ComputePointLight(PointLight pLight)
 {
@@ -115,18 +121,18 @@ vec3 ComputePointLight(PointLight pLight)
     float lightDistance = length(lightDiff);
     vec3 lightDirection = lightDiff/lightDistance;
 
-    vec4 ambientColor = pLight.ambientColor * material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
-    vec4 diffuseColor = pLight.diffuseColor * material.diffuseColor * texture(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy);
+    vec4 ambientColor = pLight.ambientColor * material.ambientColor * textureCs(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy, material.ambiantTextureColorSpace);
+    vec4 diffuseColor = pLight.diffuseColor * material.diffuseColor * textureCs(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy, material.diffuseTextureColorSpace);
     float NdotL = dot(normal, -lightDirection);
     diffuseColor*= max(NdotL,0);
 
     vec3 viewDir = normalize(viewPos - pos);
     vec3 halfwayDir = normalize(-lightDirection + viewDir);
 
-    vec4 specularColor;
+    vec4 specularColor = vec4(0,0,0,1);
     if(NdotL >= 0.001)
     {
-        specularColor = pLight.specularColor * material.specularColor * texture(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy);;
+        specularColor = pLight.specularColor * material.specularColor * textureCs(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy, material.specularTextureColorSpace);
         specularColor*= pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     }
   
@@ -146,12 +152,12 @@ vec3 ComputeSpotLight(SpotLight sLight)
     vec3 lightDirection = lightDiff/lightDistance;
 
     float cosAngle    = dot(lightDirection, normalize(sLight.direction));
-    vec4 ambientColor = sLight.ambientColor * material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
+    vec4 ambientColor = sLight.ambientColor * material.ambientColor * textureCs(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy, material.ambiantTextureColorSpace);
 
     if(cosAngle > sLight.spotCosAngle)
     {
-        vec4 diffuseColor = sLight.diffuseColor * material.diffuseColor * texture(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy);
-        vec4 specularColor;
+        vec4 diffuseColor = sLight.diffuseColor * material.diffuseColor * textureCs(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy, material.diffuseTextureColorSpace);
+        vec4 specularColor = vec4(0,0,0,1);
 
         
         float NdotL = dot(normal, -lightDirection);
@@ -162,7 +168,7 @@ vec3 ComputeSpotLight(SpotLight sLight)
 
         if(NdotL >= 0.001)
         {
-            specularColor = sLight.specularColor * material.specularColor * texture(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy);;
+            specularColor = sLight.specularColor * material.specularColor * textureCs(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy, material.specularTextureColorSpace);
             specularColor*= pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
         }
   
@@ -180,7 +186,7 @@ vec3 ComputeSpotLight(SpotLight sLight)
 
 void main()
 {   
-    vec4 mAmbiant = material.ambientColor * texture(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy);
+    vec4 mAmbiant = material.ambientColor * textureCs(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy, material.ambiantTextureColorSpace);
     vec4 ambientColor = globalAmbiantColor * mAmbiant;
     vec3 color = vec3(ambientColor.r, ambientColor.g, ambientColor.b);
 

@@ -93,7 +93,7 @@ vec3 ComputeDirectionalLightColor(DirectionalLight dLight)
     vec3 viewDir = normalize(viewPos - pos);
     vec3 halfwayDir = normalize(-lightDirection + viewDir);
 
-    vec4 specularColor;
+    vec4 specularColor = vec4(0,0,0,1);
     if(NdotL >= 0.001)
     {
         specularColor = dLight.specularColor * material.specularColor * texture(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy);
@@ -121,7 +121,7 @@ vec3 ComputePointLight(PointLight pLight)
     vec3 viewDir = normalize(viewPos - pos);
     vec3 halfwayDir = normalize(-lightDirection + viewDir);
 
-    vec4 specularColor;
+    vec4 specularColor = vec4(0,0,0,1);
     if(NdotL >= 0.001)
     {
         specularColor = pLight.specularColor * material.specularColor * texture(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy);;
@@ -149,7 +149,7 @@ vec3 ComputeSpotLight(SpotLight sLight)
     if(cosAngle > sLight.spotCosAngle)
     {
         vec4 diffuseColor = sLight.diffuseColor * material.diffuseColor * texture(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy);
-        vec4 specularColor;
+        vec4 specularColor = vec4(0,0,0,1);
 
         
         float NdotL = dot(normal, -lightDirection);

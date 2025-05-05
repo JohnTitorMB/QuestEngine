@@ -1,6 +1,11 @@
 #include "CubeMap.h"
 #include <vector>
 #include <iostream>
+#include "../ColorManagement/Color.h"
+#include "../ColorManagement/RGBModel.h"
+#include "../ColorManagement/ColorConversion.h"
+#include "../../Math/Mathf.h"
+
 CubeMap::CubeMap(std::string filePath) : Texture(filePath)
 {
 	m_layerTextureInfos.push_back(Texture::LayerTextureInfo());
@@ -27,13 +32,18 @@ CubeMap::CubeMap(std::string filePath) : Texture(filePath)
 void CubeMap::SetTextureInternalFormat(InternalFormat internalFormat)
 {
 	m_layerTextureInfos[0].m_internalFormat = internalFormat;
-	unsigned char* data = LoadTexture(m_path);
+    RefreshTextureData(0);
+}
 
-	if (data)
-	{
-		UpdateTextureData(data);
-		stbi_image_free(data);
-	}
+void CubeMap::RefreshTextureData(int layer)
+{
+    unsigned char* data = LoadTexture(m_path);
+
+    if (data)
+    {
+        UpdateTextureData(data);
+        stbi_image_free(data);
+    }
 }
 
 void CubeMap::SetMipmapTexture(int level, std::string filePath, CubeMapFace cubeMapFace)
@@ -51,43 +61,64 @@ void CubeMap::SetMipmapTexture(int level, std::string filePath, CubeMapFace cube
 
 void CubeMap::UpdateTextureData(const unsigned char* data)
 {
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_layerTextureInfos[0].m_textureID);
+    auto& info = m_layerTextureInfos[0];
+    glBindTexture(GL_TEXTURE_CUBE_MAP, info.m_textureID);
 
-	int subWidth = m_width/4;
-	int subHeight = m_height/3;
-	
-	std::vector<unsigned char> leftSubData = GetSubData(data, m_width, m_height, 0, subHeight, subWidth, subHeight, false, true);
-	glTexImage2D((int)CubeMapFace::NEGATIVE_X, 0, (int)m_layerTextureInfos[0].m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, leftSubData.data());
+    int subWidth = m_width / 4;
+    int subHeight = m_height / 3;
 
-	std::vector<unsigned char> rightSubData = GetSubData(data, m_width, m_height, subWidth*2, subHeight, subWidth, subHeight, false, true);
-	glTexImage2D((int)CubeMapFace::POSITIVE_X, 0, (int)m_layerTextureInfos[0].m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, rightSubData.data());
+    auto srcColorSpace = ColorManagement::GetRGBColorSpaceFromType(info.m_colorSpace);
+    auto dstColorSpace = ColorManagement::Instance().GetGPUWorkingSpace();
 
-	std::vector<unsigned char> bottomSubData = GetSubData(data, m_width, m_height, subWidth, 0, subWidth, subHeight, false, true);
-	glTexImage2D((int)CubeMapFace::NEGATIVE_Y, 0, (int)m_layerTextureInfos[0].m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, bottomSubData.data());
+    auto uploadFace = [&](CubeMapFace face, int offsetX, int offsetY) {
+        std::vector<unsigned char> rawSubData = GetSubData(data, m_width, m_height, offsetX, offsetY, subWidth, subHeight, false, true);
 
-	std::vector<unsigned char> topSubData = GetSubData(data, m_width, m_height, subWidth, subHeight*2, subWidth, subHeight, false, true);
-	glTexImage2D((int)CubeMapFace::POSITIVE_Y, 0, (int)m_layerTextureInfos[0].m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, topSubData.data());
+        if (info.m_textureConversionMode == TextureConversionMode::CPUConvert) {
+            std::vector<unsigned char> convertedData(subWidth * subHeight * 4);
 
-	std::vector<unsigned char> backSubData = GetSubData(data, m_width, m_height, subWidth * 3, subHeight, subWidth, subHeight, false, true);
-	glTexImage2D((int)CubeMapFace::NEGATIVE_Z, 0, (int)m_layerTextureInfos[0].m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, backSubData.data());
+            for (int i = 0; i < subWidth * subHeight; ++i) {
+                std::unique_ptr<ColorModel> model = std::make_unique<RGBModel>(
+                    rawSubData[i * 4 + 0] / 255.0f,
+                    rawSubData[i * 4 + 1] / 255.0f,
+                    rawSubData[i * 4 + 2] / 255.0f
+                );
 
-	std::vector<unsigned char> frontSubData = GetSubData(data, m_width, m_height, subWidth, subHeight, subWidth, subHeight, false, true);
-	glTexImage2D((int)CubeMapFace::POSITIVE_Z, 0, (int)m_layerTextureInfos[0].m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, frontSubData.data());
+                Color color(std::move(model), srcColorSpace, rawSubData[i * 4 + 3] / 255.0f);
+                Color converted = ColorConversion::Convert(color, ColorModelType::RGB, dstColorSpace);
+                const RGBModel& rgb = static_cast<const RGBModel&>(converted.GetColorModel());
 
-	
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)m_layerTextureInfos[0].m_minificationFilter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)m_layerTextureInfos[0].m_magnificationFilter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)m_layerTextureInfos[0].m_wrapHorizontalParameter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)m_layerTextureInfos[0].m_wrapVerticalParameter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_R, (GLint)m_layerTextureInfos[0].m_wrapDepthParameter);
+                convertedData[i * 4 + 0] = static_cast<unsigned char>(Mathf::Clamp(rgb.m_r * 255.0f, 0.0f, 255.0f));
+                convertedData[i * 4 + 1] = static_cast<unsigned char>(Mathf::Clamp(rgb.m_g * 255.0f, 0.0f, 255.0f));
+                convertedData[i * 4 + 2] = static_cast<unsigned char>(Mathf::Clamp(rgb.m_b * 255.0f, 0.0f, 255.0f));
+                convertedData[i * 4 + 3] = static_cast<unsigned char>(Mathf::Clamp(converted.m_alpha * 255.0f, 0.0f, 255.0f));
+            }
 
-	glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)m_layerTextureInfos[0].m_mipmapBaseLevel);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)m_layerTextureInfos[0].m_mipmapMaxLevel);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)m_layerTextureInfos[0].m_mipmapMinLOD);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)m_layerTextureInfos[0].m_mipmapMaxLOD);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)m_layerTextureInfos[0].m_mipmapLODBias);
-	glGenerateMipmap((int)m_textureType);
+            glTexImage2D((int)face, 0, (int)info.m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, convertedData.data());
+        }
+        else {
+            glTexImage2D((int)face, 0, (int)info.m_internalFormat, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawSubData.data());
+        }
+        };
 
-	SetAnisotropy(m_layerTextureInfos[0].m_anisotropyValue);
+    uploadFace(CubeMapFace::NEGATIVE_X, 0, subHeight);
+    uploadFace(CubeMapFace::POSITIVE_X, subWidth * 2, subHeight);
+    uploadFace(CubeMapFace::NEGATIVE_Y, subWidth, 0);
+    uploadFace(CubeMapFace::POSITIVE_Y, subWidth, subHeight * 2);
+    uploadFace(CubeMapFace::NEGATIVE_Z, subWidth * 3, subHeight);
+    uploadFace(CubeMapFace::POSITIVE_Z, subWidth, subHeight);
 
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)info.m_minificationFilter);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)info.m_magnificationFilter);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)info.m_wrapHorizontalParameter);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)info.m_wrapVerticalParameter);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_R, (GLint)info.m_wrapDepthParameter);
+
+    glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)info.m_mipmapBaseLevel);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)info.m_mipmapMaxLevel);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)info.m_mipmapMinLOD);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)info.m_mipmapMaxLOD);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)info.m_mipmapLODBias);
+    glGenerateMipmap((int)m_textureType);
+
+    SetAnisotropy(info.m_anisotropyValue);
 }

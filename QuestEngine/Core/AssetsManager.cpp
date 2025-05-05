@@ -43,6 +43,8 @@ Mesh* AssetsManager::CreateMesh(const std::string& assetName, bool useOneVbo)
 	Mesh* mesh = new Mesh();
 	assetsManager->m_assetsNameMap.emplace(newAssetName, mesh);
 	assetsManager->m_assets.insert(mesh);
+	assetsManager->m_assetsByType[typeid(*mesh)].push_back(mesh);
+	mesh->m_name = newAssetName;
 	return mesh;
 }
 
@@ -58,6 +60,12 @@ std::string AssetsManager::GenerateUniqueAssetName(const std::string& baseName) 
 	}
 
 	return uniqueName;
+}
+
+void AssetsManager::Destroy()
+{
+	delete m_assetsManager;
+	m_assetsManager = nullptr;
 }
 
 Texture2D* AssetsManager::CreateTexture2D(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded)
@@ -81,18 +89,27 @@ Texture2D* AssetsManager::CreateTexture2D(const std::string& assetName, std::str
 		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
 
 	Texture2D* texture = new Texture2D(filePath);
+	texture->m_name = newAssetName;
 	assetsManager->m_assetsNameMap.emplace(newAssetName, texture);
 	assetsManager->m_assetsFilePathMap.emplace(filePath, texture);
 	assetsManager->m_assets.insert(texture);
+	assetsManager->m_assetsByType[typeid(*texture)].push_back(texture);
 	return texture;
 }
 
 RenderTexture2D* AssetsManager::CreateRenderTexture2D(const std::string& assetName, const int width, const int height)
 {
 	AssetsManager* assetsManager = AssetsManager::Instance();
+	std::string newAssetName = assetName;
+
+	if (assetsManager->m_assetsNameMap.find(assetName) != assetsManager->m_assetsNameMap.end())
+		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
+
 	RenderTexture2D* renderTexture = new RenderTexture2D(width, height);
-	assetsManager->m_assetsNameMap.emplace(assetName, renderTexture);
+	renderTexture->m_name = newAssetName;
+	assetsManager->m_assetsNameMap.emplace(newAssetName, renderTexture);
 	assetsManager->m_assets.insert(renderTexture);
+	assetsManager->m_assetsByType[typeid(*renderTexture)].push_back(renderTexture);
 	return renderTexture;
 }
 
@@ -117,13 +134,15 @@ CubeMap* AssetsManager::CreateCubeMap(const std::string& assetName, std::string 
 		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
 
 	CubeMap* cubeMap = new CubeMap(filePath);
+	cubeMap->m_name = newAssetName;
 	assetsManager->m_assetsNameMap.emplace(newAssetName, cubeMap);
 	assetsManager->m_assetsFilePathMap.emplace(filePath, cubeMap);
 	assetsManager->m_assets.insert(cubeMap);
+	assetsManager->m_assetsByType[typeid(*cubeMap)].push_back(cubeMap);
 	return cubeMap;
 }
 
-Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Color ambientColor, Color diffuseColor, Color specularColor, float shininess)
+Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, ColorRGB ambientColor, ColorRGB diffuseColor, ColorRGB specularColor, float shininess)
 {
 	AssetsManager* assetsManager = AssetsManager::Instance();
 	std::string newAssetName = assetName;
@@ -131,6 +150,8 @@ Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, 
 		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
 
 	Material* material = new Material();
+	material->m_name = newAssetName;
+
 	material->SetColor("material.ambientColor", ambientColor);
 	material->SetColor("material.diffuseColor", diffuseColor);
 	material->SetColor("material.specularColor", specularColor);
@@ -153,6 +174,7 @@ Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, 
 
 	assetsManager->m_assetsNameMap.emplace(newAssetName, material);
 	assetsManager->m_assets.insert(material);
+	assetsManager->m_assetsByType[typeid(*material)].push_back(material);
 	return material;
 }
 
@@ -164,8 +186,10 @@ Material* AssetsManager::CreateMaterial(const std::string& assetName)
 		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
 
 	Material* material = new Material();
+	material->m_name = newAssetName;
 	assetsManager->m_assetsNameMap.emplace(newAssetName, material);
 	assetsManager->m_assets.insert(material);
+	assetsManager->m_assetsByType[typeid(*material)].push_back(material);
 	return material;
 }
 
@@ -177,8 +201,10 @@ Shader* AssetsManager::CreateShader(const std::string& assetName, std::string ve
 		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
 
 	Shader* shader = new Shader(vertexShaderFilePath, fragmentShaderFilePath);
+	shader->m_name = newAssetName;
 	assetsManager->m_assetsNameMap.emplace(newAssetName, shader);
 	assetsManager->m_assets.insert(shader);
+	assetsManager->m_assetsByType[typeid(*shader)].push_back(shader);
 	return shader;
 }
 
@@ -190,8 +216,10 @@ EntityGroupAsset* AssetsManager::CreateEntityGroup(const std::string& assetName)
 		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
 
 	EntityGroupAsset* entityGroupAsset = new EntityGroupAsset();
+	entityGroupAsset->m_name = newAssetName;
 	assetsManager->m_assetsNameMap.emplace(newAssetName, entityGroupAsset);
 	assetsManager->m_assets.insert(entityGroupAsset);
+	assetsManager->m_assetsByType[typeid(*entityGroupAsset)].push_back(entityGroupAsset);
 	return entityGroupAsset;
 }
 

@@ -43,6 +43,12 @@ World* World::Instance()
 	return m_world;
 }
 
+void World::Destroy()
+{
+	delete m_world;
+	m_world = nullptr;
+}
+
 World::~World()
 {
 	DestroyWorldEntity();
@@ -68,6 +74,7 @@ void World::InitAssets()
 	Shader* tintShader = AssetsManager::CreateShader("TintShader", "Assets/ScreenShader.vert", "Assets/TintShader.frag");
 	Shader* gaussianBlurShader = AssetsManager::CreateShader("GaussianBlurShader", "Assets/ScreenShader.vert", "Assets/GaussianBlurShader.frag");
 	Shader* colorGradingShader = AssetsManager::CreateShader("ColorGradingShader", "Assets/ScreenShader.vert", "Assets/ColorGradingShader.frag");
+	Shader* lut2DShader = AssetsManager::CreateShader("LUT2DShader", "Assets/ScreenShader.vert", "Assets/LUT2DShader.frag");
 
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
@@ -76,16 +83,27 @@ void World::InitAssets()
 	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture","Assets/Box/BoxDiffuse.png");
 	Texture* boxAlphaTexture = AssetsManager::CreateTexture2D("BoxAlphaTexture","Assets/Box/BoxAlpha.png");
 	Texture* gradiant = AssetsManager::CreateTexture2D("Gradiant","Assets/Gradiant.png");
+	Texture2D* lut = AssetsManager::CreateTexture2D("lutYellow", "Assets/lutYellow.png");
+	Texture2D* lutCustom = AssetsManager::CreateTexture2D("LUTCustom", "Assets/LutCustom.png");
+	Texture2D* NightBlade = AssetsManager::CreateTexture2D("NightBlade", "Assets/NightBlade.png");
+
 	
+	lut->SetTextureInternalFormat(InternalFormat::RGBA8);
+	lut->SetMinification(MinificationFilter::Point);
+	lut->SetMagnification(MagnificationFilter::Point);
+	lut->SetWrapHorizontalParameter(Wrap::ClampToEdge);
+	lut->SetWrapVerticalParameter(Wrap::ClampToEdge);
+	lut->SetAnisotropy(1);
+
 	//Render Texture
 	RenderTexture2D* renderTexture = AssetsManager::CreateRenderTexture2D("RenderTexture", 1920, 1080);
-	renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::SRGB8_ALPHA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE,0);
+	renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE,0);
 	renderTexture->AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8);
-
+	renderTexture->SetTextureColorManagementParam(ColorManagement::RGBColorSpaceType::SRGB, Texture::TextureConversionMode::GPUConvert, 0);
 	///Initialise Materials
 
 	//White Material
-	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture,Color(1,1,1,1), Color(1, 1, 1, 1), Color(1, 1, 1, 1),32.0f);
+	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture, ColorRGB(1,1,1,1), ColorRGB(1, 1, 1, 1), ColorRGB(1, 1, 1, 1),32.0f);
 
 	// CubeMap Material
 	Material* skyboxMaterial = AssetsManager::CreateMaterial("SkyboxMaterial");
@@ -93,7 +111,7 @@ void World::InitAssets()
 
 	//Materaial for display the renderTexture on the screen
 	Material* renderMaterial = AssetsManager::CreateMaterial("RenderMaterial");
-	renderMaterial->SetColor("material.color", Color(1, 1, 1, 1));
+	renderMaterial->SetColor("material.color", ColorRGB(1, 1, 1, 1));
 	renderMaterial->SetTexture("material.texture", renderTexture, 0);
 	renderMaterial->SetVector4D("material.textureST", Vector4D(0, 0, -1, 1));
 
@@ -130,12 +148,14 @@ void World::InitAssets()
 
 void World::InitWorld()
 {
+	//glEnable(GL_FRAMEBUFFER_SRGB);
 
-	glEnable(GL_FRAMEBUFFER_SRGB);
+	Graphics::GetInstance()->SetAntiAliasingType(Graphics::AntiAliasingType::MSAA);
+	Graphics::GetInstance()->SetMSAASample(16);
 
 	InitAssets();
 
-	LightingSettings::m_globalAmbiantColor = Color(0.1f, 0.1f, 0.1f,1);
+	LightingSettings::m_globalAmbiantColor = ColorRGB(0.1f, 0.1f, 0.1f,1);
 	Scene& scene1 = SceneManager::Instance()->CreateScene();
 	Entity* cameraEntity = scene1.CreateEntity<Entity>();
 	{
@@ -152,9 +172,29 @@ void World::InitWorld()
 		cameraController->m_scrollMove = 10;
 		cameraController->movementSpeed = 0.5f;
 		PostProcessing* postProcessing = cameraEntity->AddComponent<PostProcessing>(true);
-		std::shared_ptr<ColorGrading> colorGradingEffect = std::make_shared<ColorGrading>();
-		postProcessing->AddEffect(colorGradingEffect);
+	
 	}
+
+	Entity* postProcessVolumeEntity = scene1.CreateEntity<Entity>();
+	{
+		PostProcessingVolume* postProcessVolume = postProcessVolumeEntity->AddComponent<PostProcessingVolume>();
+		std::shared_ptr<ColorGradingSettings> colorGradingSetting = std::make_shared<ColorGradingSettings>();
+		postProcessVolume->AddEffect(colorGradingSetting);
+				
+		postProcessVolume->SetGlobal(true);
+
+		PostProcessing* postProcessing = cameraEntity->GetComponent<PostProcessing>();
+		postProcessing->AddPostProcessingVolume(postProcessVolume);
+
+		MeshRendererComponent* meshRendererComponent = postProcessVolumeEntity->AddComponent<MeshRendererComponent>(true);
+		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+	}
+
+
+
 
 	CameraComponent* cameraComponent2 = nullptr;
 	Entity* cameraEntity2 = scene1.CreateEntity<Entity>();
@@ -169,15 +209,14 @@ void World::InitWorld()
 		cameraComponent2->SetRenderTexture(AssetsManager::GetAsset<RenderTexture2D>("RenderTexture"));
 	}
 	
-	//Initialise Directional Light entity
-	
+	//Initialise Directional Light entity	
 	DirectionalLightComponent* dLightComponent = nullptr;
 	Entity* lightEntity = scene1.CreateEntity<Entity>();
 	{
 		dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
-		dLightComponent->m_ambiantColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
-		dLightComponent->m_diffuseColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-		dLightComponent->m_specularColor = Color(1.0f, 1.0f, 1.0f, 0.0f);
+		dLightComponent->m_ambiantColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
+		dLightComponent->m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+		dLightComponent->m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 0.0f);
 		dLightComponent->m_intensity = 1.0f;
 		 
 		dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, 0.0f, 0)));
@@ -241,7 +280,7 @@ void World::InitWorld()
 
 
 
-	scene1.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Camera"), firstEntity);
+	/*scene1.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Camera"), firstEntity);
 
 	if (firstEntity)
 	{
@@ -251,7 +290,7 @@ void World::InitWorld()
 			sceneComponent->SetWorldPosition(Vector3D(0.0f, 1.0f, -4.9f));
 			sceneComponent->SetWorldScale(Vector3D(0.001f, 0.001f, 0.001f));
 		}
-	}
+	}*/
 
 	
 	scene1.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Wall"), firstEntity);
@@ -266,7 +305,6 @@ void World::InitWorld()
 			sceneComponent->SetWorldScale(Vector3D(1.0f, 1.0f, 1.0f));
 		}
 	}
-
 
 
 	SceneManager::Instance()->LoadScene(0);
@@ -372,14 +410,14 @@ void World::Display(Window* window)
 		for (auto rendererIt = m_opaqueMeshRenderers.begin(); rendererIt != m_opaqueMeshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
-			meshRenderer->Draw(camera, m_lights, window);
+			meshRenderer->Draw(camera, m_lights, window, cameraRT);
 		}
 		
 		OrdoredTransparenceMeshRenderer(camera);
 		for (auto rendererIt = m_transparentMeshRenderers.begin(); rendererIt != m_transparentMeshRenderers.end(); ++rendererIt)
 		{
 			MeshRendererComponent* meshRenderer = *rendererIt;
-			meshRenderer->Draw(camera, m_lights, window);
+			meshRenderer->Draw(camera, m_lights, window, cameraRT);
 		}
 		
 

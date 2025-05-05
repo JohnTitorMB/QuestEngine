@@ -78,13 +78,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)..\Library\GLFW\include;$(SolutionDir)..\Library\Glad\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\Library\GLFW\include;$(SolutionDir)..\Library\Glad\include;$(SolutionDir)..\Library\ImGui\include;$(SolutionDir)..\Library\ImGui\backends\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\Library\GLFW\Debug;$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)..\Library\GLFW\include;$(SolutionDir)..\Library\Glad\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\Library\GLFW\include;$(SolutionDir)..\Library\Glad\include;$(SolutionDir)..\Library\ImGui\include;$(SolutionDir)..\Library\ImGui\backends\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\Library\GLFW\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -149,15 +149,49 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Library\Glad\src\glad.c" />
+    <ClCompile Include="..\Library\ImGui\backends\src\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\Library\ImGui\backends\src\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\Library\ImGui\src\imgui.cpp" />
+    <ClCompile Include="..\Library\ImGui\src\imgui_draw.cpp" />
+    <ClCompile Include="..\Library\ImGui\src\imgui_tables.cpp" />
+    <ClCompile Include="..\Library\ImGui\src\imgui_widgets.cpp" />
+    <ClCompile Include="Core\ColorRGBY.cpp" />
+    <ClCompile Include="Core\ColorManagement\ACESccTransferCurve.cpp" />
+    <ClCompile Include="Core\ColorManagement\ACEScctTransferCurve.cpp" />
+    <ClCompile Include="Core\ColorManagement\ColorConversion.cpp" />
+    <ClCompile Include="Core\ColorManagement\ColorRGBBase.cpp" />
+    <ClCompile Include="Core\ColorManagement\ColorBase.cpp" />
+    <ClCompile Include="Core\ColorManagement\Color.cpp" />
+    <ClCompile Include="Core\ColorManagement\ChromaticAdaptation.cpp" />
+    <ClCompile Include="Core\ColorManagement\Chromaticity.cpp" />
+    <ClCompile Include="Core\ColorManagement\CIEXYZColorSpace.cpp" />
+    <ClCompile Include="Core\ColorManagement\ColorManagement.cpp" />
+    <ClCompile Include="Core\ColorManagement\ColorModel.cpp" />
+    <ClCompile Include="Core\ColorManagement\ColorSpace.cpp" />
+    <ClCompile Include="Core\ColorManagement\Gamut.cpp" />
+    <ClCompile Include="Core\ColorManagement\HSLModel.cpp" />
+    <ClCompile Include="Core\ColorManagement\HSVModel.cpp" />
+    <ClCompile Include="Core\ColorManagement\LinearTransferCurve.cpp" />
+    <ClCompile Include="Core\ColorManagement\LMSColorSpace.cpp" />
+    <ClCompile Include="Core\ColorManagement\LMSModel.cpp" />
+    <ClCompile Include="Core\ColorManagement\RGBColorSpace.cpp" />
+    <ClCompile Include="Core\ColorManagement\RGBModel.cpp" />
+    <ClCompile Include="Core\ColorManagement\sRGBTransferCurve.cpp" />
+    <ClCompile Include="Core\ColorManagement\TransferCurve.cpp" />
+    <ClCompile Include="Core\ColorManagement\XYZModel.cpp" />
     <ClCompile Include="Core\PostProcessing\ColorGrading.cpp" />
     <ClCompile Include="Core\Assets\CubeMap.cpp" />
+    <ClCompile Include="Core\CustomColorRGB.cpp" />
+    <ClCompile Include="Core\PostProcessing\EffectRenderer.cpp" />
+    <ClCompile Include="Core\PostProcessing\EffectSettings.cpp" />
+    <ClCompile Include="Core\PostProcessing\EffectRegistry.cpp" />
     <ClCompile Include="Game\ComponentExample.cpp" />
     <ClCompile Include="Core\Assets\EntityGroupAsset.cpp" />
     <ClCompile Include="Core\tiny_obj_loader.cc" />
     <ClCompile Include="Game\CameraController.cpp" />
     <ClCompile Include="Core\Assets\Assets.cpp" />
     <ClCompile Include="Core\AssetsManager.cpp" />
-    <ClCompile Include="Core\Color.cpp" />
+    <ClCompile Include="Core\ColorRGB.cpp" />
     <ClCompile Include="Core\Components\Camera.cpp" />
     <ClCompile Include="Core\Component.cpp" />
     <ClCompile Include="Core\Components\DirectionalLight.cpp" />
@@ -184,6 +218,10 @@
     <ClCompile Include="Library\stb_image_write.cpp" />
     <ClCompile Include="Core\Components\PostProcessing.cpp" />
     <ClCompile Include="Core\PostProcessing\TintEffect.cpp" />
+    <ClCompile Include="Core\LinearColorRGB.cpp" />
+    <ClCompile Include="Core\Components\PostProcessingVolume.cpp" />
+    <ClCompile Include="Editor\SimpleEditor.cpp" />
+    <ClCompile Include="Core\RuntimePipeline.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -217,15 +255,46 @@
     <ClCompile Include="Math\Vector4D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\ColorRGBY.h" />
+    <ClInclude Include="Core\ColorManagement\ACESccTransferCurve.h" />
+    <ClInclude Include="Core\ColorManagement\ACEScctTransferCurve.h" />
+    <ClInclude Include="Core\ColorManagement\ColorConversion.h" />
+    <ClInclude Include="Core\ColorManagement\ColorRGBBase.h" />
+    <ClInclude Include="Core\ColorManagement\ColorBase.h" />
+    <ClInclude Include="Core\ColorManagement\Color.h" />
+    <ClInclude Include="Core\ColorManagement\ChromaticAdaptation.h" />
+    <ClInclude Include="Core\ColorManagement\Chromaticity.h" />
+    <ClInclude Include="Core\ColorManagement\CIEXYZColorSpace.h" />
+    <ClInclude Include="Core\ColorManagement\ColorManagement.h" />
+    <ClInclude Include="Core\ColorManagement\ColorModel.h" />
+    <ClInclude Include="Core\ColorManagement\ColorModelType.h" />
+    <ClInclude Include="Core\ColorManagement\ColorSpace.h" />
+    <ClInclude Include="Core\ColorManagement\Gamut.h" />
+    <ClInclude Include="Core\ColorManagement\HSLModel.h" />
+    <ClInclude Include="Core\ColorManagement\HSVModel.h" />
+    <ClInclude Include="Core\ColorManagement\LinearTransferCurve.h" />
+    <ClInclude Include="Core\ColorManagement\LMSColorSpace.h" />
+    <ClInclude Include="Core\ColorManagement\LMSModel.h" />
+    <ClInclude Include="Core\ColorManagement\RGBColorSpace.h" />
+    <ClInclude Include="Core\ColorManagement\RGBModel.h" />
+    <ClInclude Include="Core\ColorManagement\sRGBTransferCurve.h" />
+    <ClInclude Include="Core\ColorManagement\TransferCurve.h" />
+    <ClInclude Include="Core\ColorManagement\XYZModel.h" />
+    <ClInclude Include="Core\ImGuiCustom.h" />
     <ClInclude Include="Core\PostProcessing\ColorGrading.h" />
     <ClInclude Include="Core\Assets\CubeMap.h" />
+    <ClInclude Include="Core\CustomColorRGB.h" />
+    <ClInclude Include="Core\PostProcessing\RenderContext.h" />
+    <ClInclude Include="Core\PostProcessing\EffectRenderer.h" />
+    <ClInclude Include="Core\PostProcessing\EffectSettings.h" />
+    <ClInclude Include="Core\PostProcessing\EffectRegistry.h" />
     <ClInclude Include="Game\ComponentExample.h" />
     <ClInclude Include="Core\Assets\EntityGroupAsset.h" />
     <ClInclude Include="Core\tiny_obj_loader.h" />
     <ClInclude Include="Game\CameraController.h" />
     <ClInclude Include="Core\Assets\Assets.h" />
     <ClInclude Include="Core\AssetsManager.h" />
-    <ClInclude Include="Core\Color.h" />
+    <ClInclude Include="Core\ColorRGB.h" />
     <ClInclude Include="Core\Components\Camera.h" />
     <ClInclude Include="Core\Component.h" />
     <ClInclude Include="Core\Components\DirectionalLight.h" />
@@ -252,6 +321,10 @@
     <ClInclude Include="Library\stb_image_write.h" />
     <ClInclude Include="Core\Components\PostProcessing.h" />
     <ClInclude Include="Core\PostProcessing\TintEffect.h" />
+    <ClInclude Include="Core\LinearColorRGB.h" />
+    <ClInclude Include="Core\Components\PostProcessingVolume.h" />
+    <ClInclude Include="Editor\SimpleEditor.h" />
+    <ClInclude Include="Core\RuntimePipeline.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />
@@ -287,10 +360,12 @@
     <None Include="Assets\BlinnPhongShader.frag" />
     <None Include="Assets\BlinnPhongShader.vert" />
     <None Include="Assets\BlinnPhongShaderFog.frag" />
+    <None Include="Assets\ColorManagement.glsl" />
     <None Include="Assets\DefaultFragmentShader.frag" />
     <None Include="Assets\DefaultVertexShader.vert" />
     <None Include="Assets\FragCoordZShader.frag" />
     <None Include="Assets\LinearDepthShader.frag" />
+    <None Include="Assets\LUT2DShader.frag" />
     <None Include="Assets\NormalShader.frag" />
     <None Include="Assets\UVShader.frag" />
   </ItemGroup>
@@ -299,6 +374,7 @@
     <Image Include="Assets\CubeTextureSpecular.png" />
     <Image Include="Assets\CylinderTexture16x8.png" />
     <Image Include="Assets\DirectionalLightTexture.png" />
+    <Image Include="Assets\LUT2D.png" />
     <Image Include="Assets\PointLightTexture.png" />
     <Image Include="Assets\SphereTexture.png" />
     <Image Include="Assets\SpotLightTexture.png" />

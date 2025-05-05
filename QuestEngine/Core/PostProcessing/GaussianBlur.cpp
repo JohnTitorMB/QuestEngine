@@ -1,108 +1,84 @@
 #include "GaussianBlur.h"
-#include "../Graphics.h"
-#include "../AssetsManager.h"
 
-void GaussianBlur::Init()
-{
-	m_shader = AssetsManager::GetAsset<Shader>("GaussianBlurShader");
-	m_material = AssetsManager::CreateMaterial("GaussianBlurMaterial");
-	UpdateKernel();
+
+std::shared_ptr<EffectSettings> GaussianBlurSettings::BlendWith(const std::vector<std::pair<std::shared_ptr<EffectSettings>, float>>& others) const {
+    float totalWeight = 1.0f;
+    float sumRadius = radius;
+    float sumSigma = GetSigmaFinal();
+
+    for (const auto& [settings, weight] : others)
+    {
+        auto other = std::dynamic_pointer_cast<GaussianBlurSettings>(settings);
+        if (!other) continue;
+
+        sumRadius += other->radius * weight;
+        sumSigma += other->GetSigmaFinal() * weight;
+        totalWeight += weight;
+    }
+
+    auto result = std::make_shared<GaussianBlurSettings>();
+    result->radius = std::clamp(sumRadius / totalWeight, 1.0f, MaxRadius);
+    result->sigma = sumSigma / totalWeight;
+    result->autoSigma = false;
+
+    return result;
 }
 
-void GaussianBlur::DisplayEffect(Window* window, RenderTexture2D* rtSource, RenderTexture2D* rtTarget, CameraComponent* camera)
+void GaussianBlurEffect::Init()
 {
-	if (updateKernel)
-		UpdateKernel();
-
-	float rtWidth = rtSource->GetWidth();
-	float rtHeight = rtSource->GetHeight();
-
-	Wrap hWrap = rtSource->GetHorizontalParameter();
-	Wrap vWrap = rtSource->GetVerticalParameter();
-
-	rtSource->SetWrapHorizontalParameter(Wrap::MirrorRepeat);
-	rtSource->SetWrapVerticalParameter(Wrap::MirrorRepeat);
-
-	rtSource->SetMagnification(MagnificationFilter::Bilinear); //GL_LINEAR
-	rtSource->SetMinification(MinificationFilter::Bilinear); //GL_LINEAR
-
-
-	m_material->SetTexture("texture2D", rtSource);
-	
-	//Horizontal Pass
-	m_material->SetVector2D("pixelSpacement", Vector2D(1.0f / rtWidth, 0));
-	Graphics::GetInstance()->RenderImage(window, rtTarget, m_shader, m_material);
-
-	//Copy target Framebuffer to postProcess Framebuffer (rtSource)
-	Blit(window, rtTarget, rtSource, camera);
-
-	//Vertical Pass
-	m_material->SetVector2D("pixelSpacement", Vector2D(0, 1.0f / rtHeight));
-	Graphics::GetInstance()->RenderImage(window, rtTarget, m_shader, m_material);
-
-	rtSource->SetWrapHorizontalParameter(hWrap);
-	rtSource->SetWrapVerticalParameter(vWrap);
+    m_shader = AssetsManager::GetAsset<Shader>("GaussianBlurShader");
+    m_material = AssetsManager::CreateMaterial("GaussianBlurMaterial");
 }
 
-void GaussianBlur::UpdateKernel()
+void GaussianBlurEffect::Render(const RenderContext& ctx, std::shared_ptr<GaussianBlurSettings> settings)
 {
-	if (autoSigma)
-		m_sigma = m_radius * m_sigmaFactor;
+    float radius = settings->radius;
+    float sigma = settings->GetSigmaFinal();
 
-	std::vector<float> kernel = ComputeKernal(m_radius, m_sigma);
-	m_material->SetFloatArray("kernel", kernel);
-	int radius = (int)m_radius;
-	m_material->SetInt("radius", radius);
+    std::vector<float> kernel = ComputeKernel((int)radius, sigma);
+    m_material->SetFloatArray("kernel", kernel);
+    m_material->SetInt("radius", (int)radius);
+    m_material->SetTexture("texture2D", ctx.source);
+
+    // Horizontal pass
+    m_material->SetVector2D("pixelSpacement", Vector2D(1.0f / ctx.source->GetWidth(), 0));
+    Graphics::GetInstance()->RenderImage(ctx.window, ctx.target, m_shader, m_material);
+
+    RenderContext ctx2;
+    ctx2.window = ctx.window;
+    ctx2.camera = ctx.camera;
+    ctx2.source = ctx.target;
+    ctx2.target = ctx.source;
+
+    // Copy back to source
+    Blit(ctx2);
+
+    // Vertical pass
+    m_material->SetVector2D("pixelSpacement", Vector2D(0, 1.0f / ctx.source->GetHeight()));
+    Graphics::GetInstance()->RenderImage(ctx.window, ctx.target, m_shader, m_material);
 }
 
-std::vector<float> GaussianBlur::ComputeKernal(int radius, float sigma)
+std::vector<float> GaussianBlurEffect::ComputeKernel(int radius, float sigma)
 {
-	std::vector<float> kernel;
-	float sum = 0.0f;
-	for (int i = -radius; i <= radius; i++)
-	{
-		float value = Gauss(i, sigma);
-		kernel.push_back(value);
-		sum += value;
-	}
+    std::vector<float> kernel;
+    float sum = 0.0f;
 
-	float factor = 1.0f / sum;
-	for (int i = 0; i < kernel.size(); i++)
-		kernel[i] *= factor;
+    for (int i = -radius; i <= radius; i++)
+    {
+        float value = Gauss(i, sigma);
+        kernel.push_back(value);
+        sum += value;
+    }
 
-	return kernel;
+    float invSum = 1.0f / sum;
+    for (float& k : kernel)
+        k *= invSum;
+
+    return kernel;
 }
 
-float GaussianBlur::Gauss(float x, float sigma)
+float GaussianBlurEffect::Gauss(float x, float sigma)
 {
-	float sigmaSQ = sigma * sigma;
-	return expf(-(x * x) / (2.0f * sigmaSQ)) / (sqrtf(2.0f * Mathf::PI) * sigma);
-}
-
-float GaussianBlur::GetRadius()
-{
-	return m_radius;
-}
-
-void GaussianBlur::SetRadius(float radius)
-{
-	if (radius != m_radius)
-	{
-		m_radius = Mathf::Clamp(radius, 1, MaxRadius);
-		updateKernel = true;
-	}
-}
-
-float GaussianBlur::GetSigma()
-{
-	return m_sigma;
-}
-
-void GaussianBlur::SetSigma(float sigma)
-{
-	if (sigma != m_sigma)
-	{
-		m_sigma = sigma;
-		updateKernel = true;
-	}
+    float sigmaSq = sigma * sigma;
+    return expf(-(x * x) / (2.0f * sigmaSq)) / (sqrtf(2.0f * Mathf::PI) * sigma);
 }

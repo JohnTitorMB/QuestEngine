@@ -142,6 +142,31 @@ void Texture::SetMagnification(MagnificationFilter magnificationFilter, int laye
 	glTexParameteri((int)GetTextureLayerType(layer), GL_TEXTURE_MAG_FILTER, (GLint)m_layerTextureInfos[layer].m_magnificationFilter);
 }
 
+void Texture::SetTextureConversionMode(TextureConversionMode textureConversionMode, int layer)
+{
+	m_layerTextureInfos[layer].m_textureConversionMode = textureConversionMode;
+	RefreshTextureData(layer);
+}
+
+void Texture::SetTextureColorSpace(ColorManagement::RGBColorSpaceType colorSpace, int layer)
+{
+	m_layerTextureInfos[layer].m_colorSpace = colorSpace;
+	RefreshTextureData(layer);
+}
+
+void Texture::SetTextureColorManagementParam(ColorManagement::RGBColorSpaceType colorSpace, TextureConversionMode textureConversionMode, int layer)
+{
+	m_layerTextureInfos[layer].m_textureConversionMode = textureConversionMode;
+	m_layerTextureInfos[layer].m_colorSpace = colorSpace;
+	RefreshTextureData(layer);
+}
+
+void Texture::RefreshTextureData(int layer)
+{
+
+}
+
+
 MinificationFilter Texture::GetMinification(int layer)const
 {
 	return m_layerTextureInfos[layer].m_minificationFilter;
@@ -246,4 +271,9 @@ float Texture::GetHeight() const
 int Texture::GetSubLayerCount() const
 {
 	return m_layerTextureInfos.size();
+}
+
+const Texture::LayerTextureInfo Texture::GetTextureLayerInfo(int layer) const
+{
+	return m_layerTextureInfos[layer];
 }

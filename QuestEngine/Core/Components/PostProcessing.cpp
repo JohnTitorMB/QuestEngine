@@ -1,5 +1,5 @@
 #include "PostProcessing.h"
-
+#include "../PostProcessing/EffectRenderer.h"
 
 PostProcessing::PostProcessing() : Component()
 {
@@ -9,7 +9,6 @@ PostProcessing::PostProcessing() : Component()
 PostProcessing::PostProcessing(const PostProcessing& postProcessing) : Component(postProcessing)
 {
 	CreatePostProcessRenderTexture();
-	m_effects = postProcessing.m_effects;
 }
 
 void PostProcessing::Start()
@@ -41,38 +40,142 @@ Component* PostProcessing::Clone()
 void PostProcessing::AssignPointerAndReference()
 {
 	Component::AssignPointerAndReference();
+    PostProcessing* basePostProcessing = (PostProcessing*)baseObject;
+
+    if (basePostProcessing->m_postProcessingVolumes.size() > 0)
+    {
+        for (auto* var : basePostProcessing->m_postProcessingVolumes)
+        {
+            m_postProcessingVolumes.push_back((PostProcessingVolume*)var->clonnedObject);
+        }
+    }
 }
 
-void PostProcessing::DisplayEffects(Window* window, RenderTexture2D* renderTextureSource,CameraComponent* cameraComponent)
+void PostProcessing::AddPostProcessingVolume(PostProcessingVolume* volume) {
+	m_postProcessingVolumes.push_back(volume);
+}
+
+void PostProcessing::DisplayEffects(Window* window, RenderTexture2D* source,CameraComponent* camera)
 {
-	int viewportWidth = window->GetWidth();
-	int viewportHeight = window->GetHeight();
-	if (renderTextureSource)
-	{
-		viewportWidth = renderTextureSource->GetWidth();
-		viewportHeight = renderTextureSource->GetHeight();
-	}
-	
-	float bCornerX = cameraComponent->m_viewportBottomCornerX * viewportWidth;
-	float bCornerY = cameraComponent->m_viewportBottomCornerY * viewportHeight;
+    if (!camera || !window) return;
 
-	float tCornerX = cameraComponent->m_viewportTopCornerX * viewportWidth;
-	float tCornerY = cameraComponent->m_viewportTopCornerY * viewportHeight;
+    Vector3D camPos = camera->GetWorldPosition();
 
-	m_renderTexture->Resize(tCornerX - bCornerX, tCornerY - bCornerY);
+    struct WeightedEffectEntry {
+        std::shared_ptr<EffectSettings> setting;
+        float weight;
+        int order;
+    };
+
+    std::vector<WeightedEffectEntry> allEntries;
+
+    for (auto* volume : m_postProcessingVolumes) {
+        if (!volume) continue;
+
+        float weight = 0.0f;
+        if (volume->IsGlobal()) {
+             weight = 1.0f;
+        }
+        else {
+            Vector3D boxPos = volume->GetWorldPosition();
+            Vector3D boxScale = volume->GetWorldScale();
+            Quaternion boxRot = volume->GetWorldRotation();
+
+            if (IsPointOnBox(camPos, boxPos, boxRot, boxScale)) {
+                weight = 1.0f; 
+            }
+        }
+
+        if (weight > 0.0f) {
+            const auto& effects = volume->GetEffects();
+            for (int i = 0; i < effects.size(); ++i) {
+                allEntries.push_back({ effects[i], weight, i });
+            }
+        }
+    }
+
+    // 3. Construire la pipeline de rendu blendée
+    struct RuntimeEffectInstance {
+        std::vector<std::pair<std::shared_ptr<EffectSettings>, float>> weightedEffects;
+        float averageOrder = 0.0f;
+    };
+
+    std::vector<RuntimeEffectInstance> pipeline;
+
+    while (!allEntries.empty()) {
+        auto current = allEntries.front();
+        std::type_index type = current.setting->GetTypeIndex();
+        int order = current.order;
+        allEntries.erase(allEntries.begin());
+
+        RuntimeEffectInstance instance;
+        instance.weightedEffects.emplace_back(current.setting, current.weight);
+        instance.averageOrder = static_cast<float>(order);
+
+        for (auto it = allEntries.begin(); it != allEntries.end(); ) {
+            if (it->setting->GetTypeIndex() == type && it->order == order) {
+                instance.weightedEffects.emplace_back(it->setting, it->weight);
+                instance.averageOrder += static_cast<float>(it->order);
+                it = allEntries.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        instance.averageOrder /= static_cast<float>(instance.weightedEffects.size());
+        pipeline.push_back(instance);
+    }
+
+    // 4. Trier par ordre d'application
+    std::sort(pipeline.begin(), pipeline.end(), [](const auto& a, const auto& b) {
+        return a.averageOrder < b.averageOrder;
+        });
+
+    // 5. Blending
+    std::vector<std::shared_ptr<EffectSettings>> blended;
+    for (const auto& instance : pipeline) {
+        if (instance.weightedEffects.empty()) continue;
+        blended.push_back(instance.weightedEffects[0].first->BlendWith(instance.weightedEffects));
+    }
+
+    // 6. Application des effets
+    int viewportWidth = window->GetWidth();
+    int viewportHeight = window->GetHeight();
+    if (source)
+    {
+        viewportWidth = source->GetWidth();
+        viewportHeight = source->GetHeight();
+    }
+
+    float bCornerX = camera->m_viewportBottomCornerX * viewportWidth;
+    float bCornerY = camera->m_viewportBottomCornerY * viewportHeight;
+
+    float tCornerX = camera->m_viewportTopCornerX * viewportWidth;
+    float tCornerY = camera->m_viewportTopCornerY * viewportHeight;
+
+    m_renderTexture->Resize(tCornerX - bCornerX, tCornerY - bCornerY);
 
 
-	for (std::shared_ptr<Effect> effect : m_effects)
-	{
-		if (effect->m_enable)
-		{
-			RenderTexture2D::Blit(renderTextureSource, m_renderTexture, bCornerX, bCornerY, tCornerX, tCornerY,
-				0, 0, m_renderTexture->GetWidth(), m_renderTexture->GetHeight(),
-				BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
 
-			effect->DisplayEffect(window, m_renderTexture, renderTextureSource, cameraComponent);
-		}
-	}
+    RenderContext ctx;
+    ctx.window = window;
+    ctx.camera = camera;
+
+
+    for (size_t i = 0; i < blended.size(); ++i) {
+        ctx.source = m_renderTexture;
+        ctx.target = source; 
+
+        if (blended[i]) {
+
+            		RenderTexture2D::Blit(source, m_renderTexture, bCornerX, bCornerY, tCornerX, tCornerY,
+			0, 0, m_renderTexture->GetWidth(), m_renderTexture->GetHeight(),
+			BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
+
+            EffectRegistry::Instance().Render(ctx, blended[i]);
+        }
+    }
 }
 
 void PostProcessing::CreatePostProcessRenderTexture()
@@ -85,26 +188,4 @@ void PostProcessing::CreatePostProcessRenderTexture()
 
 	layerTextureInfo.m_generateMimpap = false;
 	m_renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE, 0, layerTextureInfo);
-}
-
-void PostProcessing::AddEffect(std::shared_ptr<Effect> effect)
-{
-	effect->Init();
-	m_effects.push_back(effect);
-}
-
-void Effect::Blit(Window* window, RenderTexture2D* rtFrom, RenderTexture2D* rtTo, CameraComponent* camera)
-{
-	int viewportWidth = rtFrom ? rtFrom->GetWidth() : window->GetWidth();
-	int viewportHeight = rtFrom ? rtFrom->GetHeight() : window->GetHeight();
-
-	float bCornerX = camera->m_viewportBottomCornerX * viewportWidth;
-	float bCornerY = camera->m_viewportBottomCornerY * viewportHeight;
-
-	float tCornerX = camera->m_viewportTopCornerX * viewportWidth;
-	float tCornerY = camera->m_viewportTopCornerY * viewportHeight;
-
-	RenderTexture2D::Blit(rtFrom, rtTo, bCornerX, bCornerY, tCornerX, tCornerY,
-		0, 0, rtTo->GetWidth(), rtTo->GetHeight(),
-		BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
 }

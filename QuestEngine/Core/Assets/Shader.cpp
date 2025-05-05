@@ -2,14 +2,73 @@
 #include <glad/glad.h>
 #include <iostream>
 #include "../../Utilities/FileSystem.h"
+#include "../ColorManagement/ColorConversion.h"
+#include "../ColorManagement/ColorManagement.h"
+#include <fstream>
+#include <sstream>
+#include <regex>
+#include <unordered_set>
+
+
 Shader::Shader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
-	std::string vertexShaderSource = FileSystem::get_file_contents(vertexShaderFilePath);
-	std::string fragmentShaderSource = FileSystem::get_file_contents(fragmentShaderFilePath);
+	std::string vertexShaderSource = PreProsessShader(vertexShaderFilePath);
+	std::string fragmentShaderSource = PreProsessShader(fragmentShaderFilePath);
 
 	int vertexShaderIndex = ConfigureVertexShader(vertexShaderSource.c_str());
 	int fragementShaderIndex = ConfigureFragmentShader(fragmentShaderSource.c_str());
 	ConfigureShaderProgram(vertexShaderIndex, fragementShaderIndex);
+}
+
+std::string Shader::PreProsessShader(std::string shaderFilePath)
+{
+	// Si déjà chargé, retour immédiat
+	auto it = m_loadedGLSLFiles.find(shaderFilePath);
+	if (it != m_loadedGLSLFiles.end()) {
+		return it->second;
+	}
+
+	// Protection contre les cycles
+	static std::unordered_set<std::string> filesBeingProcessed;
+	if (filesBeingProcessed.count(shaderFilePath)) {
+		throw std::runtime_error("Cycle detected in shader includes with file: " + shaderFilePath);
+	}
+	filesBeingProcessed.insert(shaderFilePath);
+
+	std::string contents = FileSystem::get_file_contents(shaderFilePath);
+	std::stringstream processed;
+
+	std::regex includeRegex("^\\s*#include\\s+\"([^\"]+)\"\\s*$");
+	std::stringstream contentStream(contents);
+	std::string line;
+
+	// Trouver le répertoire du fichier courant
+	std::string directory;
+	size_t lastSlash = shaderFilePath.find_last_of("/\\");
+	if (lastSlash != std::string::npos) {
+		directory = shaderFilePath.substr(0, lastSlash + 1);
+	}
+
+	while (std::getline(contentStream, line)) {
+		std::smatch matches;
+		if (std::regex_match(line, matches, includeRegex)) {
+			std::string includePath = matches[1].str();
+			std::string fullIncludePath = directory + includePath;
+			processed << PreProsessShader(fullIncludePath);
+		}
+		else {
+			processed << line << '\n';
+		}
+	}
+
+	std::string finalShaderCode = processed.str();
+
+	// Cache dans m_loadedGLSLFiles
+	m_loadedGLSLFiles[shaderFilePath] = finalShaderCode;
+
+	filesBeingProcessed.erase(shaderFilePath);
+
+	return finalShaderCode;
 }
 
 void Shader::UseShader()
@@ -108,11 +167,28 @@ void Shader::SetUniformVector4D(std::string name, Vector4D value)
 }
 
 
-void Shader::SetUniformColor(std::string name, Color value)
+void Shader::SetUniformColor(std::string name, ColorRGB value)
 {
+	LinearColorRGB linear = value.ToLinear();
+	CustomColorRGB c = ColorConversion::ConvertRGBColor(linear, ColorManagement::Instance().GetGPUWorkingSpace());
 	UseShader();
 	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
-	glUniform4f(location, value.m_r, value.m_g, value.m_b, value.m_a);
+	glUniform4f(location, c.m_r, c.m_g, c.m_b, value.m_alpha);
+}
+
+void Shader::SetUniformColorY(std::string name, ColorRGBY value)
+{
+	LinearColorRGB linear = value.ToLinear();
+	CustomColorRGB c = ColorConversion::ConvertRGBColor(linear, ColorManagement::Instance().GetGPUWorkingSpace());
+
+	Vector4D encoded = Vector4D(-1.0f + 2.0f * c.m_r,
+		-1.0f + 2.0f * c.m_g,
+		-1.0f + 2.0f * c.m_b,
+		linear.m_alpha);
+
+	UseShader();
+	int location = glGetUniformLocation(m_shaderProgram, name.c_str());
+	glUniform4f(location, encoded.m_x, encoded.m_y, encoded.m_z, encoded.m_w);
 }
 
 void Shader::SetUniformVector2D(std::string name, Vector2D value)

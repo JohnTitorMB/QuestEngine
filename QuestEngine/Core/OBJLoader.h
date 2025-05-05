@@ -6,6 +6,7 @@
 #include "Assets/Mesh.h"
 #include <unordered_map>
 #include "Assets/Material.h"
+#include "ColorRGB.h"
 #include <fstream>
 #include <mutex>
 
@@ -60,15 +61,15 @@ namespace OBJLibrary
             m_ambientMapPath = "";
             m_diffuseMapPath = "";
             m_specularMapPath = "";
-            m_ambientColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-            m_diffuseColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-            m_specularColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+            m_ambientColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+            m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+            m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
             m_shininess = 32;
         }
         std::string m_materialName;
-        Color m_ambientColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-        Color m_diffuseColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-        Color m_specularColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+        ColorRGB m_ambientColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+        ColorRGB m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+        ColorRGB m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
         float m_shininess = 32;
         float m_alpha = 1.0f;
 
@@ -101,7 +102,7 @@ namespace OBJLibrary
         static inline long ReadLongFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline void ReadVector2DFromBuffer(const std::vector<char>& buffer, size_t& pos, Vector2D& result);
         static inline void ReadVector3DFromBuffer(const std::vector<char>& buffer, size_t& pos, Vector3D& result);
-        static inline void ReadRGBColorFromBuffer(const std::vector<char>& buffer, size_t& pos, Color& result);
+        static inline void ReadColorFromBuffer(const std::vector<char>& buffer, size_t& pos, ColorRGB& result);
         static inline void SkipLine(const std::vector<char>& buffer, size_t& pos);
         static inline std::string ReadRemainStringFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline std::string GetFullPath(const std::filesystem::path& path, std::string subFilePath);

@@ -6,7 +6,7 @@
 #include "../Component.h"
 #include "SceneComponent.h"
 #include "../Assets/RenderTexture2D.h"
-#include "../Color.h"
+#include "../ColorRGB.h"
 struct ViewportRect
 {
 	int leftBottom;
@@ -88,7 +88,7 @@ public:
 	float m_viewportTopCornerX = 1.0f;
 	float m_viewportTopCornerY = 1.0f;
 
-	Color m_clearColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
+	ColorRGB m_clearColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
 	bool m_isClearRedMaskEnable = true;
 	bool m_isClearBlueMaskEnable = true;
 	bool m_isClearGreenMaskEnable = true;

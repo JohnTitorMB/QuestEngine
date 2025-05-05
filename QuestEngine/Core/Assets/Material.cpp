@@ -2,10 +2,7 @@
 
 Material::Material()
 {
-	/*
-	m_diffuseTexture = nullptr;
-	m_specularTexture = nullptr;
-	m_ambientTexture = nullptr;*/
+	
 }
 
 const std::unordered_map<std::string, int>& Material::GetIntMap()
@@ -48,6 +45,16 @@ const std::unordered_map<std::string, std::vector<float>>& Material::GetFloatArr
     return m_floatArrayKeyValue;
 }
 
+const std::unordered_map<std::string, ColorRGB>& Material::GetColorRGBMap()
+{
+    return m_colorKeyValue;
+}
+
+const std::unordered_map<std::string, ColorRGBY>& Material::GetColorYMap()
+{
+    return m_colorRGBYKeyValue;
+}
+
 void Material::SetInt(std::string key, int value)
 {
 	m_integerKeyValue[key] = value;
@@ -73,9 +80,14 @@ void Material::SetVector4D(std::string key, Vector4D value)
 	m_vector4DKeyValue[key] = value;
 }
 
-void Material::SetColor(std::string key, Color value)
+void Material::SetColor(std::string key, ColorRGB value)
 {
-	m_vector4DKeyValue[key] = Vector4D(value.m_r, value.m_g, value.m_b, value.m_a);
+    m_colorKeyValue[key] = value;
+}
+
+void Material::SetColorY(std::string key, ColorRGBY value)
+{
+    m_colorRGBYKeyValue[key] = value;
 }
 
 void Material::SetTexture(std::string key, Texture* value, int subLayerIndex)
@@ -129,12 +141,21 @@ Vector4D Material::GetVector4D(const std::string& key) const {
     return Vector4D(); 
 }
 
-Color Material::GetColor(const std::string& key) const {
-    auto it = m_vector4DKeyValue.find(key); 
-    if (it != m_vector4DKeyValue.end()) {
-        return Color(it->second.m_x, it->second.m_y, it->second.m_z, it->second.m_w);
-    }
-    return Color(); 
+ColorRGB Material::GetColor(const std::string& key) const {
+    auto it = m_colorKeyValue.find(key);
+    if (it != m_colorKeyValue.end())
+        return it->second;
+
+    return ColorRGB(0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+ColorRGBY Material::GetColorY(const std::string& key) const
+{
+    auto it = m_colorRGBYKeyValue.find(key);
+    if (it != m_colorRGBYKeyValue.end())
+        return it->second;
+
+    return ColorRGBY(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 Texture* Material::GetTexture(const std::string& key) const {
@@ -161,3 +182,5 @@ std::vector<float> Material::GetFloatArray(const std::string& key) const
     }
     return std::vector<float>();
 }
+
+

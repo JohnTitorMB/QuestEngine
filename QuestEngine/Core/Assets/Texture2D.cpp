@@ -1,4 +1,8 @@
 #include "Texture2D.h"
+#include "../ColorManagement/Color.h"
+#include "../ColorManagement/RGBModel.h"
+#include "../ColorManagement/ColorConversion.h"
+#include "../../Math/Mathf.h"
 
 Texture2D::Texture2D(std::string filePath) : Texture(filePath)
 {
@@ -20,8 +24,13 @@ Texture2D::Texture2D(std::string filePath) : Texture(filePath)
 void Texture2D::SetTextureInternalFormat(InternalFormat internalFormat)
 {
 	m_layerTextureInfos[0].m_internalFormat = internalFormat;
+	RefreshTextureData(0);
+}
+
+void Texture2D::RefreshTextureData(int layer)
+{
 	unsigned char* data = LoadTexture(m_path);
-	
+
 	if (data)
 	{
 		UpdateTextureData(data);
@@ -44,21 +53,57 @@ void Texture2D::SetMipmapTexture(int level, std::string filePath)
 void Texture2D::UpdateTextureData(const unsigned char* data)
 {
 
-	glBindTexture((int)m_textureType, m_layerTextureInfos[0].m_textureID);
-	glTexImage2D((int)m_textureType, 0, (int)m_layerTextureInfos[0].m_internalFormat, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    auto& info = m_layerTextureInfos[0];
 
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)m_layerTextureInfos[0].m_minificationFilter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)m_layerTextureInfos[0].m_magnificationFilter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)m_layerTextureInfos[0].m_wrapHorizontalParameter);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)m_layerTextureInfos[0].m_wrapVerticalParameter);
+    glBindTexture((int)m_textureType, info.m_textureID);
 
-	glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)m_layerTextureInfos[0].m_mipmapBaseLevel);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)m_layerTextureInfos[0].m_mipmapMaxLevel);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)m_layerTextureInfos[0].m_mipmapMinLOD);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)m_layerTextureInfos[0].m_mipmapMaxLOD);
-	glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)m_layerTextureInfos[0].m_mipmapLODBias);
-	glGenerateMipmap((int)m_textureType);
+    // --- CPU Conversion ---
+    if (info.m_textureConversionMode == TextureConversionMode::CPUConvert)
+    {
+        std::vector<unsigned char> convertedData(m_width * m_height * 4);
 
-	SetAnisotropy(m_layerTextureInfos[0].m_anisotropyValue);
+        auto srcColorSpace = ColorManagement::GetRGBColorSpaceFromType(info.m_colorSpace);
+        auto dstColorSpace = ColorManagement::Instance().GetGPUWorkingSpace();
+
+        for (int i = 0; i < m_width * m_height; ++i)
+        {
+            std::unique_ptr<ColorModel> model = std::make_unique<RGBModel>(
+                data[i * 4 + 0] / 255.0f,
+                data[i * 4 + 1] / 255.0f,
+                data[i * 4 + 2] / 255.0f
+            );
+
+            Color color(std::move(model), srcColorSpace, data[i * 4 + 3] / 255.0f);
+            Color converted = ColorConversion::Convert(color, ColorModelType::RGB, dstColorSpace);
+            const RGBModel& rgb = static_cast<const RGBModel&>(converted.GetColorModel());
+
+            convertedData[i * 4 + 0] = static_cast<unsigned char>(Mathf::Clamp(rgb.m_r * 255.0f, 0.0f, 255.0f));
+            convertedData[i * 4 + 1] = static_cast<unsigned char>(Mathf::Clamp(rgb.m_g * 255.0f, 0.0f, 255.0f));
+            convertedData[i * 4 + 2] = static_cast<unsigned char>(Mathf::Clamp(rgb.m_b * 255.0f, 0.0f, 255.0f));
+            convertedData[i * 4 + 3] = static_cast<unsigned char>(Mathf::Clamp(converted.m_alpha * 255.0f, 0.0f, 255.0f));
+        }
+
+        glTexImage2D((int)m_textureType, 0, (int)info.m_internalFormat, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, convertedData.data());
+    }
+    else
+    {
+        // No conversion
+        glTexImage2D((int)m_textureType, 0, (int)info.m_internalFormat, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    }
+
+    // --- Texture parameters ---
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_FILTER, (GLint)info.m_minificationFilter);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MAG_FILTER, (GLint)info.m_magnificationFilter);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_S, (GLint)info.m_wrapHorizontalParameter);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_WRAP_T, (GLint)info.m_wrapVerticalParameter);
+
+    glTexParameteri((int)m_textureType, GL_TEXTURE_BASE_LEVEL, (GLint)info.m_mipmapBaseLevel);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LEVEL, (GLint)info.m_mipmapMaxLevel);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MIN_LOD, (GLint)info.m_mipmapMinLOD);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_MAX_LOD, (GLint)info.m_mipmapMaxLOD);
+    glTexParameteri((int)m_textureType, GL_TEXTURE_LOD_BIAS, (GLint)info.m_mipmapLODBias);
+    glGenerateMipmap((int)m_textureType);
+
+    SetAnisotropy(info.m_anisotropyValue);
 
 }

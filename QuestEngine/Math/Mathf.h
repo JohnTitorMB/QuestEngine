@@ -14,6 +14,9 @@ public:
 	static float PingPong(float t, float length);
 	static float Repeat(float t, float length);
 	static float Lerp(float a, float b, float t);
+	static float Max(float a, float b, float c);
+	static float Min(float a, float b, float c);
+	static float Min(float a, float b);
 };
 
 

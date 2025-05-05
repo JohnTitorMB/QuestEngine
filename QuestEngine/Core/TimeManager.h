@@ -22,6 +22,8 @@ class TimeManager
 	TimeManager(TimeManager& other) = delete;
 	~TimeManager();
 
+	static void Destroy();
+
 public :
 	float GetDeltaTime()const;
 	float GetTime()const;

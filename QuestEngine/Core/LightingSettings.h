@@ -1,10 +1,10 @@
 #ifndef _LIGHTINGSETTINGS_H_
 #define _LIGHTINGSETTINGS_H_
-#include "Color.h"
+#include "ColorRGB.h"
 class LightingSettings
 {
 public:
-	static Color m_globalAmbiantColor;
+	static ColorRGB m_globalAmbiantColor;
 };
 #endif
 

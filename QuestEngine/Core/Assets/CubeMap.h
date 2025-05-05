@@ -19,7 +19,7 @@ public:
 	CubeMap(std::string filePath);
 	void SetMipmapTexture(int level, std::string filePath, CubeMapFace cubeMapFace);
 	void SetTextureInternalFormat(InternalFormat internalFormat);
-
+	void RefreshTextureData(int layer) override;
 };
 
 #endif // _CUBEMAP_H_

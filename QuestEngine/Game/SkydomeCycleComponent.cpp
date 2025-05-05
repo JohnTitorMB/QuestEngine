@@ -30,11 +30,11 @@ void SkydomeCycleComponent::Update()
 
     float normalisedTime = time / cycleDuration;
 
-    Color startColorA = Color();
-    Color startColorB = Color();
+    ColorRGB startColorA = ColorRGB();
+    ColorRGB startColorB = ColorRGB();
 
-    Color endColorA = Color();
-    Color endColorB = Color();
+    ColorRGB endColorA = ColorRGB();
+    ColorRGB endColorB = ColorRGB();
     float interpolationTime = 0.0f;
 
     float sunAngle = 0.0f;
@@ -127,8 +127,8 @@ void SkydomeCycleComponent::Update()
         sunAngle = 357 + interpolationTime * (360 - 357);  
     }
 
-    Color colorA = Color::Lerp(startColorA, endColorA, interpolationTime);
-    Color colorB = Color::Lerp(startColorB, endColorB, interpolationTime);
+    ColorRGB colorA = ColorRGB::Lerp(startColorA, endColorA, interpolationTime);
+    ColorRGB colorB = ColorRGB::Lerp(startColorB, endColorB, interpolationTime);
     skyDomeMaterial->SetColor("colorA", colorA);
     skyDomeMaterial->SetColor("colorB", colorB);
 

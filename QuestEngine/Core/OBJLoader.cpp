@@ -42,7 +42,7 @@ Entity* OBJLoader::CreateSceneEntity(std::string entityName, EntityGroupAsset* e
 Material* OBJLibrary::OBJLoader::CreateMaterial(std::string assetName,MaterialData materialData)
 {
 	Texture* defaultTexture = AssetsManager::GetAsset<Texture>("White");
-	Color whiteColor = Color(1.0f,1.0f,1.0f,1.0f);
+	ColorRGB whiteColor = ColorRGB(1.0f,1.0f,1.0f,1.0f);
 	Material* material = AssetsManager::CreateBlinnPhongMaterial(assetName, defaultTexture, defaultTexture, defaultTexture, whiteColor, whiteColor, whiteColor, 32);
 	material->SetColor("material.ambientColor", materialData.m_ambientColor);
 	material->SetColor("material.diffuseColor", materialData.m_diffuseColor);
@@ -149,7 +149,7 @@ inline void OBJLibrary::OBJLoader::ReadVector3DFromBuffer(const std::vector<char
 	return;
 }
 
-inline void OBJLibrary::OBJLoader::ReadRGBColorFromBuffer(const std::vector<char>& buffer, size_t& pos, Color& result)
+inline void OBJLibrary::OBJLoader::ReadColorFromBuffer(const std::vector<char>& buffer, size_t& pos, ColorRGB& result)
 {
 	const char* start = buffer.data() + pos;
 
@@ -169,7 +169,7 @@ inline void OBJLibrary::OBJLoader::ReadRGBColorFromBuffer(const std::vector<char
 	float b = std::strtof(start, &end);
 	pos += end - start;
 
-	result = Color(r, g, b, 1);
+	result = ColorRGB(r, g, b, 1);
 	return;
 }
 
@@ -619,24 +619,24 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 		if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'a')
 		{
 			current_position += 3;
-			Color color = Color();
-			ReadRGBColorFromBuffer(buffer, current_position, color);
+			ColorRGB color = ColorRGB();
+			ReadColorFromBuffer(buffer, current_position, color);
 			currentMaterialData.m_ambientColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'd')
 		{
 			current_position += 3;
-			Color color = Color();
-			ReadRGBColorFromBuffer(buffer, current_position, color);
+			ColorRGB color = ColorRGB();
+			ReadColorFromBuffer(buffer, current_position, color);
 			currentMaterialData.m_diffuseColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 's')
 		{
 			current_position += 3;
-			Color color = Color();
-			ReadRGBColorFromBuffer(buffer, current_position, color);
+			ColorRGB color = ColorRGB();
+			ReadColorFromBuffer(buffer, current_position, color);
 			currentMaterialData.m_specularColor = color;
 			SkipLine(buffer, current_position);
 		}

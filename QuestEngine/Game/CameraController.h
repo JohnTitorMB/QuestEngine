@@ -51,7 +51,7 @@ public:
 	float m_deltaX = 0;
 	float m_deltaY = 0;
 
-	float movementSpeed = 0.03f;
+	float movementSpeed = 0.1f;
 
 	void DigitalInputTestStarted(InputCallbackData data);
 	void DigitalInputTestOnGoing(InputCallbackData data);

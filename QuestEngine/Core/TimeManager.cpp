@@ -30,7 +30,12 @@ TimeManager::~TimeManager()
 
 	m_timers.clear();
 
-	std::cout << "Destroy TimerManager" << std::endl;
+}
+
+void TimeManager::Destroy()
+{
+	delete m_instance;
+	m_instance = nullptr;
 }
 
 float TimeManager::GetDeltaTime() const

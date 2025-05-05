@@ -1,5 +1,5 @@
-#ifndef _GAUSSIAN_BLUR_H_
-#define _GAUSSIAN_BLUR_H_
+#ifndef _GAUSSIAN_BLUR_EFFECT_H_
+#define _GAUSSIAN_BLUR_EFFECT_H_
 
 #include "../Components/PostProcessing.h"
 #include "../Component.h"
@@ -7,33 +7,49 @@
 #include "../Components/Camera.h"
 #include "../Assets/Material.h"
 #include "../Assets/Shader.h"
+#include "../AssetsManager.h"
+#include "../Graphics.h"
+#include "EffectSettings.h"
+#include "EffectRenderer.h"
+#include "../../Math/Mathf.h"
 
-class GaussianBlur : public Effect
+//=====================
+// Gaussian Blur Settings
+//=====================
+class GaussianBlurSettings : public EffectSettings
 {
-	Material* m_material;
-	Shader* m_shader;
-	float m_radius = 1.0f;
-	bool autoSigma = true;
-	float m_sigma = 1.0f / 3.0f;
-	const float MaxRadius = 1021;
-	
-	bool updateKernel = false;
-	float m_sigmaFactor = 1.0f/3.0f;
-	void UpdateKernel();
 public:
-	Color m_color = Color(1, 0, 0, 1);
-	void Init() override;
-	void DisplayEffect(Window* window, RenderTexture2D* renderTextureSource, RenderTexture2D* renderTextureTarget, CameraComponent* cameraComponent) override;
+    float radius = 1.0f;
+    float sigma = 1.0f / 3.0f;
+    bool autoSigma = true;
+    float sigmaFactor = 1.0f / 3.0f;
+    const float MaxRadius = 513.0f;
 
-	std::vector<float> ComputeKernal(int radius, float sigma);
-	float Gauss(float x, float sigma);
+    float GetSigmaFinal() const {
+        return autoSigma ? radius * sigmaFactor : sigma;
+    }
 
-	float GetRadius();
-	void SetRadius(float radius);
+    std::shared_ptr<EffectSettings> BlendWith(const std::vector<std::pair<std::shared_ptr<EffectSettings>, float>>& others) const override;
 
-	float GetSigma();
-	void SetSigma(float sigma);
+    std::type_index GetTypeIndex() const override { return typeid(GaussianBlurSettings); }
+    const char* GetTypeName() const override { return "GaussianBlur"; }
+};
+
+//=====================
+// Gaussian Blur Effect
+//=====================
+class GaussianBlurEffect : public EffectRenderer<GaussianBlurEffect, GaussianBlurSettings>
+{
+public:
+    void Init() override;
+    void Render(const RenderContext& ctx, std::shared_ptr<GaussianBlurSettings> settings) override;
+
+private:
+    std::vector<float> ComputeKernel(int radius, float sigma);
+    float Gauss(float x, float sigma);
+
+    Material* m_material = nullptr;
+    Shader* m_shader = nullptr;
 };
 
 #endif
-

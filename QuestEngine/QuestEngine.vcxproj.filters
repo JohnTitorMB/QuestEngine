@@ -84,7 +84,7 @@
     <ClCompile Include="Core\Assets\Material.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Color.cpp">
+    <ClCompile Include="Core\ColorRGB.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="Core\Components\DirectionalLight.cpp">
@@ -216,6 +216,120 @@
     <ClCompile Include="Core\PostProcessing\ColorGrading.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ChromaticAdaptation.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ColorModel.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\HSLModel.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\HSVModel.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\LMSModel.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\RGBModel.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\XYZModel.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\Chromaticity.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\CIEXYZColorSpace.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ColorSpace.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\Gamut.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\LinearTransferCurve.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\LMSColorSpace.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\RGBColorSpace.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\sRGBTransferCurve.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\TransferCurve.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ColorManagement.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\Color.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ColorBase.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LinearColorRGB.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ColorRGBBase.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ColorConversion.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Library\ImGui\src\imgui.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Library\ImGui\src\imgui_draw.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Library\ImGui\src\imgui_tables.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Library\ImGui\src\imgui_widgets.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Library\ImGui\backends\src\imgui_impl_glfw.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Library\ImGui\backends\src\imgui_impl_opengl3.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ACESccTransferCurve.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorManagement\ACEScctTransferCurve.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ColorRGBY.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CustomColorRGB.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Components\PostProcessingVolume.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SimpleEditor.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RuntimePipeline.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PostProcessing\EffectRenderer.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PostProcessing\EffectSettings.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PostProcessing\EffectRegistry.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Window.h">
@@ -281,7 +395,7 @@
     <ClInclude Include="Core\Assets\Material.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Color.h">
+    <ClInclude Include="Core\ColorRGB.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="Core\Components\DirectionalLight.h">
@@ -413,6 +527,111 @@
     <ClInclude Include="Core\PostProcessing\ColorGrading.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ChromaticAdaptation.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ColorModel.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ColorModelType.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\HSLModel.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\HSVModel.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\LMSModel.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\RGBModel.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\XYZModel.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\Chromaticity.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\CIEXYZColorSpace.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ColorSpace.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\Gamut.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\LinearTransferCurve.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\LMSColorSpace.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\RGBColorSpace.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\sRGBTransferCurve.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\TransferCurve.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ColorManagement.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\Color.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ColorBase.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LinearColorRGB.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ColorRGBBase.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ColorConversion.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ImGuiCustom.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ACESccTransferCurve.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorManagement\ACEScctTransferCurve.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ColorRGBY.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CustomColorRGB.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Components\PostProcessingVolume.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SimpleEditor.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RuntimePipeline.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PostProcessing\RenderContext.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PostProcessing\EffectRenderer.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PostProcessing\EffectSettings.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PostProcessing\EffectRegistry.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\DefaultFragmentShader.frag" />
@@ -424,6 +643,8 @@
     <None Include="Assets\FragCoordZShader.frag" />
     <None Include="Assets\LinearDepthShader.frag" />
     <None Include="Assets\BlinnPhongShaderFog.frag" />
+    <None Include="Assets\LUT2DShader.frag" />
+    <None Include="Assets\ColorManagement.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Texture.png">
@@ -478,6 +699,9 @@
       <Filter>Fichiers de ressources</Filter>
     </Image>
     <Image Include="Assets\PointLightTexture.png">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="Assets\LUT2D.png">
       <Filter>Fichiers de ressources</Filter>
     </Image>
   </ItemGroup>

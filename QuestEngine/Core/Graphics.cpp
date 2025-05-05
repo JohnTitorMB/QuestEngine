@@ -43,7 +43,7 @@ void Graphics::Clear(CameraComponent* camera, int x, int y, int width, int heigh
 	glScissor(x, y, width, height);
 	glStencilMask(camera->m_clearStencilMask);
 	glDepthMask(camera->m_isClearDepthMaskEnable);
-	glClearColor(camera->m_clearColor.m_r, camera->m_clearColor.m_g, camera->m_clearColor.m_b, camera->m_clearColor.m_a);
+	glClearColor(camera->m_clearColor.m_r, camera->m_clearColor.m_g, camera->m_clearColor.m_b, camera->m_clearColor.m_alpha);
 	glClearDepth(camera->m_clearDepthValue);
 	glClearStencil(camera->m_clearStencilValue);
 	glColorMask(camera->m_isClearRedMaskEnable, camera->m_isClearGreenMaskEnable, camera->m_isClearBlueMaskEnable, camera->m_isClearAlphaMaskEnable);
@@ -239,5 +239,5 @@ void Graphics::RenderImage(Window* window, RenderTexture2D* renderTextureTarget,
 	MeshRendererComponent* renderer = entity->GetComponent<MeshRendererComponent>();
 	renderer->SetShader(shader);
 	renderer->SetMaterial(material);
-	renderer->Draw(nullptr, std::set<LightComponent*>(), window);
+	renderer->Draw(nullptr, std::set<LightComponent*>(), window, renderTextureTarget);
 }

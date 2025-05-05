@@ -412,3 +412,9 @@ void InputSystem::InitInputCodeState()
 	m_inputsCurrentState[InputCode::E_MOUSE_SCROLL_X] = 0.0f;
 	m_inputsCurrentState[InputCode::E_MOUSE_SCROLL_Y] = 0.0f;
 }
+
+void InputSystem::Destroy()
+{
+	delete m_inputSystem;
+	m_inputSystem = nullptr;
+}

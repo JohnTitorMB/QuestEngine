@@ -1,6 +1,6 @@
 #ifndef  _LIGHT_H_
 #define _LIGHT_H_
-#include "../Color.h"
+#include "../ColorRGB.h"
 #include "../../Math/Vector3D.h"
 #include "../Component.h"
 #include "SceneComponent.h"
@@ -21,9 +21,9 @@ public:
 	};
 
 	LightType m_lightType;
-	Color m_ambiantColor;
-	Color m_diffuseColor;
-	Color m_specularColor;
+	ColorRGB m_ambiantColor;
+	ColorRGB m_diffuseColor;
+	ColorRGB m_specularColor;
 	float m_intensity = 1.0f;	
 
 public:

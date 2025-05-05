@@ -27,7 +27,7 @@ private :
 	InputSystem();
 	~InputSystem();
 	void InitInputCodeState();
-
+	static void Destroy();
 public:
 	static InputSystem* Instance();
 

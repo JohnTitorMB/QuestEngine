@@ -18,6 +18,9 @@ void MeshRendererComponent::SendMaterialToShader()const
 	const std::unordered_map<std::string, Vector2D> vector2DKeyValue = m_material->GetVector2DMap();
 	const std::unordered_map<std::string, Vector3D> vector3DKeyValue = m_material->GetVector3DMap();
 	const std::unordered_map<std::string, Vector4D> vector4DKeyValue = m_material->GetVector4DMap();
+	const std::unordered_map<std::string, ColorRGB> colorRGBKeyValue = m_material->GetColorRGBMap();
+	const std::unordered_map<std::string, ColorRGBY> colorRGBYKeyValue = m_material->GetColorYMap();
+
 	const std::unordered_map<std::string, Texture*> textureKeyValue = m_material->GetTextureMap();
 	std::unordered_map<std::string, int> textureSubLayerKeyValue = m_material->GetTextureSubLayerMap();
 	const std::unordered_map<std::string, std::vector<float>> floatArrayKeyValue = m_material->GetFloatArrayMap();
@@ -40,24 +43,52 @@ void MeshRendererComponent::SendMaterialToShader()const
 	for (auto pair : floatArrayKeyValue)
 		m_shader->SetUniformFloatArray(pair.first, pair.second);
 
+	for (auto pair : colorRGBKeyValue)
+	{
+		m_shader->SetUniformColor(pair.first, pair.second);
+	}
+
+	for (auto pair : colorRGBYKeyValue)
+	{
+		m_shader->SetUniformColorY(pair.first, pair.second);
+	}
+
 	int textureIndex = 0;
 	for (auto pair : textureKeyValue)
 	{
 		m_shader->SetUniformInt(pair.first, textureIndex);
-
+		std::string name = pair.first;
+		std::string colorSpaceName = name + "ColorSpace";
 		if (pair.second)
 		{
-			std::string name = pair.first;
-			if(textureSubLayerKeyValue[name] < pair.second->GetSubLayerCount())
+			if (textureSubLayerKeyValue[name] < pair.second->GetSubLayerCount())
+			{
+				Texture::LayerTextureInfo layerTextureInfo = pair.second->GetTextureLayerInfo(textureSubLayerKeyValue[name]);
+				if (layerTextureInfo.m_textureConversionMode == Texture::TextureConversionMode::GPUConvert)
+					m_shader->SetUniformInt(colorSpaceName, ColorManagement::RGBColorSpaceGPUIndex(layerTextureInfo.m_colorSpace));
+				else
+					m_shader->SetUniformInt(colorSpaceName, 0);
+
 				pair.second->Bind(textureIndex, textureSubLayerKeyValue[name]);
+			}
 			else
+			{
+				Texture::LayerTextureInfo layerTextureInfo = pair.second->GetTextureLayerInfo(0);
+				if (layerTextureInfo.m_textureConversionMode == Texture::TextureConversionMode::GPUConvert)
+					m_shader->SetUniformInt(colorSpaceName, ColorManagement::RGBColorSpaceGPUIndex(layerTextureInfo.m_colorSpace));
+				else
+					m_shader->SetUniformInt(colorSpaceName, 0);
 				pair.second->Bind(textureIndex, 0);
+			}
 		}
+		else
+			m_shader->SetUniformInt(colorSpaceName, 0);
+
 		textureIndex++;
 	}
 }
 
-void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window)
+void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window, RenderTexture2D* renderTexture2D)
 {
 	OnRenderEvent.Trigger(window, camera);
 	Shader* shader = m_shader;
@@ -148,7 +179,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 	glBlendEquationSeparate((int)m_RGBBlendingMode, (int)m_AlphaBlendingMode);
 	glBlendFuncSeparate((int)m_sourceRGBBlendingFactor, (int)m_destinationRGBBlendingFactor, (int)m_sourceAlphaBlendingFactor, (int)m_destinationAlphaBlendingFactor);
-	glBlendColor(m_blendColor.m_r, m_blendColor.m_g, m_blendColor.m_b, m_blendColor.m_a);
+	glBlendColor(m_blendColor.m_r, m_blendColor.m_g, m_blendColor.m_b, m_blendColor.m_alpha);
 	
 	//Color Mask
 	glColorMask(m_isRedMaskEnable, m_isGreenMaskEnable, m_isBlueMaskEnable, m_isAlphaMaskEnable);
@@ -202,8 +233,12 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
 	shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
 
+	if(renderTexture2D != nullptr)
+		shader->SetUniformInt("colorSpaceOut", ColorManagement::RGBColorSpaceGPUIndex(renderTexture2D->GetTextureLayerInfo().m_colorSpace));
+	else
+		shader->SetUniformInt("colorSpaceOut", (int)ColorManagement::GetMainFBWorkingSpaceType() + 1);
 
-
+	shader->SetUniformInt("colorSpaceIn", (int)ColorManagement::GetCurrentGPUWorkingSpaceType() + 1);
 	SendMaterialToShader();
 
 	int directionalLightCounter = 0;
@@ -270,7 +305,6 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			shader->SetUniformColor(specular, spotLight->m_specularColor);
 			shader->SetUniformVector3D(position, spotLight->GetWorldPosition());
 			shader->SetUniformVector3D(direction, spotLight->GetForwardVector());
-			std::cout << spotLight->GetForwardVector() << std::endl;
 			float spotCosAngle = cosf(spotLight->m_spotAngle * M_PI/180.0f);
 			float spotCosSmoothValue = cosf((spotLight->m_spotAngle - spotLight->m_spotAngle * spotLight->m_spotSmoothValue) * M_PI/180.0f);
 			shader->SetUniformFloat(spotCosAngleName, spotCosAngle);
@@ -548,7 +582,7 @@ void MeshRendererComponent::SetDestinationAlphaBlendingFactor(BlendingFactor fac
 	m_destinationAlphaBlendingFactor = factor;
 }
 
-void MeshRendererComponent::SetBlendColor(const Color& color) 
+void MeshRendererComponent::SetBlendColor(const ColorRGB& color)
 {
 	m_blendColor = color;
 }
@@ -703,7 +737,7 @@ BlendingFactor MeshRendererComponent::GetDestinationAlphaBlendingFactor() const
 	return m_destinationAlphaBlendingFactor;
 }
 
-Color MeshRendererComponent::GetBlendColor() const 
+ColorRGB MeshRendererComponent::GetBlendColor() const
 {
 	return m_blendColor;
 }

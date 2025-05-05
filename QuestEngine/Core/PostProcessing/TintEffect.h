@@ -9,15 +9,35 @@
 #include "../Assets/Shader.h"
 #include "../AssetsManager.h"
 #include "../Graphics.h"
+#include "EffectSettings.h"
+#include "EffectRenderer.h"
 
-class TintEffect : public Effect
+//=====================
+// Tint Settings
+//=====================
+class TintSettings : public EffectSettings
 {
-	Material* m_material;
-	Shader* m_shader;
 public:
-	Color m_color = Color(1, 0, 0, 1);
-	void Init() override;
-	void DisplayEffect(Window* window, RenderTexture2D* renderTextureSource, RenderTexture2D* renderTextureTarget, CameraComponent* cameraComponent) override;
+    ColorRGB color = ColorRGB(1, 0, 0, 1);
+
+    std::shared_ptr<EffectSettings> BlendWith(const std::vector<std::pair<std::shared_ptr<EffectSettings>, float>>& others) const override;
+    std::type_index GetTypeIndex() const override { return typeid(TintSettings); }
+    const char* GetTypeName() const override { return "Tint"; }
 };
+
+//=====================
+// Tint Effect Renderer
+//=====================
+
+class TintEffect : public EffectRenderer<TintEffect, TintSettings> {
+public:
+    void Init() override;
+    void Render(const RenderContext& ctx, std::shared_ptr<TintSettings> settings) override;
+
+private:
+    Material* m_material = nullptr;
+    Shader* m_shader = nullptr;
+};
+
 
 #endif

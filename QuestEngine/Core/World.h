@@ -42,7 +42,8 @@ private:
 	void UnRegisterComponent(Component* component);
 	void OrdoredOpaqueMeshRenderer();
 	void OrdoredTransparenceMeshRenderer(CameraComponent* cameraComponent);
-	 
+	static void Destroy();
+
 protected:
 	static World* m_world;
 	World();
@@ -55,7 +56,7 @@ public :
 
 	World(World& other) = delete;
 
-	template<class T>
+	template<typename T>
 	T* CreateEntity()
 	{
 		static_assert(std::is_base_of<Entity, T>::value, "T must be derived from Entity");
@@ -63,6 +64,19 @@ public :
 		m_entities.insert(entity);
 		return (T*)entity;
 	}
+
+	template<typename T>
+	std::vector<T*> GetComponentsOfType() const {
+		std::vector<T*> result;
+		for (Component* comp : m_components) {
+			if (T* casted = dynamic_cast<T*>(comp)) {
+				result.push_back(casted);
+			}
+		}
+		return result;
+	}
+
+
 
 	std::set<Entity*> InstantiateEntityGroup(EntityGroupAsset* entityGroupAsset);
 	void DestroyEntity(Entity* entity);

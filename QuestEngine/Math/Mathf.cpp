@@ -34,3 +34,16 @@ float Mathf::PingPong(float t, float length)
 	t = Repeat(t, length * 2.0f);
 	return length - std::abs(t - length);
 }
+
+float Mathf::Max(float a, float b, float c) {
+	return fmaxf(a, fmaxf(b, c));
+}
+
+float Mathf::Min(float a, float b, float c) {
+	return fminf(a, fminf(b, c));
+}
+
+float Mathf::Min(float a, float b)
+{
+	return fminf(a, b);
+}

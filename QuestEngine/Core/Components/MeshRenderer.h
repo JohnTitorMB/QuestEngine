@@ -155,7 +155,7 @@ private:
 	BlendingFactor m_destinationRGBBlendingFactor = BlendingFactor::ONE_MINUS_SRC_ALPHA;
 	BlendingFactor m_sourceAlphaBlendingFactor = BlendingFactor::SRC_ALPHA;
 	BlendingFactor m_destinationAlphaBlendingFactor = BlendingFactor::ONE_MINUS_SRC_ALPHA;
-	Color m_blendColor = Color(0.0f,0.0f,0.0f,0.0f);
+	ColorRGB m_blendColor = ColorRGB(0.0f,0.0f,0.0f,0.0f);
 
 	//Color mask
 	bool m_isRedMaskEnable = true;
@@ -176,7 +176,7 @@ public:
 	MeshRendererComponent& operator=(const MeshRendererComponent& other) = default;
 
 
-	void Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window);
+	void Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window, RenderTexture2D* renderTexture2D);
 	void SetDrawPartialMesh(bool drawPartialMesh);
 	void SetPartialMeshElementCount(int partialMeshElementCount);
 	void SetPartialMeshStartIndex(int partialMeshStartIndex);
@@ -236,7 +236,7 @@ public:
 	void SetDestinationRGBBlendingFactor(BlendingFactor factor);
 	void SetSourceAlphaBlendingFactor(BlendingFactor factor);
 	void SetDestinationAlphaBlendingFactor(BlendingFactor factor);
-	void SetBlendColor(const Color & color);
+	void SetBlendColor(const ColorRGB& color);
 
 	//Color Mask Setters
 	void EnableRedMask(bool value);
@@ -287,7 +287,7 @@ public:
 	BlendingFactor GetDestinationRGBBlendingFactor() const;
 	BlendingFactor GetSourceAlphaBlendingFactor() const;
 	BlendingFactor GetDestinationAlphaBlendingFactor() const;
-	Color GetBlendColor() const;
+	ColorRGB GetBlendColor() const;
 
 	//Color mask
 	bool IsRedMaskEnable()const;

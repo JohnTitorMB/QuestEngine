@@ -17,6 +17,12 @@ SceneManager::~SceneManager()
 	m_scenes.clear();
 }
 
+void SceneManager::Destroy()
+{
+	delete m_instance;
+	m_instance = nullptr;
+}
+
 Scene& SceneManager::CreateScene()
 {
 	Scene* scene = new Scene();

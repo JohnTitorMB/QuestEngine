@@ -9,6 +9,7 @@ class SceneManager
 	std::vector<Scene*> m_scenes;
 	static SceneManager* m_instance;
 	~SceneManager();
+	static void Destroy();
 
 public:
 	SceneManager();

@@ -51,4 +51,7 @@ std::ostream& operator<<(std::ostream& os, const Matrix3x3& value);
 Vector2D operator*(const Matrix3x3& a, const Vector2D& b);
 Vector2D operator*(const Vector2D& b, const Matrix3x3& a);
 
+Vector3D operator*(const Matrix3x3& a, const Vector3D& b);
+Vector3D operator*(const Vector3D& b, const Matrix3x3& a);
+
 #endif
