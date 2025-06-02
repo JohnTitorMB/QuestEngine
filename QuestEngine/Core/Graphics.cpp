@@ -229,9 +229,13 @@ void Graphics::RenderImage(Window* window, RenderTexture2D* renderTextureTarget,
 	if (renderTextureTarget == nullptr)
 	{
 		BindMainFrameBuffer();
+		glViewport(0, 0, window->GetWidth(), window->GetHeight());
 	}
 	else
+	{
 		renderTextureTarget->BindFramebuffer();
+		glViewport(0, 0, renderTextureTarget->GetWidth(), renderTextureTarget->GetHeight());
+	}
 
 	EntityGroupAsset* postProcessEG = AssetsManager::GetAsset<EntityGroupAsset>("PostProcessEntityGroup");
 	Entity* entity = postProcessEG->GetEntityAt(0);

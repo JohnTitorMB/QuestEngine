@@ -372,6 +372,7 @@ public:
 	void SetMipmapMinLOD(int mipmapMinLOD, int layer = 0);
 	void SetMipmapMaxLOD(int mipmapMaxLOD, int layer = 0);
 	void SetMipmapLODBias(int mipmapLODBias, int layer = 0);
+    static bool SaveTextureToPNG(GLuint textureID, int width, int height, const std::string& filename);
 
 	int GetMipmapBaseLevel(int layer = 0)const;
 	int GetMipmapMaxLevel(int layer = 0)const;

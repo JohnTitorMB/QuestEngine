@@ -64,7 +64,8 @@ struct Material
     vec4 ambientColor;
     vec4 diffuseColor;
     vec4 specularColor;
-  
+    vec4 emissiveColor;
+
     sampler2D ambiantTexture;
     vec4 ambiantTextureST;
     int ambiantTextureColorSpace;
@@ -76,6 +77,10 @@ struct Material
     sampler2D specularTexture;
     vec4 specularTextureST;
     int specularTextureColorSpace;
+
+    sampler2D emissiveTexture;
+    vec4 emissiveTextureST;
+    int emissiveTextureColorSpace;
 
     sampler2D alphaTexture;
     vec4 alphaTextureST;
@@ -101,7 +106,9 @@ vec3 ComputeDirectionalLightColor(DirectionalLight dLight)
     if(NdotL >= 0.001)
     {
         specularColor = dLight.specularColor * material.specularColor * textureCs(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy, material.specularTextureColorSpace);
-        specularColor*= pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+        spec = smoothstep(0.0, 1.0, spec);
+        specularColor *= spec;
     }
   
     vec4 color = ambientColor+diffuseColor + specularColor;
@@ -129,7 +136,9 @@ vec3 ComputePointLight(PointLight pLight)
     if(NdotL >= 0.001)
     {
         specularColor = pLight.specularColor * material.specularColor * textureCs(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy, material.specularTextureColorSpace);
-        specularColor*= pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+        spec = smoothstep(0.0, 1.0, spec);
+        specularColor *= spec;
     }
   
     float attenuation = 1.0 / (pLight.constant + pLight.linear * lightDistance +  pLight.quadratic * (lightDistance * lightDistance));    
@@ -153,7 +162,6 @@ vec3 ComputeSpotLight(SpotLight sLight)
     if(cosAngle > sLight.spotCosAngle)
     {
         vec4 diffuseColor = sLight.diffuseColor * material.diffuseColor * textureCs(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy, material.diffuseTextureColorSpace);
-        vec4 specularColor = vec4(0,0,0,1);
 
         
         float NdotL = dot(normal, -lightDirection);
@@ -162,10 +170,13 @@ vec3 ComputeSpotLight(SpotLight sLight)
         vec3 viewDir = normalize(viewPos - pos);
         vec3 halfwayDir = normalize(-lightDirection + viewDir);
 
+        vec4 specularColor = vec4(0,0,0,1);
         if(NdotL >= 0.001)
         {
             specularColor = sLight.specularColor * material.specularColor * textureCs(material.specularTexture, uv * material.specularTextureST.zw + material.specularTextureST.xy, material.specularTextureColorSpace);
-            specularColor*= pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+            float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+            spec = smoothstep(0.0, 1.0, spec);
+            specularColor *= spec;
         }
   
         float attenuation = 1.0 / (sLight.constant + sLight.linear * lightDistance +  sLight.quadratic * (lightDistance * lightDistance));    
@@ -197,6 +208,8 @@ void main()
         color += ComputeSpotLight(spotLights[i]);
     
     float alpha = material.alpha * texture(material.alphaTexture, uv * material.alphaTextureST.zw + material.alphaTextureST.xy).r;
+
+    color.rgb += material.emissiveColor.rgb * textureCs(material.emissiveTexture, uv * material.emissiveTextureST.zw + material.emissiveTextureST.xy, material.emissiveTextureColorSpace).rgb;
 
     color.rgb = ConvertColor(color.rgb, colorSpaceIn, colorSpaceOut);
 

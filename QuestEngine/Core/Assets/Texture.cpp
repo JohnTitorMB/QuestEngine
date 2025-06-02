@@ -277,3 +277,24 @@ const Texture::LayerTextureInfo Texture::GetTextureLayerInfo(int layer) const
 {
 	return m_layerTextureInfos[layer];
 }
+
+bool Texture::SaveTextureToPNG(GLuint textureID, int width, int height, const std::string& filename)
+{
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	std::vector<unsigned char> pixels(width * height * 4);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+
+	// Flip vertically (OpenGL's origin is bottom-left, PNG's is top-left)
+	for (int y = 0; y < height / 2; ++y) {
+		int top = y * width * 4;
+		int bottom = (height - y - 1) * width * 4;
+		for (int x = 0; x < width * 4; ++x) {
+			std::swap(pixels[top + x], pixels[bottom + x]);
+		}
+	}
+
+	int result = stbi_write_png(filename.c_str(), width, height, 4, pixels.data(), width * 4);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return result != 0;
+}

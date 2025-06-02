@@ -35,7 +35,7 @@ public:
 	static Texture2D* CreateTexture2D(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
 	static RenderTexture2D* CreateRenderTexture2D(const std::string& assetName, const int width, const int height);
 	static CubeMap* CreateCubeMap(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
-	static Material* CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, ColorRGB ambientColor, ColorRGB diffuseColor, ColorRGB specularColor, float shininess);
+	static Material* CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Texture* emissiveTexture, ColorRGB ambientColor, ColorRGB diffuseColor, ColorRGB specularColor, ColorRGB emissiveColor, float shininess);
 	static Material* CreateMaterial(const std::string& assetName);
 	static Shader* CreateShader(const std::string& assetName, std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
 	static EntityGroupAsset* CreateEntityGroup(const std::string& assetName);

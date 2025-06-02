@@ -16,6 +16,7 @@
 class PostProcessing : public Component {
 private:
     RenderTexture2D* m_renderTexture = nullptr;
+    RenderTexture2D* m_renderTextureHDR = nullptr;
     std::vector<PostProcessingVolume*> m_postProcessingVolumes;
 
     Vector3D WorldBaseChangementNoScale(Vector3D _point, Vector3D _targetBaseTranslation, Quaternion _targetBaseRotation)
@@ -50,6 +51,7 @@ public:
     void AddPostProcessingVolume(PostProcessingVolume* volume);
     void DisplayEffects(Window* window, RenderTexture2D* source, CameraComponent* camera);
     void CreatePostProcessRenderTexture();
+    void CreateHDRPostProcessRenderTexture();
 };
 
 #endif

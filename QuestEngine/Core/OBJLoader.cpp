@@ -42,11 +42,14 @@ Entity* OBJLoader::CreateSceneEntity(std::string entityName, EntityGroupAsset* e
 Material* OBJLibrary::OBJLoader::CreateMaterial(std::string assetName,MaterialData materialData)
 {
 	Texture* defaultTexture = AssetsManager::GetAsset<Texture>("White");
+	Texture* blackTexture = AssetsManager::GetAsset<Texture>("Black");
 	ColorRGB whiteColor = ColorRGB(1.0f,1.0f,1.0f,1.0f);
-	Material* material = AssetsManager::CreateBlinnPhongMaterial(assetName, defaultTexture, defaultTexture, defaultTexture, whiteColor, whiteColor, whiteColor, 32);
+	ColorRGB blackColor = ColorRGB(0.0f,0.0f,0.0f,1.0f);
+	Material* material = AssetsManager::CreateBlinnPhongMaterial(assetName, defaultTexture, defaultTexture, defaultTexture, blackTexture, whiteColor, whiteColor, whiteColor, blackColor, 32);
 	material->SetColor("material.ambientColor", materialData.m_ambientColor);
 	material->SetColor("material.diffuseColor", materialData.m_diffuseColor);
 	material->SetColor("material.specularColor", materialData.m_specularColor);
+	material->SetColor("material.emissiveColor", materialData.m_emissiveColor);
 	material->SetFloat("material.shininess", materialData.m_shininess);
 
 	if (!materialData.m_ambientMapPath.empty())
@@ -68,6 +71,13 @@ Material* OBJLibrary::OBJLoader::CreateMaterial(std::string assetName,MaterialDa
 		Texture* specularTexture = AssetsManager::CreateTexture2D(assetName + "specularTexture", materialData.m_specularMapPath, true);
 		if (specularTexture)
 			material->SetTexture("material.specularTexture", specularTexture);
+	}
+
+	if (!materialData.m_emissiveMapPath.empty())
+	{
+		Texture* emissiveTexture = AssetsManager::CreateTexture2D(assetName + "emissiveTexture", materialData.m_emissiveMapPath, true);
+		if (emissiveTexture)
+			material->SetTexture("material.emissiveTexture", emissiveTexture);
 	}
 
 	if (!materialData.m_alphaMapPath.empty())
@@ -640,6 +650,14 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			currentMaterialData.m_specularColor = color;
 			SkipLine(buffer, current_position);
 		}
+		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'e')
+		{
+			current_position += 3;
+			ColorRGB color = ColorRGB();
+			ReadColorFromBuffer(buffer, current_position, color);
+			currentMaterialData.m_emissiveColor = color;
+			SkipLine(buffer, current_position);
+		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'N' && buffer[current_position + 1] == 's')
 		{
 			current_position += 3;
@@ -697,6 +715,18 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			current_position += 6;
 			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
 			currentMaterialData.m_alphaMapPath = GetFullPath(p, texturePath);
+			SkipLine(buffer, current_position);
+		}
+		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'm' &&
+			buffer[current_position + 1] == 'a' &&
+			buffer[current_position + 2] == 'p' &&
+			buffer[current_position + 3] == '_' &&
+			buffer[current_position + 4] == 'K' &&
+			buffer[current_position + 5] == 'e')
+		{
+			current_position += 7;
+			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
+			currentMaterialData.m_emissiveMapPath = GetFullPath(p, texturePath);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'n' &&

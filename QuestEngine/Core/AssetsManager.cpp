@@ -142,7 +142,7 @@ CubeMap* AssetsManager::CreateCubeMap(const std::string& assetName, std::string 
 	return cubeMap;
 }
 
-Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, ColorRGB ambientColor, ColorRGB diffuseColor, ColorRGB specularColor, float shininess)
+Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Texture* emissiveTexture, ColorRGB ambientColor, ColorRGB diffuseColor, ColorRGB specularColor, ColorRGB emissiveColor, float shininess)
 {
 	AssetsManager* assetsManager = AssetsManager::Instance();
 	std::string newAssetName = assetName;
@@ -155,15 +155,18 @@ Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, 
 	material->SetColor("material.ambientColor", ambientColor);
 	material->SetColor("material.diffuseColor", diffuseColor);
 	material->SetColor("material.specularColor", specularColor);
+	material->SetColor("material.emissiveColor", emissiveColor);
 	material->SetFloat("material.shininess", shininess);
 
 	material->SetTexture("material.ambiantTexture", ambientTexture);
 	material->SetTexture("material.diffuseTexture", diffuseTexture);
 	material->SetTexture("material.specularTexture", specularTexture);
+	material->SetTexture("material.emissiveTexture", emissiveTexture);
 
 	material->SetVector4D("material.diffuseTextureST", Vector4D(0, 0, 1, 1));
 	material->SetVector4D("material.ambiantTextureST", Vector4D(0, 0, 1, 1));
 	material->SetVector4D("material.specularTextureST", Vector4D(0, 0, 1, 1));
+	material->SetVector4D("material.emissiveTextureST", Vector4D(0, 0, 1, 1));
 
 	Texture* defaultTexture = AssetsManager::GetAsset<Texture>("White");
 

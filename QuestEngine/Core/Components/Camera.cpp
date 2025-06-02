@@ -2,12 +2,7 @@
 #include <iostream>
 # define M_PI           3.14159265358979323846  /* pi */
 
-CameraComponent::CameraComponent(Vector3D position, Quaternion rotation, float size, bool isPerspective, bool isHorizontal)
-{
-	m_size = size;
-	m_isHorizontal = isHorizontal;	
-	m_isPerspective = isPerspective;
-}
+
 
 CameraComponent::CameraComponent(const CameraComponent& other) : SceneComponent(other)
 {
@@ -23,6 +18,8 @@ CameraComponent::CameraComponent(const CameraComponent& other) : SceneComponent(
 	m_viewportBottomCornerY = other.m_viewportBottomCornerY;
 	m_viewportTopCornerX = other.m_viewportTopCornerX;
 	m_viewportTopCornerY = other.m_viewportTopCornerY;
+	m_enableHDR = other.m_enableHDR;
+	m_enableMultiSampling = other.m_enableMultiSampling;
 }
 
 Vector2D CameraComponent::GetVerticalAndHorizontalSize(float width, float height)const

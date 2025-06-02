@@ -179,15 +179,6 @@ void RenderTexture2D::Resize(int newWidth, int newHeight)
 			glRenderbufferStorageMultisample(GL_RENDERBUFFER, entry.second.m_samples, (int)(int)entry.second.m_interRerableFormat, m_width, m_height);
 	}
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		std::cout << "Framebuffer not complete after resize: " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-	}
-	else
-	{
-		std::cout << "Framebuffer successfully resized." << std::endl;
-	}
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 

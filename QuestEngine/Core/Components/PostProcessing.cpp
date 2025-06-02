@@ -4,11 +4,13 @@
 PostProcessing::PostProcessing() : Component()
 {
 	CreatePostProcessRenderTexture();
+    CreateHDRPostProcessRenderTexture();
 }
 
 PostProcessing::PostProcessing(const PostProcessing& postProcessing) : Component(postProcessing)
 {
 	CreatePostProcessRenderTexture();
+    CreateHDRPostProcessRenderTexture();
 }
 
 void PostProcessing::Start()
@@ -154,7 +156,9 @@ void PostProcessing::DisplayEffects(Window* window, RenderTexture2D* source,Came
     float tCornerX = camera->m_viewportTopCornerX * viewportWidth;
     float tCornerY = camera->m_viewportTopCornerY * viewportHeight;
 
-    m_renderTexture->Resize(tCornerX - bCornerX, tCornerY - bCornerY);
+
+    RenderTexture2D* tempRt = camera->m_enableHDR ? m_renderTextureHDR : m_renderTexture;
+    tempRt->Resize(tCornerX - bCornerX, tCornerY - bCornerY);
 
 
 
@@ -164,13 +168,13 @@ void PostProcessing::DisplayEffects(Window* window, RenderTexture2D* source,Came
 
 
     for (size_t i = 0; i < blended.size(); ++i) {
-        ctx.source = m_renderTexture;
+        ctx.source = tempRt;
         ctx.target = source; 
 
         if (blended[i]) {
 
-            		RenderTexture2D::Blit(source, m_renderTexture, bCornerX, bCornerY, tCornerX, tCornerY,
-			0, 0, m_renderTexture->GetWidth(), m_renderTexture->GetHeight(),
+            		RenderTexture2D::Blit(source, tempRt, bCornerX, bCornerY, tCornerX, tCornerY,
+			0, 0, tempRt->GetWidth(), tempRt->GetHeight(),
 			BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
 
             EffectRegistry::Instance().Render(ctx, blended[i]);
@@ -188,4 +192,16 @@ void PostProcessing::CreatePostProcessRenderTexture()
 
 	layerTextureInfo.m_generateMimpap = false;
 	m_renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE, 0, layerTextureInfo);
+}
+
+void PostProcessing::CreateHDRPostProcessRenderTexture()
+{
+    //Post-Process RenderTexture
+    m_renderTextureHDR = AssetsManager::CreateRenderTexture2D("HDRPostProcessRenderTexture", 1, 1);
+    Texture::LayerTextureInfo layerTextureInfo = Texture::LayerTextureInfo();
+    layerTextureInfo.m_minificationFilter = MinificationFilter::Bilinear;
+    layerTextureInfo.m_magnificationFilter = MagnificationFilter::Bilinear;
+
+    layerTextureInfo.m_generateMimpap = false;
+    m_renderTextureHDR->AttachColorTextureBuffer(ColorRenderableFormat::RGBA16F, ColorFormat::RGBA, DataType::FLOAT, 0, layerTextureInfo);
 }

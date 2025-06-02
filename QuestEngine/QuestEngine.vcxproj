@@ -179,6 +179,9 @@
     <ClCompile Include="Core\ColorManagement\sRGBTransferCurve.cpp" />
     <ClCompile Include="Core\ColorManagement\TransferCurve.cpp" />
     <ClCompile Include="Core\ColorManagement\XYZModel.cpp" />
+    <ClCompile Include="Core\PostProcessing\Bloom3Effect.cpp" />
+    <ClCompile Include="Core\PostProcessing\BloomEffect.cpp" />
+    <ClCompile Include="Core\PostProcessing\Bloom2Effect.cpp" />
     <ClCompile Include="Core\PostProcessing\ColorGrading.cpp" />
     <ClCompile Include="Core\Assets\CubeMap.cpp" />
     <ClCompile Include="Core\CustomColorRGB.cpp" />
@@ -281,6 +284,9 @@
     <ClInclude Include="Core\ColorManagement\TransferCurve.h" />
     <ClInclude Include="Core\ColorManagement\XYZModel.h" />
     <ClInclude Include="Core\ImGuiCustom.h" />
+    <ClInclude Include="Core\PostProcessing\Bloom3Effect.h" />
+    <ClInclude Include="Core\PostProcessing\BloomEffect.h" />
+    <ClInclude Include="Core\PostProcessing\Bloom2Effect.h" />
     <ClInclude Include="Core\PostProcessing\ColorGrading.h" />
     <ClInclude Include="Core\Assets\CubeMap.h" />
     <ClInclude Include="Core\CustomColorRGB.h" />

@@ -27,6 +27,9 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "PostProcessing/TintEffect.h"
 #include "PostProcessing/GaussianBlur.h"
 #include "PostProcessing/ColorGrading.h"
+#include "PostProcessing/BloomEffect.h"
+#include "PostProcessing/Bloom2Effect.h"
+#include "PostProcessing/Bloom3Effect.h"
 
 World::World()
 {
@@ -75,9 +78,15 @@ void World::InitAssets()
 	Shader* gaussianBlurShader = AssetsManager::CreateShader("GaussianBlurShader", "Assets/ScreenShader.vert", "Assets/GaussianBlurShader.frag");
 	Shader* colorGradingShader = AssetsManager::CreateShader("ColorGradingShader", "Assets/ScreenShader.vert", "Assets/ColorGradingShader.frag");
 	Shader* lut2DShader = AssetsManager::CreateShader("LUT2DShader", "Assets/ScreenShader.vert", "Assets/LUT2DShader.frag");
+	Shader* hdrFilterShader = AssetsManager::CreateShader("HDRFilterShader", "Assets/ScreenShader.vert", "Assets/HDRFilterShader.frag");
+	Shader* blendShader = AssetsManager::CreateShader("BlendShader", "Assets/ScreenShader.vert", "Assets/BlendShader.frag");
+	Shader* additiveShader = AssetsManager::CreateShader("AdditiveShader", "Assets/ScreenShader.vert", "Assets/AdditiveShader.frag");
+	Shader* boxBlurShader = AssetsManager::CreateShader("BoxBlurShader", "Assets/ScreenShader.vert", "Assets/BoxBlurShader.frag");
+	Shader* upScaleShader = AssetsManager::CreateShader("UpScaleShader", "Assets/ScreenShader.vert", "Assets/UpScaleShader.frag");
 
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
+	Texture* blackTexture = AssetsManager::CreateTexture2D("Black","Assets/BlackTexture.png");	
 	Texture* skyboxTexture = AssetsManager::CreateCubeMap("SkyboxTexture", "Assets/Skybox.png");
 	Texture* tileTexture = AssetsManager::CreateTexture2D("TileTexture", "Assets/Texture.png");
 	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture","Assets/Box/BoxDiffuse.png");
@@ -100,10 +109,29 @@ void World::InitAssets()
 	renderTexture->AttachColorTextureBuffer(ColorRenderableFormat::RGBA8, ColorFormat::RGBA, DataType::UNSIGNED_BYTE,0);
 	renderTexture->AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8);
 	renderTexture->SetTextureColorManagementParam(ColorManagement::RGBColorSpaceType::SRGB, Texture::TextureConversionMode::GPUConvert, 0);
+
+	//HDR Render Texture
+	RenderTexture2D* HDRRenderTexture = AssetsManager::CreateRenderTexture2D("HDRRenderTexture", 1920, 1080);
+	Texture::LayerTextureInfo layerTextureInfo = Texture::LayerTextureInfo();
+	layerTextureInfo.m_minificationFilter = MinificationFilter::Point;
+	layerTextureInfo.m_magnificationFilter = MagnificationFilter::Point;
+	layerTextureInfo.m_generateMimpap = false;
+
+	layerTextureInfo.m_useMultisampledTexture = true;
+	layerTextureInfo.m_samples = 16;
+
+	HDRRenderTexture->AttachColorTextureBufferMS(ColorRenderableFormat::RGBA16F,0, layerTextureInfo);
+
+	RenderTexture2D::RenderBufferInfo renderBufferInfo = RenderTexture2D::RenderBufferInfo();
+	renderBufferInfo.m_useMultisampledRenderBuffer = true;
+	renderBufferInfo.m_samples = 16;
+	HDRRenderTexture->AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8, renderBufferInfo);
+
+
 	///Initialise Materials
 
 	//White Material
-	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture, ColorRGB(1,1,1,1), ColorRGB(1, 1, 1, 1), ColorRGB(1, 1, 1, 1),32.0f);
+	Material* whiteMaterial = AssetsManager::CreateBlinnPhongMaterial("WhiteMaterial", whiteTexture, whiteTexture, whiteTexture, blackTexture, ColorRGB(1,1,1,1), ColorRGB(1, 1, 1, 1), ColorRGB(1, 1, 1, 1), ColorRGB(0, 0, 0, 1),32.0f);
 
 	// CubeMap Material
 	Material* skyboxMaterial = AssetsManager::CreateMaterial("SkyboxMaterial");
@@ -114,6 +142,7 @@ void World::InitAssets()
 	renderMaterial->SetColor("material.color", ColorRGB(1, 1, 1, 1));
 	renderMaterial->SetTexture("material.texture", renderTexture, 0);
 	renderMaterial->SetVector4D("material.textureST", Vector4D(0, 0, -1, 1));
+	renderMaterial->SetFloat("material.intensity", 2.0f);
 
 	//Initialise Mesh
 	Mesh* cubeMesh = MeshUtilities::CreateCube("CubeMesh", 1.0f);
@@ -165,9 +194,15 @@ void World::InitWorld()
 		cameraComponent->SetFar(1000.0);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
 		cameraComponent->SetFov(60);
-		cameraComponent->SetWorldPosition(Vector3D(-0.33, 1, -6.6));
+	//	cameraComponent->SetWorldPosition(Vector3D(-0.33, 1, -6.6));
+		cameraComponent->SetWorldPosition(Vector3D(2.49044f, 5.31755f, -1.74864f));
+		cameraComponent->SetWorldRotation(Quaternion(0.851237f, 0.193399, -0.475721, 0.108083));
+
+
+
 		cameraComponent->SetRenderingPriority(1);
 		cameraComponent->m_enableMultiSampling = true;
+		cameraComponent->m_enableHDR = true;
 		CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
 		cameraController->m_scrollMove = 10;
 		cameraController->movementSpeed = 0.5f;
@@ -178,6 +213,11 @@ void World::InitWorld()
 	Entity* postProcessVolumeEntity = scene1.CreateEntity<Entity>();
 	{
 		PostProcessingVolume* postProcessVolume = postProcessVolumeEntity->AddComponent<PostProcessingVolume>();
+
+		std::shared_ptr<Bloom3Settings> bloom3Setting = std::make_shared<Bloom3Settings>();
+		postProcessVolume->AddEffect(bloom3Setting);
+
+
 		std::shared_ptr<ColorGradingSettings> colorGradingSetting = std::make_shared<ColorGradingSettings>();
 		postProcessVolume->AddEffect(colorGradingSetting);
 				
@@ -217,7 +257,7 @@ void World::InitWorld()
 		dLightComponent->m_ambiantColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
 		dLightComponent->m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
 		dLightComponent->m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 0.0f);
-		dLightComponent->m_intensity = 1.0f;
+		dLightComponent->m_intensity = 0.3f;
 		 
 		dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, 0.0f, 0)));
 		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
@@ -280,7 +320,7 @@ void World::InitWorld()
 
 
 
-	/*scene1.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Camera"), firstEntity);
+	scene1.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Camera"), firstEntity);
 
 	if (firstEntity)
 	{
@@ -290,7 +330,7 @@ void World::InitWorld()
 			sceneComponent->SetWorldPosition(Vector3D(0.0f, 1.0f, -4.9f));
 			sceneComponent->SetWorldScale(Vector3D(0.001f, 0.001f, 0.001f));
 		}
-	}*/
+	}
 
 	
 	scene1.CloneGroupEntityToScene(AssetsManager::GetAsset<EntityGroupAsset>("Wall"), firstEntity);
@@ -390,7 +430,20 @@ void World::Display(Window* window)
 			viewportHeight = cameraRT->GetHeight();
 		}
 		else
-			Graphics::GetInstance()->BindMainFrameBuffer();
+		{
+			if (camera->m_enableHDR)
+			{
+				cameraRT = AssetsManager::GetAsset<RenderTexture2D>("HDRRenderTexture");
+				cameraRT->Resize(viewportWidth, viewportHeight);
+				cameraRT->BindFramebuffer();
+
+				viewportWidth = cameraRT->GetWidth();
+				viewportHeight = cameraRT->GetHeight();
+			}
+			else
+				Graphics::GetInstance()->BindMainFrameBuffer();
+
+		}
 			
 		float bCornerX = camera->m_viewportBottomCornerX * viewportWidth;
 		float bCornerY = camera->m_viewportBottomCornerY * viewportHeight;
@@ -402,7 +455,11 @@ void World::Display(Window* window)
 
 		Graphics::GetInstance()->Clear(camera, bCornerX, bCornerY, tCornerX - bCornerX, tCornerY - bCornerY);
 		if (camera->m_enableMultiSampling)
+		{
 			glEnable(GL_MULTISAMPLE);
+			glEnable(GL_SAMPLE_SHADING);
+			glMinSampleShading(1.0f);
+		}
 		else
 			glDisable(GL_MULTISAMPLE);
 		
@@ -420,10 +477,23 @@ void World::Display(Window* window)
 			meshRenderer->Draw(camera, m_lights, window, cameraRT);
 		}
 		
+		if (camera->m_enableMultiSampling)
+		{
+			glDisable(GL_SAMPLE_SHADING);
+			glDisable(GL_MULTISAMPLE);
+		}
 
 		PostProcessing* postProcessing = camera->GetOwnEntity()->GetComponent<PostProcessing>();
 		if (postProcessing)
 			postProcessing->DisplayEffects(window, cameraRT, camera);
+
+
+		if (camera->m_enableHDR && camera->GetRenderTexture() == nullptr)
+		{
+			RenderTexture2D::Blit(cameraRT, nullptr, bCornerX, bCornerY, tCornerX, tCornerY,
+				bCornerX, bCornerY, tCornerX, tCornerY,
+				BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
+		}
 
 
 		if (cameraRT)

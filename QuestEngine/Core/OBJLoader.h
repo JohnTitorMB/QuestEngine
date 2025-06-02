@@ -63,19 +63,21 @@ namespace OBJLibrary
             m_specularMapPath = "";
             m_ambientColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
             m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
-            m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+            m_specularColor = ColorRGB(0.0f, 0.0f, 0.0f, 0.0f);
             m_shininess = 32;
         }
         std::string m_materialName;
         ColorRGB m_ambientColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
         ColorRGB m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
         ColorRGB m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+        ColorRGB m_emissiveColor = ColorRGB(0.0f, 0.0f, 0.0f, 1.0f);
         float m_shininess = 32;
         float m_alpha = 1.0f;
 
         std::string m_ambientMapPath;
         std::string m_diffuseMapPath;
         std::string m_specularMapPath;
+        std::string m_emissiveMapPath;
         std::string m_alphaMapPath;
     };
 

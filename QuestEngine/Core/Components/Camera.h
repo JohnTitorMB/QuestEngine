@@ -31,7 +31,6 @@ public :
 		PERSPECTIVE,
 		ORTHOGRAPHIC,
 	};
-	CameraComponent(Vector3D position, Quaternion rotation, float size, bool isPerspective = true, bool isHorizontal = true);
 	CameraComponent() {};
 	CameraComponent(const CameraComponent& other);
 private :
@@ -45,7 +44,7 @@ private :
 	bool m_useReversedZProjection = false;
 	bool m_useInfiniteProjection = false;
 	float m_infiniteEpisilon = 1e-6;
-	RenderTexture2D* m_renderTexture2D;
+	RenderTexture2D* m_renderTexture2D = nullptr;
 	int m_renderingPriority = 0;
 
 	
@@ -100,7 +99,7 @@ public:
 	bool m_isClearDepthMaskEnable = true;
 	bool m_clearDepthValue = 1.0f;
 	bool m_enableMultiSampling = false;
-
+	bool m_enableHDR = false;
 	unsigned int m_clearBufferMask = (unsigned int)BufferBit::COLOR_BUFFER_BIT | (unsigned int)BufferBit::DEPTH_BUFFER_BIT | (unsigned int)BufferBit::STENCIL_BUFFER_BIT;
 
 
