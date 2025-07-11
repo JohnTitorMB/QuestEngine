@@ -1,4 +1,4 @@
-#include "MeshRenderer.h"
+﻿#include "MeshRenderer.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
@@ -88,27 +88,24 @@ void MeshRendererComponent::SendMaterialToShader()const
 	}
 }
 
-void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window, RenderTexture2D* renderTexture2D)
+void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window, RenderTexture* renderTexture, RenderingPassType renderingPassType)
 {
 	OnRenderEvent.Trigger(window, camera);
 	Shader* shader = m_shader;
 
-	switch (World::m_renderingType)
+	switch (renderingPassType)
 	{
-	case RenderingType::UV:
+	case RenderingPassType::DebugUv:
 		shader = AssetsManager::GetAsset<Shader>("UVShader");
 		break;
-	case RenderingType::Normal:
+	case RenderingPassType::DebugNormal:
 		shader = AssetsManager::GetAsset<Shader>("NormalShader");
 		break;
-	case RenderingType::FragCoordZ:
-		shader = AssetsManager::GetAsset<Shader>("FragCoordZShader");
-		break;
-	case RenderingType::LinearDepth:
+	case RenderingPassType::DebugDepth:
 		shader = AssetsManager::GetAsset<Shader>("LinearDepthShader");
 		break;
-	case RenderingType::Fog:
-		shader = AssetsManager::GetAsset<Shader>("BlinnPhongShaderFog");
+	case RenderingPassType::ShadowMap:
+		shader = AssetsManager::GetAsset<Shader>("ShadowShader");
 		break;
 	default:
 		break;
@@ -117,6 +114,70 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	if (m_mesh == nullptr|| shader == nullptr || m_material == nullptr)
 		return;
 	
+	if (renderingPassType == RenderingPassType::ShadowMap)
+	{
+		if (camera == nullptr)
+			return;
+
+		if (m_castShadow == false)
+			return;
+
+		RenderTexture* depthRt = camera->GetRenderTexture();
+		if (RenderCubeMap* cubeMap = dynamic_cast<RenderCubeMap*>(depthRt))
+			shader = AssetsManager::GetAsset<Shader>("PointShadowShader");
+
+		glDisable(GL_BLEND);
+		glDisable(GL_STENCIL_TEST);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+		glEnable(GL_CULL_FACE);
+
+		glCullFace(GL_BACK);
+
+		if (camera != nullptr)
+		{
+			if (camera->GetUseDepthZeroToOneProjection())
+				glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+			else
+				glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+		}
+
+
+		glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
+
+		shader->UseShader();
+
+		Matrix4x4 modelMatrix = GetTransform().TransformMatrix();
+		shader->SetUniformMatrix4x4("model", modelMatrix);
+
+		int width = window->GetWidth();
+		int height = window->GetHeight();
+		if (depthRt != nullptr)
+		{
+			width = depthRt->GetWidth();
+			height = depthRt->GetHeight();
+		}
+
+		Matrix4x4 mvp = camera->ProjectionMatrix(width, height) * camera->ViewMatrix() * modelMatrix;
+		shader->SetUniformMatrix4x4("mvp", mvp);
+
+		shader->SetUniformFloat("far", camera->GetFar());
+		shader->SetUniformVector3D("lightPos", camera->GetWorldPosition());
+
+		m_mesh->UseMesh();
+		if (m_drawPartialMesh)
+			glDrawElements((int)m_mesh->m_shapeType, m_partialMeshElementCount, GL_UNSIGNED_INT, (void*)(m_partialMeshStartIndex * sizeof(unsigned int)));
+		else
+			glDrawElements((int)m_mesh->m_shapeType, m_mesh->GetIndices().size(), GL_UNSIGNED_INT, 0);
+
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // reset
+		return;
+	}
+
+
+
 	if (m_ovverideMultiSamplingEnable)
 	{
 		if (m_enableMultiSampling)
@@ -128,13 +189,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 	glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
 
-	if (camera != nullptr)
-	{
-		if (camera->GetUseDepthZeroToOneProjection())
-			glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-		else
-			glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
-	}
+	
 
 	//Cull Face Specification
 	if (m_isCullFaceEnable)
@@ -207,7 +262,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 		else
 			shader->SetUniformMatrix4x4("view", camera->ViewMatrixWithoutTranslation());
 
-		RenderTexture2D* rt = camera->GetRenderTexture();
+		RenderTexture* rt = camera->GetRenderTexture();
 		int width = window->GetWidth();
 		int height = window->GetHeight();
 		if (rt != nullptr)
@@ -233,8 +288,8 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
 	shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
 
-	if(renderTexture2D != nullptr)
-		shader->SetUniformInt("colorSpaceOut", ColorManagement::RGBColorSpaceGPUIndex(renderTexture2D->GetTextureLayerInfo().m_colorSpace));
+	if(renderTexture != nullptr)
+		shader->SetUniformInt("colorSpaceOut", ColorManagement::RGBColorSpaceGPUIndex(renderTexture->GetTextureLayerInfo().m_colorSpace));
 	else
 		shader->SetUniformInt("colorSpaceOut", (int)ColorManagement::GetMainFBWorkingSpaceType() + 1);
 
@@ -244,6 +299,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	int directionalLightCounter = 0;
 	int spotLightCounter = 0;
 	int pointLightCounter = 0;
+	int textureCount = m_material->GetTextureMap().size();
 	for (auto it = lights.begin(); it != lights.end(); ++it)
 	{
 		LightComponent* light = *it;
@@ -256,6 +312,35 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			shader->SetUniformVector3D("directionalLight.direction", directionalLight->GetForwardVector());
 			shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
 
+			RenderTexture2D* shadowDepth = (static_cast<DirectionalLightComponent*>(light))->GetShadowMap();
+
+			m_shader->SetUniformInt("directionalLight.lightDepthMap", textureCount);
+			shadowDepth->Bind(textureCount);
+
+			CameraComponent lightCamera = CameraComponent();
+			Vector3D lightDir = light->GetForwardVector();
+			Vector3D lightTarget = Vector3D::Zero;
+			Vector3D lightPosition = directionalLight->GetShadowMapTargetPos() - lightDir.Normalized() * directionalLight->GetShadowDistance();
+
+			lightCamera.SetProjectionMode(CameraComponent::EProjectionMode::ORTHOGRAPHIC);
+
+			lightCamera.SetWorldPosition(lightPosition);
+			lightCamera.SetWorldRotation(Quaternion::SetGoToRotation(lightCamera.GetForwardVector(), lightDir));
+			lightCamera.SetSize(directionalLight->GetShadowSize());
+			lightCamera.SetNear(directionalLight->GetShadowNear());
+			lightCamera.SetFar(directionalLight->GetShadowFar());
+
+			Matrix4x4 lightVP = lightCamera.ProjectionMatrix(directionalLight->GetShadowMapWidth(), directionalLight->GetShadowMapHeight()) * lightCamera.ViewMatrix();
+			m_shader->SetUniformMatrix4x4("lightsVP[0]", lightVP);
+
+			m_shader->SetUniformVector4D("directionalLight.shadowParam", Vector4D(directionalLight->GetShadowMinBias(), directionalLight->GetShadowMaxBias(), directionalLight->GetShadowNear(), directionalLight->GetShadowFar()));
+
+			if(m_receiveShadow)
+				shader->SetUniformInt("directionalLight.blurResolution", directionalLight->GetShadowBlurResolution());
+			else
+				shader->SetUniformInt("directionalLight.blurResolution", -1);
+
+			textureCount++;
 			directionalLightCounter++;
 		}
 		else if (light->m_lightType == LightComponent::LightType::Point)
@@ -271,6 +356,7 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			std::string quadratic = (std::ostringstream() << "pointLights[" << pointLightCounter << "].quadratic").str();
 
 			std::string intensity = (std::ostringstream() << "pointLights[" << pointLightCounter << "].intensity").str();
+			std::string shadowParam = (std::ostringstream() << "pointLights[" << pointLightCounter << "].shadowParam").str();
 
 			shader->SetUniformColor(ambiant, pointLight->m_ambiantColor);
 			shader->SetUniformColor(diffuse, pointLight->m_diffuseColor);
@@ -282,6 +368,32 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			shader->SetUniformFloat(quadratic, pointLight->m_quadraticValue);
 			shader->SetUniformFloat(intensity, pointLight->m_intensity);
 			pointLightCounter++;
+
+			RenderCubeMap* shadowDepth = pointLight->GetShadowMap();
+
+			std::string lightDepthMapName = (std::ostringstream() << "pointLights[" << spotLightCounter << "].lightDepthMap").str();
+			shader->SetUniformInt(lightDepthMapName, textureCount);
+			shadowDepth->Bind(textureCount);
+
+			std::string resName = (std::ostringstream() << "pointLights[" << spotLightCounter << "].blurResolution").str();
+			
+			if(m_receiveShadow)
+				shader->SetUniformInt(resName, pointLight->GetShadowBlurResolution());
+			else
+				shader->SetUniformInt(resName, -1);
+
+			shader->SetUniformVector4D(shadowParam, Vector4D(pointLight->GetShadowMinBias(), pointLight->GetShadowMaxBias(), pointLight->GetShadowNear(), pointLight->GetShadowFar()));
+
+			std::string blurOffsetName = (std::ostringstream() << "pointLights[" << spotLightCounter << "].blurOffset").str();
+			float shadowRange = pointLight->GetShadowBlurRange();
+			if (pointLight->GetShadowBlurResolution() > 0)
+			{
+				Vector2D blurOffset = Vector2D(shadowRange / 2.0f, shadowRange / static_cast<float>(pointLight->GetShadowBlurResolution() + 1));
+				shader->SetUniformVector2D(blurOffsetName, blurOffset);
+			}
+
+			textureCount++;
+
 		}
 		else if (light->m_lightType == LightComponent::LightType::Spot)
 		{
@@ -299,14 +411,16 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			std::string linear = (std::ostringstream() << "spotLights[" << spotLightCounter << "].linear").str();
 			std::string quadratic = (std::ostringstream() << "spotLights[" << spotLightCounter << "].quadratic").str();
 			std::string intensity = (std::ostringstream() << "spotLights[" << spotLightCounter << "].intensity").str();
+			
 
 			shader->SetUniformColor(ambiant, spotLight->m_ambiantColor);
 			shader->SetUniformColor(diffuse, spotLight->m_diffuseColor);
 			shader->SetUniformColor(specular, spotLight->m_specularColor);
 			shader->SetUniformVector3D(position, spotLight->GetWorldPosition());
 			shader->SetUniformVector3D(direction, spotLight->GetForwardVector());
-			float spotCosAngle = cosf(spotLight->m_spotAngle * M_PI/180.0f);
-			float spotCosSmoothValue = cosf((spotLight->m_spotAngle - spotLight->m_spotAngle * spotLight->m_spotSmoothValue) * M_PI/180.0f);
+			float halfAngle = spotLight->m_spotAngle / 2.0f;
+			float spotCosAngle = cosf(halfAngle * M_PI/180.0f);
+			float spotCosSmoothValue = cosf((halfAngle - halfAngle * spotLight->m_spotSmoothValue) * M_PI/180.0f);
 			shader->SetUniformFloat(spotCosAngleName, spotCosAngle);
 			shader->SetUniformFloat(spotCosSmoothAngleName, spotCosSmoothValue);	
 
@@ -315,6 +429,37 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 			shader->SetUniformFloat(quadratic, spotLight->m_quadraticValue);
 			shader->SetUniformFloat(intensity, spotLight->m_intensity);
 
+			RenderTexture2D* shadowDepth = (static_cast<SpotLightComponent*>(light))->GetShadowMap();
+
+			std::string lightDepthMapName = (std::ostringstream() << "spotLights[" << spotLightCounter << "].lightDepthMap").str();
+			shader->SetUniformInt(lightDepthMapName, textureCount);
+			shadowDepth->Bind(textureCount);
+
+			Vector3D lightDir = spotLight->GetForwardVector();
+
+			CameraComponent lightCamera = CameraComponent();
+			lightCamera.SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+			lightCamera.SetFov(spotLight->m_spotAngle);
+			lightCamera.SetWorldPosition(spotLight->GetWorldPosition());
+			lightCamera.SetWorldRotation(Quaternion::SetGoToRotation(lightCamera.GetForwardVector(), lightDir));
+			lightCamera.SetNear(spotLight->GetShadowNear());
+			lightCamera.SetFar(spotLight->GetShadowFar());
+
+			std::string lighsVPName = (std::ostringstream() << "lightsVP[" << spotLightCounter + 1 << "]").str();
+			Matrix4x4 lighVP = lightCamera.ProjectionMatrix(spotLight->GetShadowMapWidth(), spotLight->GetShadowMapHeight()) * lightCamera.ViewMatrix();
+			shader->SetUniformMatrix4x4(lighsVPName, lighVP);
+
+			std::string shadowParamName = (std::ostringstream() << "spotLights[" << spotLightCounter << "].shadowParam").str();
+			shader->SetUniformVector4D(shadowParamName, Vector4D(spotLight->GetShadowMinBias(), spotLight->GetShadowMaxBias(), spotLight->GetShadowNear(), spotLight->GetShadowFar()));
+
+			std::string resName = (std::ostringstream() << "spotLights[" << spotLightCounter << "].blurResolution").str();
+			if (m_receiveShadow)
+				shader->SetUniformInt(resName, spotLight->GetShadowBlurResolution());
+			else	
+				shader->SetUniformInt(resName, -1);
+
+			textureCount++;
+
 			spotLightCounter++;
 		}
 	}
@@ -322,8 +467,40 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	shader->SetUniformInt("spotLightCount", spotLightCounter);
 	shader->SetUniformInt("directionalLightCount", directionalLightCounter);
 	shader->SetUniformColor("globalAmbiantColor", LightingSettings::m_globalAmbiantColor);
-
 	
+	int POINT_LIGHT_COUNT = 4;
+	int SPOT_LIGHT_COUNT = 4;
+
+	// Bind dummy 2D texture for unused directional lights
+	if (directionalLightCounter == 0)
+	{
+		shader->SetUniformInt("directionalLight.lightDepthMap", textureCount);
+		textureCount++;
+	}
+
+	// Bind dummy cubemaps for unused point lights
+	for (int i = pointLightCounter; i < POINT_LIGHT_COUNT; ++i)
+	{
+		std::string lightDepthMapName = "pointLights[" + std::to_string(i) + "].lightDepthMap";
+		shader->SetUniformInt(lightDepthMapName, textureCount);
+
+		std::string blurResName = "pointLights[" + std::to_string(i) + "].blurResolution";
+		shader->SetUniformInt(blurResName, 0); // pas de blur
+		textureCount++;
+	}
+
+	// Bind dummy 2D textures for unused spot lights
+	for (int i = spotLightCounter; i < SPOT_LIGHT_COUNT; ++i)
+	{
+		std::string lightDepthMapName = "spotLights[" + std::to_string(i) + "].lightDepthMap";
+		shader->SetUniformInt(lightDepthMapName, textureCount);
+
+		std::string blurResName = "spotLights[" + std::to_string(i) + "].blurResolution";
+		shader->SetUniformInt(blurResName, 0); // pas de blur
+		textureCount++;
+	}
+
+
 	m_mesh->UseMesh();
 	
 
@@ -775,6 +952,28 @@ bool MeshRendererComponent::GetEnableMultiSampling() const {
 	return m_enableMultiSampling;
 }
 
+bool MeshRendererComponent::GetReceiveShadow(bool value) const
+{
+	return m_receiveShadow;
+}
+
+bool MeshRendererComponent::GetCastShadow(bool value) const
+{
+	return m_castShadow;
+}
+
+
+
 void MeshRendererComponent::SetEnableMultiSampling(bool enableMultiSampling) {
 	m_enableMultiSampling = enableMultiSampling;
+}
+
+void MeshRendererComponent::SetReceiveShadow(bool value)
+{
+	m_receiveShadow = value;
+}
+
+void MeshRendererComponent::SetCastShadow(bool value)
+{
+	m_castShadow = value;
 }

@@ -161,6 +161,14 @@ void Texture::SetTextureColorManagementParam(ColorManagement::RGBColorSpaceType 
 	RefreshTextureData(layer);
 }
 
+void Texture::SetBorderColor(Vector4D color, int layer)
+{
+	m_layerTextureInfos[layer].m_borderColor = color;
+	glBindTexture((int)GetTextureLayerType(layer), m_layerTextureInfos[layer].m_textureID);
+	float borderColor[] = { color.m_x, color.m_y, color.m_z, color.m_w };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+}
+
 void Texture::RefreshTextureData(int layer)
 {
 

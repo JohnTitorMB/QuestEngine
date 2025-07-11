@@ -5,7 +5,7 @@
 #include "../../Math/Matrix4x4.h"
 #include "../Component.h"
 #include "SceneComponent.h"
-#include "../Assets/RenderTexture2D.h"
+#include "../Assets/RenderTexture.h"
 #include "../ColorRGB.h"
 struct ViewportRect
 {
@@ -44,7 +44,7 @@ private :
 	bool m_useReversedZProjection = false;
 	bool m_useInfiniteProjection = false;
 	float m_infiniteEpisilon = 1e-6;
-	RenderTexture2D* m_renderTexture2D = nullptr;
+	RenderTexture* m_renderTexture = nullptr;
 	int m_renderingPriority = 0;
 
 	
@@ -69,7 +69,7 @@ public:
 	void SetUseReversedZProjection(bool value);
 	void SetUseInfiniteProjection(bool value);
 	void SetInifiniteProjectionEpsilon(float value);
-	void SetRenderTexture(RenderTexture2D* renderTexture);
+	void SetRenderTexture(RenderTexture* renderTexture);
 	void SetRenderingPriority(const int renderingPriority);
 	Vector2D GetVerticalAndHorizontalSize(float width, float height)const;
 	float GetNear()const;
@@ -103,7 +103,7 @@ public:
 	unsigned int m_clearBufferMask = (unsigned int)BufferBit::COLOR_BUFFER_BIT | (unsigned int)BufferBit::DEPTH_BUFFER_BIT | (unsigned int)BufferBit::STENCIL_BUFFER_BIT;
 
 
-	RenderTexture2D* GetRenderTexture()const;
+	RenderTexture* GetRenderTexture()const;
 
 	Matrix4x4 ViewMatrix()const;
 	Matrix4x4 ViewMatrixWithoutTranslation()const;

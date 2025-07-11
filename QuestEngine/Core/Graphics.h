@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <GLFW/glfw3.h>
 #include <queue>
+#include "Assets/RenderTexture2D.h"
 
 class Graphics
 {

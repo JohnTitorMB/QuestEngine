@@ -69,8 +69,10 @@ private:
     Shader* m_lutShader = nullptr;
     Texture2D* m_texture = nullptr;
     Texture2D* m_colorWheel = nullptr;
+    RenderTexture2D* m_hdrRenderTextureA = nullptr;
 
     void SetGradingParams(const std::string& name, const ColorGradingSettings::GradingParams& params);
+    RenderTexture2D* CreateHDRPostProcessRenderTexture();
 };
 
 #endif

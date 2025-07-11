@@ -11,33 +11,55 @@ void ColorGradingEffect::Init() {
     m_material = AssetsManager::CreateMaterial("ColorGradingMaterial");
     m_lutMaterial = AssetsManager::CreateMaterial("LUT2DMaterial");
     m_colorWheel = AssetsManager::CreateTexture2D("ColorWheelTexture", "Assets/ColorWheel.png");
+    m_hdrRenderTextureA = CreateHDRPostProcessRenderTexture();
+
 }
 
 void ColorGradingEffect::Render(const RenderContext& ctx, std::shared_ptr<ColorGradingSettings> settings) {
     if (!settings) return;
+
+    m_hdrRenderTextureA->Resize(ctx.source->GetWidth(), ctx.source->GetHeight());
 
     if (settings->useLUT) {
         if (settings->m_lutTexture) {
             m_lutMaterial->SetTexture("texture2D", ctx.source);
             m_lutMaterial->SetTexture("lut", settings->m_lutTexture);
             m_lutMaterial->SetFloat("lutSize", settings->lutSize);
-            Graphics::GetInstance()->RenderImage(ctx.window, ctx.target, m_lutShader, m_lutMaterial);
-            return;
+            Graphics::GetInstance()->RenderImage(ctx.window, m_hdrRenderTextureA, m_lutShader, m_lutMaterial);
+            
         }
     }
+    else
+    {
+        m_material->SetTexture("texture2D", ctx.source);
 
-    m_material->SetTexture("texture2D", ctx.source);
+        SetGradingParams("Global", settings->global);
+        SetGradingParams("Shadows", settings->shadow);
+        SetGradingParams("Midtones", settings->midtone);
+        SetGradingParams("Highlights", settings->highlight);
 
-    SetGradingParams("Global", settings->global);
-    SetGradingParams("Shadows", settings->shadow);
-    SetGradingParams("Midtones", settings->midtone);
-    SetGradingParams("Highlights", settings->highlight);
+        m_material->SetFloat("exposure", settings->exposure);
+        m_material->SetFloat("temperature", settings->temperature);
+        m_material->SetFloat("temperatureTint", settings->temperatureTint);
 
-    m_material->SetFloat("exposure", settings->exposure);
-    m_material->SetFloat("temperature", settings->temperature);
-    m_material->SetFloat("temperatureTint", settings->temperatureTint);
+        Graphics::GetInstance()->RenderImage(ctx.window, m_hdrRenderTextureA, m_shader, m_material);
+    }
 
-    Graphics::GetInstance()->RenderImage(ctx.window, ctx.target, m_shader, m_material);
+
+
+    //Blit Final result to target
+    int viewportWidth = ctx.target ? ctx.target->GetWidth() : ctx.window->GetWidth();
+    int viewportHeight = ctx.target ? ctx.target->GetHeight() : ctx.window->GetHeight();
+
+    float bCornerX = ctx.camera->m_viewportBottomCornerX * viewportWidth;
+    float bCornerY = ctx.camera->m_viewportBottomCornerY * viewportHeight;
+
+    float tCornerX = ctx.camera->m_viewportTopCornerX * viewportWidth;
+    float tCornerY = ctx.camera->m_viewportTopCornerY * viewportHeight;
+
+    RenderTexture2D::Blit(m_hdrRenderTextureA, ctx.target, 0, 0, m_hdrRenderTextureA->GetWidth(), m_hdrRenderTextureA->GetHeight(),
+        bCornerX, bCornerY, tCornerX, tCornerY,
+        BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
 }
 void ColorGradingEffect::SetGradingParams(const std::string& name, const ColorGradingSettings::GradingParams& p) {
     m_material->SetColorY(name + ".Saturation", p.Saturation);
@@ -160,4 +182,19 @@ std::shared_ptr<EffectSettings> ColorGradingSettings::BlendWith(const std::vecto
     result->exposure *= invWeight;
 
     return result;
+}
+
+RenderTexture2D* ColorGradingEffect::CreateHDRPostProcessRenderTexture()
+{
+    //Post-Process RenderTexture
+    RenderTexture2D* rt = AssetsManager::CreateRenderTexture2D("PostProcessHDRRenderTexture", 1, 1);
+    Texture::LayerTextureInfo layerTextureInfo = Texture::LayerTextureInfo();
+    layerTextureInfo.m_minificationFilter = MinificationFilter::Bilinear;
+    layerTextureInfo.m_magnificationFilter = MagnificationFilter::Bilinear;
+    layerTextureInfo.m_wrapHorizontalParameter = Wrap::MirrorRepeat;
+    layerTextureInfo.m_wrapVerticalParameter = Wrap::MirrorRepeat;
+    layerTextureInfo.m_generateMimpap = false;
+    rt->AttachColorTextureBuffer(ColorRenderableFormat::RGBA16F, ColorFormat::RGBA, DataType::FLOAT, 0, layerTextureInfo);
+
+    return rt;
 }

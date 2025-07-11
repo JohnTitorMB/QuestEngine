@@ -30,6 +30,11 @@ RenderingType World::m_renderingType = RenderingType::Default;
 #include "PostProcessing/BloomEffect.h"
 #include "PostProcessing/Bloom2Effect.h"
 #include "PostProcessing/Bloom3Effect.h"
+#include "../Library/stb_image.h"
+#define _CRT_SECURE_NO_WARNINGS
+#include "../Library/stb_image_write.h"
+#include "Assets/RenderCubeMap.h"
+#include "Components/PointLight.h"
 
 World::World()
 {
@@ -83,6 +88,10 @@ void World::InitAssets()
 	Shader* additiveShader = AssetsManager::CreateShader("AdditiveShader", "Assets/ScreenShader.vert", "Assets/AdditiveShader.frag");
 	Shader* boxBlurShader = AssetsManager::CreateShader("BoxBlurShader", "Assets/ScreenShader.vert", "Assets/BoxBlurShader.frag");
 	Shader* upScaleShader = AssetsManager::CreateShader("UpScaleShader", "Assets/ScreenShader.vert", "Assets/UpScaleShader.frag");
+	Shader* shadowShader = AssetsManager::CreateShader("ShadowShader", "Assets/ShadowVertexShader.vert", "Assets/ShadowFragmentShader.frag");
+	Shader* pointShadowShader = AssetsManager::CreateShader("PointShadowShader", "Assets/PointShadowFragmentShader.vert", "Assets/PointShadowFragmentShader.frag");
+
+
 
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
@@ -126,7 +135,6 @@ void World::InitAssets()
 	renderBufferInfo.m_useMultisampledRenderBuffer = true;
 	renderBufferInfo.m_samples = 16;
 	HDRRenderTexture->AttachDepthStencilRenderBuffer(DepthStencilRenderableFormat::DEPTH24_STENCIL8, renderBufferInfo);
-
 
 	///Initialise Materials
 
@@ -184,15 +192,16 @@ void World::InitWorld()
 
 	InitAssets();
 
-	LightingSettings::m_globalAmbiantColor = ColorRGB(0.1f, 0.1f, 0.1f,1);
+	LightingSettings::m_globalAmbiantColor = ColorRGB(0.05, 0.05f, 0.05f,1);
 	Scene& scene1 = SceneManager::Instance()->CreateScene();
 	Entity* cameraEntity = scene1.CreateEntity<Entity>();
 	{
 		CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);	
 		cameraEntity->SetRootComponent(cameraComponent);
-		cameraComponent->SetNear(0.01f);
+		cameraComponent->SetNear(0.1f);
 		cameraComponent->SetFar(1000.0);
 		cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+//		cameraComponent->SetSize(11.0f);
 		cameraComponent->SetFov(60);
 	//	cameraComponent->SetWorldPosition(Vector3D(-0.33, 1, -6.6));
 		cameraComponent->SetWorldPosition(Vector3D(2.49044f, 5.31755f, -1.74864f));
@@ -209,7 +218,7 @@ void World::InitWorld()
 		PostProcessing* postProcessing = cameraEntity->AddComponent<PostProcessing>(true);
 	
 	}
-
+	
 	Entity* postProcessVolumeEntity = scene1.CreateEntity<Entity>();
 	{
 		PostProcessingVolume* postProcessVolume = postProcessVolumeEntity->AddComponent<PostProcessingVolume>();
@@ -225,12 +234,6 @@ void World::InitWorld()
 
 		PostProcessing* postProcessing = cameraEntity->GetComponent<PostProcessing>();
 		postProcessing->AddPostProcessingVolume(postProcessVolume);
-
-		MeshRendererComponent* meshRendererComponent = postProcessVolumeEntity->AddComponent<MeshRendererComponent>(true);
-		meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-		meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-		meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
-
 	}
 
 
@@ -257,9 +260,11 @@ void World::InitWorld()
 		dLightComponent->m_ambiantColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
 		dLightComponent->m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
 		dLightComponent->m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 0.0f);
-		dLightComponent->m_intensity = 0.3f;
-		 
-		dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, 0.0f, 0)));
+		dLightComponent->m_intensity = 1.0f;
+		dLightComponent->SetShadowBlurResolution(5);
+		dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, -30.0f, 0)));
+		dLightComponent->SetShadowFar(25.0f);
+		dLightComponent->SetShadowSize(20.0f);
 		DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 		dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 	}
@@ -273,8 +278,158 @@ void World::InitWorld()
 		meshRendererComponent->EnableCullFace(false);
 		meshRendererComponent->m_useViewMatrixWithoutTranslation = true;
 		meshRendererComponent->SetDepthTestFunc(DepthTestFunc::Lequal);
+		meshRendererComponent->EnableDepthMask(false);
+		meshRendererComponent->SetCastShadow(false);
 		meshRendererComponent->SetGeometryRenderingPriority(10000);
 	}
+	
+	bool pointOrSpotLight = false;
+
+	if (pointOrSpotLight)
+	{
+		Entity* box0 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box0->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(-2.0f, 0.0f, 0.0f));
+			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0.0f, 45.0f, 45.0f)));
+		}
+
+
+		Entity* box1 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box1->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(2.0f, 0.0f, 0.0f));
+			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(45.0f, 45.0f, 45.0f)));
+		}
+
+		Entity* box2 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box2->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(0.0f, 0.0f, 2.0f));
+			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(45.0f, 45.0f, 45.0f)));
+		}
+
+		Entity* box3 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box3->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(0.0f, 0.0f, -2.0f));
+			meshRendererComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(45.0f, 45.0f, 45.0f)));
+		}
+
+		Entity* box4 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box4->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(-5.0f, 0.0f, 0.0f));
+			meshRendererComponent->SetWorldScale(Vector3D(1.0f, 10.0f, 10.0f));
+		}
+
+		Entity* box5 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box5->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(5.0f, 0.0f, 0.0f));
+			meshRendererComponent->SetWorldScale(Vector3D(1.0f, 10.0f, 10.0f));
+		}
+
+		Entity* box6 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box6->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(0.0f, 0.0f, -5.0f));
+			meshRendererComponent->SetWorldScale(Vector3D(10.0f, 10.0f, 1.0f));
+		}
+
+		Entity* box7 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box7->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(0.0f, 0.0f, 5.0f));
+			meshRendererComponent->SetWorldScale(Vector3D(10.0f, 10.0f, 1.0f));
+		}
+
+		Entity* box8 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box8->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(0.0f, -5.0f, 0.0f));
+			meshRendererComponent->SetWorldScale(Vector3D(10.0f, 1.0f, 10.0f));
+		}
+
+		Entity* box9 = scene1.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = box9->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
+
+			meshRendererComponent->SetWorldPosition(Vector3D(0.0f, -2.0f, 0.0f));
+		}
+	}
+	
+
+	//PointLightComponent* pointLight = nullptr;
+	//Entity* lightEntity = scene1.CreateEntity<Entity>();
+	//{
+	//	pointLight = lightEntity->AddComponent<PointLightComponent>(true);
+	//	pointLight->m_ambiantColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
+	//	pointLight->m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+	//	pointLight->m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 0.0f);
+	//	pointLight->m_intensity = 1.0f;
+	//	pointLight->m_linearValue = 0.07f;
+	//	pointLight->m_quadraticValue = 0.017f;
+	//	pointLight->SetWorldPosition(Vector3D(0.0f, 0.0f, 0.0f));
+	//	pointLight->SetShadowMinBias(0.1f);
+	//	pointLight->SetShadowMaxBias(0.2f);
+	//}
+
+	//SpotLightComponent* spotLight = nullptr;
+	//Entity* lightEntity = scene1.CreateEntity<Entity>();
+	//{
+	//	spotLight = lightEntity->AddComponent<SpotLightComponent>(true);
+	//	spotLight->m_ambiantColor = ColorRGB(0.0f, 0.0f, 0.0f, 1.0f);
+	//	spotLight->m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+	//	spotLight->m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 0.0f);
+	//	spotLight->m_intensity = 1.0f;
+	//	spotLight->SetWorldPosition(Vector3D(0.0f, 1.57f, 0.0f));
+	//	spotLight->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(90.0f, 0.0f, 0)));
+	//	spotLight->m_linearValue = 0.07f;
+	//	spotLight->m_quadraticValue = 0.017f;
+	//	spotLight->m_spotAngle = 170.0f;
+	//	spotLight->SetShadowMaxBias(0.01f);
+	//}
+	
 
 	EntityGroupAsset* entityAssets = AssetsManager::GetAsset<EntityGroupAsset>("Stair");
 	scene1.CloneGroupEntityToScene(entityAssets);
@@ -345,7 +500,8 @@ void World::InitWorld()
 			sceneComponent->SetWorldScale(Vector3D(1.0f, 1.0f, 1.0f));
 		}
 	}
-
+	
+	
 
 	SceneManager::Instance()->LoadScene(0);
 }
@@ -399,6 +555,37 @@ void World::Update()
 	TimeManager::Instance()->m_previousTime = TimeManager::Instance()->m_time;
 }
 
+bool SaveDepthTextureToPNG(GLuint depthTextureID, int width, int height, const std::string& filename)
+{
+	glBindTexture(GL_TEXTURE_2D, depthTextureID);
+
+	// Lire les valeurs de profondeur (float entre 0.0 et 1.0)
+	std::vector<float> depthPixels(width * height);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, depthPixels.data());
+
+	// Convertir en unsigned char (grayscale 0–255)
+	std::vector<unsigned char> pixels8bit(width * height);
+	for (int i = 0; i < width * height; ++i)
+	{
+		float depth = depthPixels[i];
+		depth = Mathf::Clamp(depth, 0.0f, 1.0f);
+		pixels8bit[i] = static_cast<unsigned char>(depth * 255.0f);
+	}
+
+	// Flip verticalement
+	for (int y = 0; y < height / 2; ++y)
+	{
+		for (int x = 0; x < width; ++x)
+		{
+			std::swap(pixels8bit[y * width + x], pixels8bit[(height - 1 - y) * width + x]);
+		}
+	}
+
+	int result = stbi_write_png(filename.c_str(), width, height, 1, pixels8bit.data(), width);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return result != 0;
+}
+
 void World::Display(Window* window)
 {
 	if (window == nullptr)
@@ -415,11 +602,117 @@ void World::Display(Window* window)
 		return a->GetRenderingPriority() < b->GetRenderingPriority();
 		});
 
+
+	//Genere ShadowMap
+	for (auto light : m_lights)
+	{
+		if (light->m_lightType == LightComponent::LightType::Point)
+		{
+			PointLightComponent* pointLight = static_cast<PointLightComponent*>(light);
+			RenderCubeMap* shadowDepth = pointLight->GetShadowMap();
+			CameraComponent lightCamera = CameraComponent();
+			lightCamera.SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+			lightCamera.SetFov(90.0f);
+			lightCamera.SetRenderTexture(shadowDepth);
+			lightCamera.SetWorldPosition(pointLight->GetWorldPosition());
+			lightCamera.SetNear(pointLight->GetShadowNear());
+			lightCamera.SetFar(pointLight->GetShadowFar());
+
+
+			for (int i = 0; i < 6; i++)
+			{
+
+				Vector3D rotation;
+
+				switch (i)
+				{
+					case 0: rotation = Vector3D(0, 90, 0); break;  // +X
+					case 1: rotation = Vector3D(0, -90, 0); break; // -X
+					case 2: rotation = Vector3D(90, 0, 0); break; // +Y
+					case 3: rotation = Vector3D(-90, 0, 0); break;  // -Y
+					case 4: rotation = Vector3D(0, 0, 0); break;   // +Z
+					case 5: rotation = Vector3D(0, 180, 0); break; // -Z
+				}
+
+				lightCamera.SetWorldRotation(Quaternion::FromEulerAngle(rotation));
+				shadowDepth->AttachFaceToFramebuffer(BufferAttachment::DepthAttachment, i);
+
+				shadowDepth->BindFramebuffer();
+				glViewport(0, 0, shadowDepth->GetWidth(), shadowDepth->GetHeight());
+				Graphics::GetInstance()->Clear(&lightCamera, 0, 0, shadowDepth->GetWidth(), shadowDepth->GetHeight());
+
+				for (auto rendererIt = m_opaqueMeshRenderers.begin(); rendererIt != m_opaqueMeshRenderers.end(); ++rendererIt)
+				{
+					MeshRendererComponent* meshRenderer = *rendererIt;
+					meshRenderer->Draw(&lightCamera, m_lights, window, shadowDepth, MeshRendererComponent::RenderingPassType::ShadowMap);
+				}
+			}		
+
+			shadowDepth->SwapBuffer();
+			shadowDepth->GenerateAllMipmap(false);
+			shadowDepth->UnBindFramebuffer();
+		}
+		else
+		{
+			RenderTexture2D* shadowDepth = nullptr;
+			CameraComponent lightCamera = CameraComponent();
+			if (light->m_lightType == LightComponent::LightType::Directional)
+			{
+				DirectionalLightComponent* dirLight = static_cast<DirectionalLightComponent*>(light);
+				shadowDepth = dirLight->GetShadowMap();
+
+				Vector3D lightDir = light->GetForwardVector();
+				Vector3D lightTarget = Vector3D::Zero;
+				Vector3D lightPosition = dirLight->GetShadowMapTargetPos() - lightDir.Normalized() * dirLight->GetShadowDistance();
+
+				lightCamera.SetProjectionMode(CameraComponent::EProjectionMode::ORTHOGRAPHIC);
+
+				lightCamera.SetRenderTexture(shadowDepth);
+				lightCamera.SetWorldPosition(lightPosition);
+				lightCamera.SetWorldRotation(Quaternion::SetGoToRotation(lightCamera.GetForwardVector(), lightDir));
+				lightCamera.SetSize(dirLight->GetShadowSize());
+				lightCamera.SetNear(dirLight->GetShadowNear());
+				lightCamera.SetFar(dirLight->GetShadowFar());
+			}
+			else
+			{
+				SpotLightComponent* spotLight = static_cast<SpotLightComponent*>(light);
+				shadowDepth = spotLight->GetShadowMap();
+				Vector3D lightDir = light->GetForwardVector();
+
+				lightCamera.SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+				lightCamera.SetFov(spotLight->m_spotAngle);
+				lightCamera.SetRenderTexture(shadowDepth);
+				lightCamera.SetWorldPosition(spotLight->GetWorldPosition());
+				lightCamera.SetWorldRotation(Quaternion::SetGoToRotation(lightCamera.GetForwardVector(), lightDir));
+				lightCamera.SetNear(spotLight->GetShadowNear());
+				lightCamera.SetFar(spotLight->GetShadowFar());
+
+			}
+
+			shadowDepth->BindFramebuffer();
+			glViewport(0, 0, shadowDepth->GetWidth(), shadowDepth->GetHeight());
+			Graphics::GetInstance()->Clear(&lightCamera, 0, 0, shadowDepth->GetWidth(), shadowDepth->GetHeight());
+
+			for (auto rendererIt = m_opaqueMeshRenderers.begin(); rendererIt != m_opaqueMeshRenderers.end(); ++rendererIt)
+			{
+				MeshRendererComponent* meshRenderer = *rendererIt;
+				meshRenderer->Draw(&lightCamera, m_lights, window, shadowDepth, MeshRendererComponent::RenderingPassType::ShadowMap);
+			}
+
+			shadowDepth->SwapBuffer();
+			shadowDepth->GenerateAllMipmap(false);
+			shadowDepth->UnBindFramebuffer();
+		}
+
+	}
+
+	//Display Scene
 	for (auto it = sortCamera.begin(); it != sortCamera.end(); ++it)
 	{
 		CameraComponent* camera = *it;
 
-		RenderTexture2D* cameraRT = camera->GetRenderTexture();
+		RenderTexture2D* cameraRT = dynamic_cast<RenderTexture2D*>(camera->GetRenderTexture());
 		
 		int viewportWidth = window->GetWidth();
 		int viewportHeight = window->GetHeight();

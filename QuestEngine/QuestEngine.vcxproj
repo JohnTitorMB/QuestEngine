@@ -225,6 +225,8 @@
     <ClCompile Include="Core\Components\PostProcessingVolume.cpp" />
     <ClCompile Include="Editor\SimpleEditor.cpp" />
     <ClCompile Include="Core\RuntimePipeline.cpp" />
+    <ClCompile Include="Core\Assets\RenderCubeMap.cpp" />
+    <ClCompile Include="Core\Assets\RenderTexture.cpp" />
     <ClCompile Include="Utilities\GeometryUtilities.cpp" />
     <ClCompile Include="Library\stb_image.cpp" />
     <ClCompile Include="Core\Components\Light.cpp" />
@@ -331,6 +333,8 @@
     <ClInclude Include="Core\Components\PostProcessingVolume.h" />
     <ClInclude Include="Editor\SimpleEditor.h" />
     <ClInclude Include="Core\RuntimePipeline.h" />
+    <ClInclude Include="Core\Assets\RenderCubeMap.h" />
+    <ClInclude Include="Core\Assets\RenderTexture.h" />
     <ClInclude Include="Utilities\GeometryUtilities.h" />
     <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Core\Components\Light.h" />

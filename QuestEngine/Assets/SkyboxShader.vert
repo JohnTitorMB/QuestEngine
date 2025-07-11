@@ -8,9 +8,9 @@ out vec3 cubeMapCoord;
 
 void main()
 {
-	  // Transform vertex from local space to NDC space
+    // Transform vertex from local space to NDC space
     vec4 vertexInLocalSpace = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    vec4 vertexInNDCSpace =vertexInLocalSpace * model * view * projection;
+    vec4 vertexInNDCSpace = vertexInLocalSpace * model * view * projection;
 
     gl_Position = vec4(vertexInNDCSpace.x, vertexInNDCSpace.y, vertexInNDCSpace.w, vertexInNDCSpace.w);
     cubeMapCoord = vec3(aPos.x, aPos.y, aPos.z);

@@ -193,7 +193,7 @@ int Window::CreateWindow(GLFWwindow* sharedContext)
 {
 	int width = m_width;
 	int height = m_height;
-	const char* title = "First OpenGL Window";
+	const char* title = m_title;
 
 	if (sharedContext == nullptr)
 	{

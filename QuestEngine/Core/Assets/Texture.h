@@ -5,7 +5,7 @@
 #include "Assets.h"
 #include "../../Library/stb_image.h"
 #include "../ColorManagement/ColorManagement.h"
-
+#include "../../Math/Vector4D.h"
 
 #include <vector>
 
@@ -330,7 +330,7 @@ public:
         DataType m_dataType = (DataType)0;
         Format m_format = (Format)0;
         InternalFormat m_internalFormat = InternalFormat::RGBA8;
-
+        Vector4D m_borderColor = Vector4D(1, 1, 1, 1);
         TextureConversionMode m_textureConversionMode = TextureConversionMode::GPUConvert;
         ColorManagement::RGBColorSpaceType m_colorSpace = ColorManagement::RGBColorSpaceType::SRGB;
     };
@@ -361,6 +361,8 @@ public:
     void SetTextureConversionMode(TextureConversionMode textureConversionMode, int layer = 0);
     void SetTextureColorSpace(ColorManagement::RGBColorSpaceType colorSpace, int layer = 0);
     void SetTextureColorManagementParam(ColorManagement::RGBColorSpaceType colorSpace, TextureConversionMode textureConversionMode, int layer = 0);
+
+    void SetBorderColor(Vector4D color, int layer = 0);
 
     virtual void RefreshTextureData(int layer);
 

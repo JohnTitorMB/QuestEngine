@@ -113,6 +113,22 @@ RenderTexture2D* AssetsManager::CreateRenderTexture2D(const std::string& assetNa
 	return renderTexture;
 }
 
+RenderCubeMap* AssetsManager::CreateRenderCubeMap(const std::string& assetName, const int width, const int height)
+{
+	AssetsManager* assetsManager = AssetsManager::Instance();
+	std::string newAssetName = assetName;
+
+	if (assetsManager->m_assetsNameMap.find(assetName) != assetsManager->m_assetsNameMap.end())
+		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
+
+	RenderCubeMap* renderCubemap = new RenderCubeMap(width, height);
+	renderCubemap->m_name = newAssetName;
+	assetsManager->m_assetsNameMap.emplace(newAssetName, renderCubemap);
+	assetsManager->m_assets.insert(renderCubemap);
+	assetsManager->m_assetsByType[typeid(*renderCubemap)].push_back(renderCubemap);
+	return renderCubemap;
+}
+
 CubeMap* AssetsManager::CreateCubeMap(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded)
 {
 	std::filesystem::path p(filePath);

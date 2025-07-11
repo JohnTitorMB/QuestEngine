@@ -6,17 +6,9 @@
 
 
 
-RenderTexture2D::RenderTexture2D(int width, int height) : Texture()
+RenderTexture2D::RenderTexture2D(int width, int height) : RenderTexture(width, height)
 {
-	m_width = width;
-	m_height = height;
-	glGenFramebuffers(1, &m_framebufferID);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferID);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "framebuffer not properly initialized : " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-	else
-		std::cout << "framebuffer is initialized" << std::endl;
+	
 }
 
 RenderTexture2D::~RenderTexture2D()
@@ -24,35 +16,14 @@ RenderTexture2D::~RenderTexture2D()
 	for (const auto& info : m_renderBuffersInfo)
 		glDeleteRenderbuffers(1, &info.second.m_renderBufferID);
 
-	glDeleteFramebuffers(1, &m_framebufferID);
-
-	for (const GLuint& id : m_backBuffer)
-	{
-		if(id != 0)
-			glDeleteTextures(1, &id);
-	}
-
 	m_renderBuffersInfo.clear();
-	m_backBuffer.clear();
 }
 
-int RenderTexture2D::GetFrameBufferID()const
-{
-	return m_framebufferID;
-}
 
-void RenderTexture2D::BindFramebuffer()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferID);
-}
-
-void RenderTexture2D::UnBindFramebuffer()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
 
 void RenderTexture2D::DetachBuffer(BufferAttachment bufferAttachement)
 {
+	RenderTexture::DetachBuffer(bufferAttachement);
 
 	if (m_renderBuffersInfo.find(bufferAttachement) != m_renderBuffersInfo.end())
 	{
@@ -94,6 +65,8 @@ void RenderTexture2D::DetachBuffer(BufferAttachment bufferAttachement)
 
 void RenderTexture2D::SwapBuffer()
 {
+	RenderTexture::SwapBuffer();
+
 	for (int i = 0; i < m_layerTextureInfos.size(); i++)
 	{
 		if (m_backBuffer[i] != 0)
@@ -131,13 +104,12 @@ void RenderTexture2D::Blit(RenderTexture2D* rtRead, RenderTexture2D* rtDraw, int
 
 void RenderTexture2D::Resize(int newWidth, int newHeight)
 {
+	RenderTexture::Resize(newWidth, newHeight);
 	if (m_width == newWidth && m_height == newHeight)
 		return;
 
 	m_width = newWidth;
 	m_height = newHeight;
-
-	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferID);
 
 	for (int i = 0; i < m_layerTextureInfos.size(); ++i)
 	{
@@ -179,22 +151,9 @@ void RenderTexture2D::Resize(int newWidth, int newHeight)
 			glRenderbufferStorageMultisample(GL_RENDERBUFFER, entry.second.m_samples, (int)(int)entry.second.m_interRerableFormat, m_width, m_height);
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
 }
 
-void RenderTexture2D::AttachColorTextureBuffer(ColorRenderableFormat colorRenderableFormat, ColorFormat colorFormat, DataType dataTye, unsigned int colorAttachementIndex, LayerTextureInfo layerTextureInfo)
-{
-	int bufferAttachmentIndex = (int)BufferAttachment::ColorAttachment0 + colorAttachementIndex;
-	if (bufferAttachmentIndex > (int)BufferAttachment::ColorAttachment31)
-	{
-		std::cout << "RenderTexture cannot attach a buffer to a color index greater than 31" << std::endl;
-		return;
-	}
 
-	AttachTextureBuffer((BufferAttachment)bufferAttachmentIndex, (InternalFormat)colorRenderableFormat, (Format)colorFormat, dataTye, layerTextureInfo);
-}
 
 void RenderTexture2D::AttachColorTextureBufferMS(ColorRenderableFormat colorRenderableFormat, unsigned int colorAttachementIndex, LayerTextureInfo layerTextureInfo)
 {
@@ -213,10 +172,7 @@ void RenderTexture2D::AttachColorRenderBuffer(ColorRenderableFormat colorRendera
 	AttachRenderBuffer((BufferAttachment)bufferAttachmentIndex, (InternalFormat)colorRenderableFormat, renderBufferInfo);
 }
 
-void RenderTexture2D::AttachDepthTextureBuffer(DepthRenderableFormat depthRenderableFormat, DataType dataTye, LayerTextureInfo layerTextureInfo)
-{
-	AttachTextureBuffer(BufferAttachment::DepthAttachment, (InternalFormat)depthRenderableFormat, Format::DEPTH_COMPONENT, dataTye, layerTextureInfo);
-}
+
 
 void RenderTexture2D::AttachDepthTextureBufferMS(DepthRenderableFormat depthRenderableFormat, LayerTextureInfo layerTextureInfo)
 {
@@ -229,10 +185,7 @@ void RenderTexture2D::AttachDepthRenderBuffer(DepthRenderableFormat depthRendera
 	AttachRenderBuffer(BufferAttachment::DepthAttachment, (InternalFormat)depthRenderableFormat, renderBufferInfo);
 }
 
-void RenderTexture2D::AttachStencilTextureBuffer(StencilRenderableFormat stencilRenderableFormat, DataType dataTye, LayerTextureInfo layerTextureInfo)
-{
-	AttachTextureBuffer(BufferAttachment::StencilAttachment, (InternalFormat)stencilRenderableFormat, Format::STENCIL_INDEX, dataTye, layerTextureInfo);
-}
+
 
 void RenderTexture2D::AttachStencilTextureBufferMS(StencilRenderableFormat stencilRenderableFormat, LayerTextureInfo layerTextureInfo)
 {
@@ -245,10 +198,7 @@ void RenderTexture2D::AttachStencilRenderBuffer(StencilRenderableFormat stencilR
 	AttachRenderBuffer(BufferAttachment::StencilAttachment, (InternalFormat)stencilRenderableFormat, renderBufferInfo);
 }
 
-void RenderTexture2D::AttachDepthStencilTextureBuffer(DepthStencilRenderableFormat depthStencilRenderableFormat, DataType dataTye, LayerTextureInfo layerTextureInfo)
-{
-	AttachTextureBuffer(BufferAttachment::Depth_Stencil_Attachment, (InternalFormat)depthStencilRenderableFormat, Format::DEPTH_STENCIL, dataTye, layerTextureInfo);
-}
+
 
 void RenderTexture2D::AttachDepthStencilTextureBufferMS(DepthStencilRenderableFormat depthStencilRenderableFormat, LayerTextureInfo layerTextureInfo)
 {
@@ -391,6 +341,12 @@ void RenderTexture2D::AttachTextureBuffer(BufferAttachment bufferAttachement, In
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, (GLint)m_layerTextureInfos[layerIndex].m_mipmapLODBias);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_layerTextureInfos[layerIndex].m_anisotropyValue);
 
+		float borderColor[] = { m_layerTextureInfos[layerIndex].m_borderColor.m_x, 
+								m_layerTextureInfos[layerIndex].m_borderColor.m_y, 
+								m_layerTextureInfos[layerIndex].m_borderColor.m_z, 
+								m_layerTextureInfos[layerIndex].m_borderColor.m_w };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
 		glFramebufferTexture2D(GL_FRAMEBUFFER, (int)bufferAttachement, GL_TEXTURE_2D, textureID, 0);
 
 		if (layerTextureInfo.m_generateMimpap)
@@ -426,6 +382,13 @@ void RenderTexture2D::AttachTextureBuffer(BufferAttachment bufferAttachement, In
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, (GLint)m_layerTextureInfos[layerIndex].m_mipmapMaxLOD);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, (GLint)m_layerTextureInfos[layerIndex].m_mipmapLODBias);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_layerTextureInfos[layerIndex].m_anisotropyValue);
+
+			float borderColor[] = { m_layerTextureInfos[layerIndex].m_borderColor.m_x,
+						m_layerTextureInfos[layerIndex].m_borderColor.m_y,
+						m_layerTextureInfos[layerIndex].m_borderColor.m_z,
+						m_layerTextureInfos[layerIndex].m_borderColor.m_w };
+			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
 			if (layerTextureInfo.m_generateMimpap)
 				glGenerateMipmap((int)m_textureType);
 		}
@@ -488,4 +451,59 @@ void RenderTexture2D::SetRenderBufferMSSample(BufferAttachment bufferAttachement
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_renderBuffersInfo[bufferAttachement].m_samples, (int)m_renderBuffersInfo[bufferAttachement].m_interRerableFormat, m_width, m_height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, (int)bufferAttachement, GL_RENDERBUFFER, m_renderBuffersInfo[bufferAttachement].m_renderBufferID);
 	}
+}
+
+std::string GetGLErrorString(GLenum error)
+{
+	switch (error)
+	{
+	case GL_NO_ERROR: return "GL_NO_ERROR";
+	case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
+	case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
+	case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+	case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
+	case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
+	default: return "UNKNOWN_ERROR";
+	}
+}
+
+
+void RenderTexture2D::DrawBuffer(DrawBufferType drawBuffer)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferID);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cerr << "FBO not complete! Status: 0x" << std::hex << status << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_framebufferID);
+	glDrawBuffer(GL_NONE);
+
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "Error in glDrawBuffer with buffer " << static_cast<int>(drawBuffer)
+			<< ": " << GetGLErrorString(error) << std::endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderTexture2D::ReadBuffer(ReadBufferMode mode)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferID);
+	glReadBuffer(static_cast<GLenum>(mode));
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "Error in glReadBuffer with mode " << static_cast<int>(mode)
+			<< ": " << GetGLErrorString(error) << std::endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

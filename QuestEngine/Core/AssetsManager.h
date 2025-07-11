@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include "Assets/RenderTexture2D.h"
+#include "Assets/RenderCubeMap.h"
 #include <typeindex>
 
 class QuestEngine;
@@ -34,6 +35,7 @@ public:
 	static Mesh* CreateMesh(const std::string& assetName, bool useOneVbo);
 	static Texture2D* CreateTexture2D(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
 	static RenderTexture2D* CreateRenderTexture2D(const std::string& assetName, const int width, const int height);
+	static RenderCubeMap* CreateRenderCubeMap(const std::string& assetName, const int width, const int height);
 	static CubeMap* CreateCubeMap(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
 	static Material* CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Texture* emissiveTexture, ColorRGB ambientColor, ColorRGB diffuseColor, ColorRGB specularColor, ColorRGB emissiveColor, float shininess);
 	static Material* CreateMaterial(const std::string& assetName);

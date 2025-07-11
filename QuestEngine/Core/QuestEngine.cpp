@@ -80,7 +80,7 @@ void QuestEngine::Update()
 		
 	    world->Update();
 
-		SimpleEditor::Instance()->Display();
+//		SimpleEditor::Instance()->Display();
 
 		world->Display(m_window);
 

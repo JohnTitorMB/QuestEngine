@@ -103,6 +103,15 @@ enum class BlendingFactor
 
 class MeshRendererComponent : public SceneComponent
 {
+public:
+	enum class RenderingPassType
+	{
+		Default,
+		ShadowMap,
+		DebugNormal,
+		DebugUv,
+		DebugDepth
+	};
 private:
 
 	PolygonMode m_polygonMode = PolygonMode::Fill;
@@ -117,7 +126,6 @@ private:
 	bool m_isDepthMaskEnable = true;
 	bool m_isDepthTestEnable = true;
 	DepthTestFunc m_depthTestFunc = DepthTestFunc::Less;
-
 
 	//Stencil Specification
 	bool m_isStencilTestEnable = false;
@@ -167,6 +175,9 @@ private:
 	bool m_ovverideMultiSamplingEnable = false;
 	bool m_enableMultiSampling = false;
 
+	bool m_receiveShadow = true;
+	bool m_castShadow = true;
+
 public:
 
 	Event<Window*, CameraComponent*> OnRenderEvent;
@@ -175,8 +186,8 @@ public:
 	MeshRendererComponent() = default;
 	MeshRendererComponent& operator=(const MeshRendererComponent& other) = default;
 
+	void Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window, RenderTexture* renderTexture, RenderingPassType renderingPassType = RenderingPassType::Default);
 
-	void Draw(CameraComponent* camera, std::set<LightComponent*>lights, Window* window, RenderTexture2D* renderTexture2D);
 	void SetDrawPartialMesh(bool drawPartialMesh);
 	void SetPartialMeshElementCount(int partialMeshElementCount);
 	void SetPartialMeshStartIndex(int partialMeshStartIndex);
@@ -247,11 +258,16 @@ public:
 	//MultiSampling Setters
 	void SetOverrideMultiSamplingEnable(bool overrideMultiSamplingEnable);
 	void SetEnableMultiSampling(bool enableMultiSampling);
+	
+	//Shaddow Setter
+	void SetReceiveShadow(bool value);
+	void SetCastShadow(bool value);
 
 	//Depth Specification Getters
 	bool IsDepthMaskEnable();
 	bool IsDepthTestEnable();
 	DepthTestFunc GetDepthTestFunc();
+
 
 	//Stencil Specification Getters
 	int GetStencilBackMask();
@@ -299,7 +315,9 @@ public:
 	bool GetOverrideMultiSamplingEnable() const;
 	bool GetEnableMultiSampling() const;
 
-
+	//Shaddow Getter
+	bool GetReceiveShadow(bool value)const;
+	bool GetCastShadow(bool value)const;
 
 	Component* Clone()override;
 	void AssignPointerAndReference()override;
