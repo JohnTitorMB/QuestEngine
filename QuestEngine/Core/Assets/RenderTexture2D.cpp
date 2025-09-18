@@ -87,18 +87,48 @@ void RenderTexture2D::SwapBuffer()
 
 void RenderTexture2D::Blit(RenderTexture2D* rtRead, RenderTexture2D* rtDraw, int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1, BlitBitField mask, BlitFilter filter)
 {
-	if(rtRead == nullptr)
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	else
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, rtRead->GetFrameBufferID());
+	Blit(rtRead, 0, rtDraw, 0, srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+}
 
-	if(rtDraw == nullptr)
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	else
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rtDraw->GetFrameBufferID());
+void RenderTexture2D::Blit(RenderTexture2D* src, int srcColorAttachmentIndex, RenderTexture2D* dst, int dstColorAttachmentIndex, int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1
+	, BlitBitField mask, BlitFilter filter)
+{
 
-	glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, (int)mask, (int)filter);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	GLint prevReadFBO = 0, prevDrawFBO = 0, prevReadBuf = 0, prevDrawBuf = 0;
+	GLboolean scissorEnabled = GL_FALSE;
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevReadFBO);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevDrawFBO);
+	glGetIntegerv(GL_READ_BUFFER, &prevReadBuf);
+	glGetIntegerv(GL_DRAW_BUFFER, &prevDrawBuf);
+	glGetBooleanv(GL_SCISSOR_TEST, &scissorEnabled);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, src ? src->GetFrameBufferID() : 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst ? dst->GetFrameBufferID() : 0);
+
+	if (src)
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + srcColorAttachmentIndex);
+	else
+		glReadBuffer(GL_BACK); 
+
+	if (dst)
+		glDrawBuffer(GL_COLOR_ATTACHMENT0 + dstColorAttachmentIndex);
+	else
+		glDrawBuffer(GL_BACK);
+
+	if (scissorEnabled) glDisable(GL_SCISSOR_TEST);
+
+	GLenum glMask = (GLenum)mask;   
+	GLenum glFilter = (GLenum)filter; 
+	glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1,
+		dstX0, dstY0, dstX1, dstY1,
+		glMask, glFilter);
+
+	if (scissorEnabled) glEnable(GL_SCISSOR_TEST);
+	glReadBuffer(prevReadBuf);
+	glDrawBuffer(prevDrawBuf);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, prevReadFBO);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevDrawFBO);
 }
 
 

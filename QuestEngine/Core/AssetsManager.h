@@ -41,6 +41,42 @@ public:
 	static Material* CreateMaterial(const std::string& assetName);
 	static Shader* CreateShader(const std::string& assetName, std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
 	static EntityGroupAsset* CreateEntityGroup(const std::string& assetName);
+	
+	static void DestroyAsset(Assets* asset)
+	{
+		if (!asset) return;
+
+		AssetsManager* mgr = AssetsManager::Instance();
+
+		// déjà détruit / pas géré
+		auto itInSet = mgr->m_assets.find(asset);
+		if (itInSet == mgr->m_assets.end())
+			return;
+
+		for (auto it = mgr->m_assetsNameMap.begin(); it != mgr->m_assetsNameMap.end(); )
+		{
+			if (it->second == asset) it = mgr->m_assetsNameMap.erase(it);
+			else ++it;
+		}
+
+		for (auto it = mgr->m_assetsFilePathMap.begin(); it != mgr->m_assetsFilePathMap.end(); )
+		{
+			if (it->second == asset) it = mgr->m_assetsFilePathMap.erase(it);
+			else ++it;
+		}
+
+		for (auto it = mgr->m_assetsByType.begin(); it != mgr->m_assetsByType.end(); )
+		{
+			auto& vec = it->second;
+			vec.erase(std::remove(vec.begin(), vec.end(), asset), vec.end());
+			if (vec.empty()) it = mgr->m_assetsByType.erase(it);
+			else ++it;
+		}
+
+		mgr->m_assets.erase(itInSet);
+
+		delete asset;
+	}
 
 	template<class T = Assets>
 	static T* GetAsset(const std::string& assetName)

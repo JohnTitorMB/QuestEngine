@@ -10,8 +10,8 @@ class DirectionalLightComponent : public LightComponent
 	float m_shadowSize = 10.0f;
 	float m_shadowNear = 0.1f;
 	float m_shadowFar = 1000.0f;
-	float m_shadowMinBias = 0.005f;
-	float m_shadowMaxBias = 0.05f;
+	float m_shadowMinBias = 0.08f;
+	float m_shadowMaxBias = 0.13f;
 	int m_shadowMapWidth = 4096;
 	int m_shadowMapHeight = 4096;
 	Vector3D m_shadowMapTargetPos = Vector3D::Zero;

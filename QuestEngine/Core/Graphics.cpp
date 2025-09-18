@@ -51,6 +51,28 @@ void Graphics::Clear(CameraComponent* camera, int x, int y, int width, int heigh
 	glDisable(GL_SCISSOR_TEST);
 }
 
+void Graphics::Clear(int x, int y, int width, int height, const ClearParams& p)
+{
+	glEnable(GL_SCISSOR_TEST);
+	glScissor(x, y, width, height);
+
+	glStencilMask(p.stencilWriteMask);
+	glDepthMask(p.depthWrite);
+	glColorMask(p.colorMaskR, p.colorMaskG, p.colorMaskB, p.colorMaskA);
+
+	glClearColor(p.r, p.g, p.b, p.a);
+#if defined(GL_ES_VERSION_3_0) || defined(GL_ES_VERSION_2_0)
+	glClearDepthf(p.depth);
+#else
+	glClearDepth(p.depth);
+#endif
+	glClearStencil(p.stencilValue);
+
+	glClear(p.clearBufferMask);
+
+	glDisable(GL_SCISSOR_TEST);
+}
+
 void Graphics::BindMainFrameBuffer()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -4,9 +4,8 @@ in vec2 uv;
 in vec3 normal;
 in vec3 pos;
 in vec3 viewPos;
- 
-layout(location=0) out vec4 FdfragColor;    // SceneColor 
-layout(location=1) out vec4 outBehind;   // BehindRefracted1
+in vec3 viewDir;
+out vec4 FdfragColor;
 
 uniform vec2 textureTilling = vec2(1,1);
 uniform vec2 textureOffset = vec2(0,0);
@@ -108,7 +107,11 @@ struct Material
 }; 
 uniform Material material;
 
+uniform sampler2D behindTexture;
 uniform sampler2D depthTexture;
+uniform sampler2D bumpTexture;
+uniform samplerCube reflectionTexture;
+
 uniform vec2 invViewport;
 
 
@@ -417,20 +420,34 @@ void main()
 
     color.rgb = ConvertColor(color.rgb, colorSpaceIn, colorSpaceOut);
 
-    FdfragColor = vec4(color.r,color.g,color.b,alpha);
-
     vec2 uv =  gl_FragCoord.xy * invViewport;
-    float refractedDepth = texture(depthTexture, uv).r;
-  
-    const float epsilon = 1e-4;
 
-    if (refractedDepth < 0.0) {
-        outBehind = vec4(0.0);
-    } else {
-        float fragDepth = gl_FragCoord.z; 
-        bool behind = (fragDepth - refractedDepth) > -epsilon;
-        outBehind = behind ? FdfragColor : vec4(0.0);
+    vec4 bumpTex = 2.0 * texture(bumpTexture, uv) - 1.0;
+    vec2 vScale = vec2(0.01,0.01);
+    vec2 newUV = uv + bumpTex.xy * vScale.xy;
+   // newUV = uv;
+
+    vec3 depthOutSide = texture(depthTexture, newUV).rgb;
+    if(depthOutSide.r < 0)
+        color.rgb = texture(behindTexture, uv).rgb;
+    else
+    {
+        vec3 behindColor = texture(behindTexture, newUV).rgb;
+        color.rgb = behindColor;
     }
 
-    //outBehind = vec4(1.0f);
+
+    float ratio = 1.00 / 1.52;
+    vec3 I = normalize(pos - viewPos);
+    vec3 R = refract(I, normalize(normal), ratio);
+    R.y = -R.y;
+
+    vec3 reflectionColor = texture(reflectionTexture,R).rgb;
+
+    color.rgb = mix(color.rgb, reflectionColor,0.5);
+   // color.rgb = reflectionColor;
+    FdfragColor = vec4(color.r,color.g,color.b,alpha);
 };
+
+
+

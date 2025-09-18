@@ -11,6 +11,7 @@
 #include "../Component.h"
 #include "SceneComponent.h"
 #include <set>
+#include "../Assets/RenderTexture2D.h"
 
 enum class PolygonMode
 {
@@ -107,6 +108,7 @@ public:
 	enum class RenderingPassType
 	{
 		Default,
+		DepthMap,
 		ShadowMap,
 		DebugNormal,
 		DebugUv,
@@ -177,6 +179,9 @@ private:
 
 	bool m_receiveShadow = true;
 	bool m_castShadow = true;
+
+	bool m_refractedObject = false;
+
 
 public:
 
@@ -249,6 +254,8 @@ public:
 	void SetDestinationAlphaBlendingFactor(BlendingFactor factor);
 	void SetBlendColor(const ColorRGB& color);
 
+	void EnableRefracted(bool value);
+
 	//Color Mask Setters
 	void EnableRedMask(bool value);
 	void EnableGreenMask(bool value);
@@ -318,6 +325,9 @@ public:
 	//Shaddow Getter
 	bool GetReceiveShadow(bool value)const;
 	bool GetCastShadow(bool value)const;
+
+	bool IsRefracted()const;
+
 
 	Component* Clone()override;
 	void AssignPointerAndReference()override;

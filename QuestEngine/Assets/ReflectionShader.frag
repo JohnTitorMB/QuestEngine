@@ -3,10 +3,10 @@
 in vec2 uv;
 in vec3 normal;
 in vec3 pos;
+in vec3 localPos;
 in vec3 viewPos;
  
-layout(location=0) out vec4 FdfragColor;    // SceneColor 
-layout(location=1) out vec4 outBehind;   // BehindRefracted1
+out vec4 FdfragColor;
 
 uniform vec2 textureTilling = vec2(1,1);
 uniform vec2 textureOffset = vec2(0,0);
@@ -108,15 +108,21 @@ struct Material
 }; 
 uniform Material material;
 
-uniform sampler2D depthTexture;
-uniform vec2 invViewport;
-
+uniform samplerCube reflectedCubeMap;
 
 vec3 ComputeDirectionalLightColor(DirectionalLight dLight, float shadow)
 {
     vec3 lightDirection = dLight.direction;
     vec4 ambientColor = dLight.ambientColor * material.ambientColor * textureCs(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy, material.ambiantTextureColorSpace);
     vec4 diffuseColor = dLight.diffuseColor * material.diffuseColor * textureCs(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy, material.diffuseTextureColorSpace);
+
+    float ratio = 1.00 / 1.52;
+    vec3 I = normalize(pos - viewPos);
+    vec3 R = refract(I, normalize(normal), ratio);
+
+    ambientColor = texture(reflectedCubeMap,R);
+    diffuseColor = texture(reflectedCubeMap,R);
+
     float NdotL = dot(normal, -lightDirection); 
     diffuseColor*= max(NdotL,0);
 
@@ -419,18 +425,6 @@ void main()
 
     FdfragColor = vec4(color.r,color.g,color.b,alpha);
 
-    vec2 uv =  gl_FragCoord.xy * invViewport;
-    float refractedDepth = texture(depthTexture, uv).r;
-  
-    const float epsilon = 1e-4;
-
-    if (refractedDepth < 0.0) {
-        outBehind = vec4(0.0);
-    } else {
-        float fragDepth = gl_FragCoord.z; 
-        bool behind = (fragDepth - refractedDepth) > -epsilon;
-        outBehind = behind ? FdfragColor : vec4(0.0);
-    }
-
-    //outBehind = vec4(1.0f);
+ //   float shadow = ComputeSpotShadow(posLightSpaceArray[1], spotLights[0]);               
+ //   FdfragColor = vec4(shadow,shadow,shadow,1);
 };

@@ -31,6 +31,9 @@ private:
 	std::set<MeshRendererComponent*> m_meshRenderers;
 	std::vector<MeshRendererComponent*> m_opaqueMeshRenderers;
 	std::vector<MeshRendererComponent*> m_transparentMeshRenderers;
+	std::vector<MeshRendererComponent*> m_refractedMeshRenderers;
+	std::vector<RenderTexture2D*> m_refractedRTs;
+	std::vector<RenderTexture2D*> m_behindRefractedRTs;
 	std::set<Component*> m_components;
 	std::set<CameraComponent*> m_cameras;
 
@@ -42,6 +45,8 @@ private:
 	void UnRegisterComponent(Component* component);
 	void OrdoredOpaqueMeshRenderer();
 	void OrdoredTransparenceMeshRenderer(CameraComponent* cameraComponent);
+	std::vector<MeshRendererComponent*> OrdoredTransparenceRefractedMeshRenderer(CameraComponent* camera);
+
 	static void Destroy();
 
 protected:
@@ -86,9 +91,18 @@ public :
 	void Display(Window* window);
 	void RefreshPriorityRenderingComponent(MeshRendererComponent* component);
 	void RefreshBlendRenderingComponent(MeshRendererComponent* component, bool isBlendEnable);
+	void RefreshRefractedRenderingComponent(MeshRendererComponent* component, bool isRefractedEnable);
 
 	int fboWidth = 1600;
 	int fboHeight = 1200;
+
+	const std::vector<RenderTexture2D*>& GetRefractedRTs() const noexcept {
+		return m_refractedRTs;
+	}
+
+	const std::vector<RenderTexture2D*>& GetBehindRefractedRTs() const noexcept {
+		return m_behindRefractedRTs;
+	}
 };
 
 #include "Entity.h"

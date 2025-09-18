@@ -33,7 +33,10 @@ public :
 	void SetUniformInt(std::string name, int value);
 
 	void SetUniformFloatArray(std::string name, std::vector<float> value);
-
+	int GetShaderProgram()const
+	{
+		return m_shaderProgram;
+	}
 
 private:
 	int m_shaderProgram;

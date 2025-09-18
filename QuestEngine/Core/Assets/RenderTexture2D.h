@@ -51,6 +51,12 @@ public:
     void DrawBuffer(DrawBufferType drawBuffer);
     void ReadBuffer(ReadBufferMode mode);
     static void Blit(RenderTexture2D* rtA, RenderTexture2D* rtB, int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1, BlitBitField mask, BlitFilter filter);
+    static void Blit(
+        RenderTexture2D* src, int srcColorAttachmentIndex,
+        RenderTexture2D* dst, int dstColorAttachmentIndex,
+        int srcX0, int srcY0, int srcX1, int srcY1,
+        int dstX0, int dstY0, int dstX1, int dstY1, BlitBitField mask, BlitFilter filter);
+
 };
 
 #endif

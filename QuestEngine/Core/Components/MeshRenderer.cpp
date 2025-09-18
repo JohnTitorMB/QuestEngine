@@ -107,6 +107,9 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	case RenderingPassType::ShadowMap:
 		shader = AssetsManager::GetAsset<Shader>("ShadowShader");
 		break;
+	case RenderingPassType::DepthMap:
+		shader = AssetsManager::GetAsset<Shader>("DepthShader");
+		break;
 	default:
 		break;
 	}
@@ -175,8 +178,69 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // reset
 		return;
 	}
+	else if (renderingPassType == RenderingPassType::DepthMap)
+	{
+		if (!m_mesh || !shader) return;
 
+		glDisable(GL_BLEND);
+		glDisable(GL_STENCIL_TEST);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); 
 
+		if (m_isCullFaceEnable) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
+		glCullFace((int)m_cullFace);
+		glFrontFace((int)m_frontFace);
+
+		if (camera)
+		{
+			if (camera->GetUseDepthZeroToOneProjection())
+				glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+			else
+				glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+		}
+
+		glPolygonMode(GL_FRONT_AND_BACK, (int)m_polygonMode);
+
+		shader->UseShader();
+
+		Matrix4x4 model = GetTransform().TransformMatrix();
+		shader->SetUniformMatrix4x4("model", model);
+
+		if (camera)
+		{
+			int w = window->GetWidth();
+			int h = window->GetHeight();
+			if (renderTexture)
+			{
+				w = renderTexture->GetWidth();
+				h = renderTexture->GetHeight();
+			}
+
+			Matrix4x4 view = camera->ViewMatrix();
+			Matrix4x4 proj = camera->ProjectionMatrix(w, h);
+			Matrix4x4 mvp = proj * view * model;
+
+			shader->SetUniformMatrix4x4("mvp", mvp);
+			shader->SetUniformMatrix4x4("view", view);
+			shader->SetUniformMatrix4x4("projection", proj);
+			shader->SetUniformFloat("viewNear", camera->GetNear());
+			shader->SetUniformFloat("viewFar", camera->GetFar());
+		}
+
+		m_mesh->UseMesh();
+		if (m_drawPartialMesh)
+			glDrawElements((int)m_mesh->m_shapeType, m_partialMeshElementCount,
+				GL_UNSIGNED_INT, (void*)(m_partialMeshStartIndex * sizeof(unsigned int)));
+		else
+			glDrawElements((int)m_mesh->m_shapeType, (GLsizei)m_mesh->GetIndices().size(),
+				GL_UNSIGNED_INT, 0);
+
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		return;
+	}
+
+	//Default draw
 
 	if (m_ovverideMultiSamplingEnable)
 	{
@@ -262,16 +326,13 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 		else
 			shader->SetUniformMatrix4x4("view", camera->ViewMatrixWithoutTranslation());
 
-		RenderTexture* rt = camera->GetRenderTexture();
 		int width = window->GetWidth();
 		int height = window->GetHeight();
-		if (rt != nullptr)
+		if (renderTexture != nullptr)
 		{
-			width = rt->GetWidth();
-			height = rt->GetHeight();
+			width = renderTexture->GetWidth();
+			height = renderTexture->GetHeight();
 		}
-
-
 
 		float bCornerX = camera->m_viewportBottomCornerX * width;
 		float bCornerY = camera->m_viewportBottomCornerY * height;
@@ -283,7 +344,11 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 		
 		shader->SetUniformVector3D("uViewPos", camera->GetTransform().GetPosition());
+
+		shader->SetUniformVector2D("invViewport", Vector2D(1.0f/(tCornerX - bCornerX), 1.0f / (tCornerY - bCornerY)));
 	}
+
+
 
 	Matrix3x3 normalMatrix = (Matrix3x3)(modelMatrix).Inverse().Transpose();
 	shader->SetUniformMatrix3x3("normalMatrix", normalMatrix);
@@ -295,6 +360,8 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 
 	shader->SetUniformInt("colorSpaceIn", (int)ColorManagement::GetCurrentGPUWorkingSpaceType() + 1);
 	SendMaterialToShader();
+
+
 
 	int directionalLightCounter = 0;
 	int spotLightCounter = 0;
@@ -496,13 +563,27 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 		shader->SetUniformInt(lightDepthMapName, textureCount);
 
 		std::string blurResName = "spotLights[" + std::to_string(i) + "].blurResolution";
-		shader->SetUniformInt(blurResName, 0); // pas de blur
+		shader->SetUniformInt(blurResName, 0); 
 		textureCount++;
 	}
 
+	m_shader->SetUniformInt("depthTexture", textureCount);
+	World::Instance()->GetRefractedRTs()[0]->Bind(textureCount, 0);
+	textureCount++;
+	m_shader->SetUniformInt("behindTexture", textureCount);
+	World::Instance()->GetBehindRefractedRTs()[0]->Bind(textureCount, 0);
 
 	m_mesh->UseMesh();
 	
+	GLint locBehind = glGetFragDataLocation(shader->GetShaderProgram(), "outBehind");
+	if (locBehind >= 0) {
+		static const GLenum bufs2[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, bufs2);
+	}
+	else {
+		static const GLenum bufs1[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, bufs1);
+	}
 
 	if(m_drawPartialMesh)
 		glDrawElements((int)m_mesh->m_shapeType, m_partialMeshElementCount, GL_UNSIGNED_INT, (void*)(m_partialMeshStartIndex * sizeof(unsigned int)));
@@ -727,6 +808,14 @@ void MeshRendererComponent::EnableBlend(bool value)
 		World::Instance()->RefreshBlendRenderingComponent(this, value);
 
 	m_isBlendEnable = value;
+}
+
+void MeshRendererComponent::EnableRefracted(bool value)
+{
+	if (value != m_refractedObject)
+		World::Instance()->RefreshRefractedRenderingComponent(this, value);
+
+	m_refractedObject = value;
 }
 
 void MeshRendererComponent::SetRGBBlendingMode(BlendingMode mode) 
@@ -960,6 +1049,11 @@ bool MeshRendererComponent::GetReceiveShadow(bool value) const
 bool MeshRendererComponent::GetCastShadow(bool value) const
 {
 	return m_castShadow;
+}
+
+bool MeshRendererComponent::IsRefracted()const
+{
+	return m_refractedObject;
 }
 
 
