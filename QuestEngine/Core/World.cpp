@@ -195,6 +195,13 @@ void World::InitAssets()
 	meshRenderComponent->SetMaterial(renderMaterial);
 	meshRenderComponent->SetShader(renderShader);	
 
+	entityGroupAsset = OBJLibrary::OBJLoader::LoadOBJ("Bunker", "Assets/Bunker/Bunker.obj");
+	screenEntity = entityGroupAsset->GetEntityAt(56); // Get the screen entity of desk
+	meshRenderComponent = screenEntity->GetComponent<MeshRendererComponent>();
+	meshRenderComponent->SetMaterial(renderMaterial);
+	meshRenderComponent->SetShader(renderShader);
+
+
 
 	//Initialise Entity for display Post-Process effect;
 	EntityGroupAsset* postProcessEG = AssetsManager::CreateEntityGroup("PostProcessEntityGroup");
@@ -215,7 +222,7 @@ void World::InitWorld()
 	Graphics::GetInstance()->SetMSAASample(16);
 
 	InitAssets();
-	//Init Scene1
+	//Old Scene
 	Scene& scene1 = SceneManager::Instance()->CreateScene();
 	{
 		LightingSettings::m_globalAmbiantColor = ColorRGB(0.05, 0.05f, 0.05f, 1);
@@ -369,7 +376,7 @@ void World::InitWorld()
 		}
 	}
 
-	//Init Scene2
+	//Reflexion Scene
 	Scene& scene2 = SceneManager::Instance()->CreateScene();
 	{
 		LightingSettings::m_globalAmbiantColor = ColorRGB(0.05, 0.05f, 0.05f, 1);
@@ -453,7 +460,7 @@ void World::InitWorld()
 		}
 	}
 	
-	//Init Scene3
+	//Reflexion/Refraction Scene
 	Scene& scene3 = SceneManager::Instance()->CreateScene();
 	{
 		LightingSettings::m_globalAmbiantColor = ColorRGB(0.05, 0.05f, 0.05f, 1);
@@ -555,36 +562,9 @@ void World::InitWorld()
 			}
 		}
 
-		// Pyramid of cubes (square layers decreasing)
-		const int layers = 5;
-		const float baseSpacing = 1.2f;
-		for (int layer = 0; layer < layers; ++layer)
-		{
-			int count = layers - layer; // number of cubes per row/column on this layer
-			float y = 0.5f + layer * 1.05f;
-			float totalSize = (count - 1) * baseSpacing;
-			float start = -totalSize * 0.5f;
-
-			for (int i = 0; i < count; ++i)
-			{
-				for (int j = 0; j < count; ++j)
-				{
-					Entity* cubeEntity = scene3.CreateEntity<Entity>();
-					MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
-					meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
-					meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-					meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("WhiteMaterial"));
-
-					float x = start + i * baseSpacing;
-					float z = start + j * baseSpacing;
-					meshRendererComponent->SetWorldPosition(Vector3D(x, y, z));
-					meshRendererComponent->SetWorldScale(Vector3D(0.9f, 0.9f, 0.9f));
-				}
-			}
-		}
 	}
 
-	// Init Scene4
+	// PBR Scene
 	Scene& scene4 = SceneManager::Instance()->CreateScene();
 	{
 		LightingSettings::m_globalAmbiantColor = ColorRGB(0.05, 0.05f, 0.05f, 1);
@@ -623,10 +603,48 @@ void World::InitWorld()
 			dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, -30.0f, 0)));
 			dLightComponent->SetShadowFar(50.0f);
 			dLightComponent->SetShadowSize(30.0f);
-
+			dLightComponent->SetShadowMinBias(0.15f);
+			dLightComponent->SetShadowMaxBias(0.25f);
 			DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
 			dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
 		}
+
+		Entity* postProcessVolumeEntity = scene4.CreateEntity<Entity>();
+		{
+			PostProcessingVolume* postProcessVolume = postProcessVolumeEntity->AddComponent<PostProcessingVolume>();
+
+			std::shared_ptr<Bloom3Settings> bloom3Setting = std::make_shared<Bloom3Settings>();
+			postProcessVolume->AddEffect(bloom3Setting);
+			
+			postProcessVolume->SetGlobal(true);
+
+			PostProcessing* postProcessing = cameraEntity->GetComponent<PostProcessing>();
+			postProcessing->AddPostProcessingVolume(postProcessVolume);
+		}
+
+		CameraComponent* cameraComponent2 = nullptr;
+		Entity* cameraEntity2 = scene4.CreateEntity<Entity>();
+		{
+			cameraComponent2 = cameraEntity2->AddComponent<CameraComponent>(true);
+			cameraComponent2->SetNear(0.01f);
+			cameraComponent2->SetFar(1000.0);
+			cameraComponent2->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+			cameraComponent2->SetFov(60);
+			cameraComponent2->SetWorldPosition(Vector3D(-2.87488, 4.18062, 7.05849));
+			cameraComponent2->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(0.0f, 180.0f, 0.0f)));
+			cameraEntity2->SetRootComponent(cameraComponent2);
+			cameraComponent2->SetRenderTexture(AssetsManager::GetAsset<RenderTexture2D>("RenderTexture"));
+		}
+
+		/*Entity* cubeEntity = scene4.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = cubeEntity->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("ReflectionShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("ReflectedMaterial"));
+			meshRendererComponent->SetWorldPosition(Vector3D(-2.87488, 4.18062 , 7.05849));
+			meshRendererComponent->SetWorldScale(Vector3D(0.1f, 0.1f, 0.1f));
+		}*/
 
 		// Skybox
 		Entity* skyboxEntity = scene4.CreateEntity<Entity>();
@@ -643,10 +661,13 @@ void World::InitWorld()
 			meshRendererComponent->SetGeometryRenderingPriority(10000);
 		}
 
+		EntityGroupAsset* entityAssets = AssetsManager::GetAsset<EntityGroupAsset>("Bunker");
+		scene4.CloneGroupEntityToScene(entityAssets);
+
 
 	}
 
-	SceneManager::Instance()->LoadScene(2);
+	SceneManager::Instance()->LoadScene(3);
 
 }
 
@@ -900,10 +921,17 @@ void World::Display(Window* window)
 		layerTextureInfo.m_magnificationFilter = MagnificationFilter::Point;
 		layerTextureInfo.m_generateMimpap = false;
 
-		layerTextureInfo.m_useMultisampledTexture = true;
-		layerTextureInfo.m_samples = 16;
+//		layerTextureInfo.m_useMultisampledTexture = true;
+//		layerTextureInfo.m_samples = 16;
 
-		cameraRT->AttachColorTextureBufferMS(ColorRenderableFormat::RGBA16F, 1, layerTextureInfo);
+		if (camera->m_enableMultiSampling)
+		{
+			layerTextureInfo.m_useMultisampledTexture = true;
+			layerTextureInfo.m_samples = 16;
+			cameraRT->AttachColorTextureBufferMS(ColorRenderableFormat::RGBA16F, 1, layerTextureInfo);
+		}
+		else
+			cameraRT->AttachColorTextureBuffer(ColorRenderableFormat::RGBA16F, ColorFormat::RGBA, DataType::FLOAT, 1, layerTextureInfo);
 
 		float bCornerX = camera->m_viewportBottomCornerX * viewportWidth;
 		float bCornerY = camera->m_viewportBottomCornerY * viewportHeight;
@@ -1047,9 +1075,9 @@ void World::Display(Window* window)
 
 		GL_SCOPE("Post Process");
 
-		/*PostProcessing* postProcessing = camera->GetOwnEntity()->GetComponent<PostProcessing>();
+		PostProcessing* postProcessing = camera->GetOwnEntity()->GetComponent<PostProcessing>();
 		if (postProcessing)
-			postProcessing->DisplayEffects(window, cameraRT, camera);*/
+			postProcessing->DisplayEffects(window, cameraRT, camera);
 
 
 		if (camera->m_enableHDR && camera->GetRenderTexture() == nullptr)

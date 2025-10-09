@@ -116,7 +116,7 @@ vec3 ComputeDirectionalLightColor(DirectionalLight dLight, float shadow)
 {
     vec3 lightDirection = dLight.direction;
     vec4 ambientColor = dLight.ambientColor * material.ambientColor * textureCs(material.ambiantTexture, uv * material.ambiantTextureST.zw + material.ambiantTextureST.xy, material.ambiantTextureColorSpace);
-    vec4 diffuseColor = dLight.diffuseColor * material.diffuseColor * textureCs(material.diffuseTexture, uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy, material.diffuseTextureColorSpace);
+    vec4 diffuseColor = dLight.diffuseColor * material.diffuseColor * textureCs(material.diffuseTexture,     uv * material.diffuseTextureST.zw + material.diffuseTextureST.xy, material.diffuseTextureColorSpace);
     float NdotL = dot(normal, -lightDirection); 
     diffuseColor*= max(NdotL,0);
 
@@ -133,7 +133,6 @@ vec3 ComputeDirectionalLightColor(DirectionalLight dLight, float shadow)
     }
   
     vec4 color = ambientColor+(diffuseColor + specularColor) * shadow;
-
     return vec3(color.r, color.g, color.b) * dLight.intensity;
 }
 

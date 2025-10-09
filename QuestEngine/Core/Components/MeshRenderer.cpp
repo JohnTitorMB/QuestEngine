@@ -568,10 +568,16 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	}
 
 	m_shader->SetUniformInt("depthTexture", textureCount);
-	World::Instance()->GetRefractedRTs()[0]->Bind(textureCount, 0);
+
+	if (World::Instance()->GetRefractedRTs().size() > 0)
+		World::Instance()->GetRefractedRTs()[0]->Bind(textureCount, 0);
 	textureCount++;
-	m_shader->SetUniformInt("behindTexture", textureCount);
-	World::Instance()->GetBehindRefractedRTs()[0]->Bind(textureCount, 0);
+
+	if (World::Instance()->GetRefractedRTs().size() > 0)
+	{
+		m_shader->SetUniformInt("behindTexture", textureCount);
+		World::Instance()->GetBehindRefractedRTs()[0]->Bind(textureCount, 0);
+	}
 
 	m_mesh->UseMesh();
 	

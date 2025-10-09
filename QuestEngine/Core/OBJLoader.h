@@ -110,10 +110,10 @@ namespace OBJLibrary
         static inline std::string GetFullPath(const std::filesystem::path& path, std::string subFilePath);
 
     public:
-        static void LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<MaterialData>* materialCollection, const float scaleFactor = 1.0f);
+        static void LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<MaterialData>* materialCollection, const Vector3D scaleFactor = Vector3D(1.0, 1.0f, 1.0f));
         static std::unordered_map<std::string, MaterialData> LoadMTLData(const std::string& mtlFilePath);
 
-        static EntityGroupAsset* LoadOBJ(std::string assetsName, const std::string& filePath, const float scaleFactor = 1.0f);
+        static EntityGroupAsset* LoadOBJ(std::string assetsName, const std::string& filePath, const Vector3D scaleFactor = Vector3D(1.0f,1.0f,1.0f));
     };
 }
 

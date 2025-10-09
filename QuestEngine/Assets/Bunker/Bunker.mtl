@@ -1,0 +1,165 @@
+# Blender 3.4.1 MTL File: 'RenderingScene.blend'
+# www.blender.org
+
+newmtl Chair_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ka Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_Kd Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_refl Textures/Chair/Asset_chair1_Metallic.tga.png
+map_Bump -bm 1.000000 Textures/Chair/Asset_chair1_Normal.tga.png
+
+newmtl Desk_Material
+Ns 250.000000
+Ka 0.731818 0.731818 0.731818
+Kd 0.130852 0.130852 0.130852
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl Floor_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ka Textures/Floor/FloorBaseColor.png
+map_Kd Textures/Floor/FloorBaseColor.png
+map_Bump -bm 1.000000 Textures/Floor/FloorNormal.png
+
+newmtl Monitor_01_A_Material
+Ns 250.000000
+Ka 0.309091 0.309091 0.309091
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl Monitor_01_B_Material
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Monitor__Screen_Material
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Railing_Material
+Ns 250.000000
+Ka 0.731818 0.731818 0.731818
+Kd 0.130852 0.130852 0.130852
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl Trap_Door_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ka Textures/TrapDoor/TrapDoorColorBase.png
+map_Kd Textures/TrapDoor/TrapDoorColorBase.png
+map_Ke Textures/TrapDoor/TrapDoorEmissive.png
+map_Bump -bm 1.000000 Textures/TrapDoor/TrapDoorNormal.png
+
+newmtl Wall1_Material
+Ka 0.213636 0.213636 0.213636
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ka Textures/Wall1/Wall1BaseColor.png
+map_Kd Textures/Wall1/Wall1BaseColor.png
+map_Bump -bm 1.000000 Textures/Wall1/Wall1Normal.png
+
+newmtl Wall2_Material
+Ka 0.213636 0.213636 0.213636
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ka Textures/Wall2/Wall2BaseColor.png
+map_Kd Textures/Wall2/Wall2BaseColor.png
+map_Bump -bm 1.000000 Wall2Normal.png
+
+newmtl Wall3_Material
+Ka 0.213636 0.213636 0.213636
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ka Textures/Wall3/Wall3ColorBase.png
+map_Kd Textures/Wall3/Wall3ColorBase.png
+map_Bump -bm 9.999999 Textures/Wall3/Wall3Normal.png
+
+newmtl Wall4_Material
+Ka 0.213636 0.213636 0.213636
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ka Textures/Wall4/Wall4BaseColor.png
+map_Kd Textures/Wall4/Wall4BaseColor.png
+map_Bump -bm 1.000000 Textures/Wall4/Wall4Normal.png
+
+newmtl Wall_Support_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ka Textures/WallSupport/Wall_Support_ColorBase.png
+map_Kd Textures/WallSupport/Wall_Support_ColorBase.png
+map_Bump -bm 1.000000 Textures/WallSupport/Wall_Support_Normal.png
+
+newmtl Wood_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ka Textures/Stair/oak_veneer_01_diff_4k.png
+map_Kd Textures/Stair/oak_veneer_01_diff_4k.png
+map_Bump -bm 1.000000 Textures/Stair/oak_veneer_01_nor_gl_4k.png
+
+newmtl material.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 12.0 12.0 12.0
+Ni 1.500000
+d 1.000000
+illum 2
+map_Ka Textures/Camera/material_baseColor.png
+map_Kd Textures/Camera/material_baseColor.png
+map_refl Textures/Camera/material_metalic.png
+map_Ke Textures/Camera/material_emissive.png
+map_Bump -bm 1.000000 Textures/Camera/material_normal.png

@@ -213,7 +213,7 @@ inline std::string OBJLibrary::OBJLoader::GetFullPath(const std::filesystem::pat
 	return subFilePath;
 }
 
-void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<MaterialData>* materialCollection, const float scaleFactor)
+void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<MaterialData>* materialCollection, const Vector3D scaleFactor)
 {
 	std::filesystem::path p(objFilePath);
 
@@ -508,7 +508,7 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 }
 
 
-EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& filePath, const float scaleFactor)
+EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& filePath, const Vector3D scaleFactor)
 {
 	using std::chrono::high_resolution_clock;
 	using std::chrono::duration_cast;
