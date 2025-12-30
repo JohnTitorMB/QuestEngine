@@ -21,6 +21,7 @@ public:
 	};
 
 	LightType m_lightType;
+	ColorRGB m_color;
 	ColorRGB m_ambiantColor;
 	ColorRGB m_diffuseColor;
 	ColorRGB m_specularColor;

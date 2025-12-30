@@ -303,9 +303,6 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	//Color Mask
 	glColorMask(m_isRedMaskEnable, m_isGreenMaskEnable, m_isBlueMaskEnable, m_isAlphaMaskEnable);
 
-
-
-
 	shader->UseShader();
 	
 	if (camera != nullptr)
@@ -361,8 +358,6 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 	shader->SetUniformInt("colorSpaceIn", (int)ColorManagement::GetCurrentGPUWorkingSpaceType() + 1);
 	SendMaterialToShader();
 
-
-
 	int directionalLightCounter = 0;
 	int spotLightCounter = 0;
 	int pointLightCounter = 0;
@@ -373,9 +368,10 @@ void MeshRendererComponent::Draw(CameraComponent* camera, std::set<LightComponen
 		if (light->m_lightType == LightComponent::LightType::Directional)
 		{
 			DirectionalLightComponent* directionalLight = dynamic_cast<DirectionalLightComponent*>(light);
-			shader->SetUniformColor("directionalLight.ambientColor", directionalLight->m_ambiantColor);
-			shader->SetUniformColor("directionalLight.diffuseColor", directionalLight->m_diffuseColor);
-			shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
+			shader->SetUniformColor("directionalLight.color", directionalLight->m_color);
+			//shader->SetUniformColor("directionalLight.ambientColor", directionalLight->m_ambiantColor);
+			//shader->SetUniformColor("directionalLight.diffuseColor", directionalLight->m_diffuseColor);
+			//shader->SetUniformColor("directionalLight.specularColor", directionalLight->m_specularColor);
 			shader->SetUniformVector3D("directionalLight.direction", directionalLight->GetForwardVector());
 			shader->SetUniformFloat("directionalLight.intensity", directionalLight->m_intensity);
 

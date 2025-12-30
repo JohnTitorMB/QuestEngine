@@ -97,6 +97,10 @@ void World::InitAssets()
 	Shader* depthShader = AssetsManager::CreateShader("DepthShader", "Assets/DepthShader.vert", "Assets/DepthShader.frag");
 	Shader* refractorShader = AssetsManager::CreateShader("RefractorShader", "Assets/RefractorShader.vert", "Assets/RefractorShader.frag");
 
+	//PBR Shader
+	Shader* pbrShader = AssetsManager::CreateShader("PBRShader", "Assets/PBRShader.vert", "Assets/PBRShader.frag");
+
+
 
 	
 	//Initialise Textures
@@ -111,6 +115,11 @@ void World::InitAssets()
 	Texture2D* lutCustom = AssetsManager::CreateTexture2D("LUTCustom", "Assets/LutCustom.png");
 	Texture2D* NightBlade = AssetsManager::CreateTexture2D("NightBlade", "Assets/NightBlade.png");
 	Texture2D* BumpTexture = AssetsManager::CreateTexture2D("BumpTexture", "Assets/bumpTexture.jpg");
+
+	Texture* albedoTexture = AssetsManager::CreateTexture2D("Albedo", "Assets/WoodVeneerOak/Poliigon_WoodVeneerOak_7760_BaseColor.jpg");
+	Texture* roughnessTexture = AssetsManager::CreateTexture2D("Roughness", "Assets/WoodVeneerOak/Poliigon_WoodVeneerOak_7760_Roughness.jpg");
+	Texture* metallicTexture = AssetsManager::CreateTexture2D("Metallic", "Assets/WoodVeneerOak/Poliigon_WoodVeneerOak_7760_Metallic.jpg");
+
 
 	
 	lut->SetTextureInternalFormat(InternalFormat::RGBA8);
@@ -176,6 +185,8 @@ void World::InitAssets()
 	renderMaterial->SetVector4D("material.textureST", Vector4D(0, 0, -1, 1));
 	renderMaterial->SetFloat("material.intensity", 2.0f);
 
+	Material* pbrMaterial = AssetsManager::CreatePBRMaterial("PBRMaterial", albedoTexture, albedoTexture,blackTexture, metallicTexture, roughnessTexture, whiteTexture, ColorRGB(1.0f, 1.0f, 1.0f, 1), ColorRGB(1, 1, 1, 1), ColorRGB(1, 1, 1, 1), 1.0f, 1.0f, 1.0f);
+	
 	//Initialise Mesh
 	Mesh* cubeMesh = MeshUtilities::CreateCube("CubeMesh", 1.0f);
 	Mesh* sphereMesh = MeshUtilities::CreateUVSphere("SphereMesh", 0.5f, 32, 32);
@@ -667,7 +678,89 @@ void World::InitWorld()
 
 	}
 
-	SceneManager::Instance()->LoadScene(3);
+	//Simple PBR Scene
+	Scene& scene5 = SceneManager::Instance()->CreateScene();
+	{
+		LightingSettings::m_globalAmbiantColor = ColorRGB(0.05, 0.05f, 0.05f, 1);
+
+		// Camera
+		Entity* cameraEntity = scene5.CreateEntity<Entity>();
+		{
+			CameraComponent* cameraComponent = cameraEntity->AddComponent<CameraComponent>(true);
+			cameraEntity->SetRootComponent(cameraComponent);
+			cameraComponent->SetNear(0.1f);
+			cameraComponent->SetFar(1000.0);
+			cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
+			cameraComponent->SetFov(60);
+			cameraComponent->SetWorldPosition(Vector3D(0.0f, 0.0f, -5.0f));
+			cameraComponent->SetRenderingPriority(1);
+			cameraComponent->m_enableMultiSampling = true;
+			cameraComponent->m_enableHDR = true;
+
+			CameraController* cameraController = cameraEntity->AddComponent<CameraController>(true);
+			cameraController->m_scrollMove = 10;
+			cameraController->movementSpeed = 0.5f;
+
+			PostProcessing* postProcessing = cameraEntity->AddComponent<PostProcessing>(true);
+		}
+
+		// Directional light
+		DirectionalLightComponent* dLightComponent = nullptr;
+		Entity* lightEntity = scene5.CreateEntity<Entity>();
+		{
+			dLightComponent = lightEntity->AddComponent<DirectionalLightComponent>(true);
+			dLightComponent->m_ambiantColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
+			dLightComponent->m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+			dLightComponent->m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+			dLightComponent->m_color = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
+			dLightComponent->m_intensity = 1.0f;
+			dLightComponent->SetShadowBlurResolution(5);
+			dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, -30.0f, 0)));
+			dLightComponent->SetShadowFar(50.0f);
+			dLightComponent->SetShadowSize(30.0f);
+			dLightComponent->SetShadowMinBias(0.15f);
+			dLightComponent->SetShadowMaxBias(0.25f);
+			DirectionalLightControllerComponent* dLightControllerComponent = lightEntity->AddComponent<DirectionalLightControllerComponent>(true);
+			dLightControllerComponent->SetDirectionalLightComponent(dLightComponent);
+		}
+
+		Entity* postProcessVolumeEntity = scene5.CreateEntity<Entity>();
+		{
+			PostProcessingVolume* postProcessVolume = postProcessVolumeEntity->AddComponent<PostProcessingVolume>();
+
+			std::shared_ptr<Bloom3Settings> bloom3Setting = std::make_shared<Bloom3Settings>();
+			postProcessVolume->AddEffect(bloom3Setting);
+
+			postProcessVolume->SetGlobal(true);
+
+			PostProcessing* postProcessing = cameraEntity->GetComponent<PostProcessing>();
+			postProcessing->AddPostProcessingVolume(postProcessVolume);
+		}
+
+		// Skybox
+		Entity* skyboxEntity = scene5.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = skyboxEntity->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("CubeMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("SkyboxShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("SkyboxMaterial"));
+			meshRendererComponent->EnableCullFace(false);
+			meshRendererComponent->m_useViewMatrixWithoutTranslation = true;
+			meshRendererComponent->SetDepthTestFunc(DepthTestFunc::Lequal);
+			meshRendererComponent->EnableDepthMask(false);
+			meshRendererComponent->SetCastShadow(false);
+			meshRendererComponent->SetGeometryRenderingPriority(10000);
+		}
+
+		Entity* sphereEntity = scene5.CreateEntity<Entity>();
+		{
+			MeshRendererComponent* meshRendererComponent = sphereEntity->AddComponent<MeshRendererComponent>(true);
+			meshRendererComponent->SetMesh(AssetsManager::GetAsset<Mesh>("SphereMesh"));
+			meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("PBRShader"));
+			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("PBRMaterial"));
+		}
+	}
+	SceneManager::Instance()->LoadScene(4);
 
 }
 

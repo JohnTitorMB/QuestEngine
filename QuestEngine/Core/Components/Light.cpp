@@ -2,6 +2,7 @@
 
 LightComponent::LightComponent()
 {
+	m_color = ColorRGB(1, 1, 1, 1);
 	m_ambiantColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
 	m_diffuseColor = ColorRGB(1, 1, 1, 1);
 	m_specularColor = ColorRGB(1, 1, 1, 1);
@@ -11,6 +12,7 @@ LightComponent::LightComponent()
 
 LightComponent::LightComponent(const LightComponent& other) : SceneComponent(other)
 {
+	m_color = other.m_color;
 	m_ambiantColor = other.m_ambiantColor;
 	m_diffuseColor = other.m_diffuseColor;
 	m_specularColor = other.m_specularColor;

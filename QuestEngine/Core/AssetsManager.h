@@ -38,6 +38,18 @@ public:
 	static RenderCubeMap* CreateRenderCubeMap(const std::string& assetName, const int width, const int height);
 	static CubeMap* CreateCubeMap(const std::string& assetName, std::string filePath, bool verifyFilePathLoaded = false);
 	static Material* CreateBlinnPhongMaterial(const std::string& assetName, Texture* ambientTexture, Texture* diffuseTexture, Texture* specularTexture, Texture* emissiveTexture, ColorRGB ambientColor, ColorRGB diffuseColor, ColorRGB specularColor, ColorRGB emissiveColor, float shininess);
+	static Material* CreatePBRMaterial(const std::string& assetName, Texture* ambientTexture, 
+																	 Texture* albedoTexture, 
+																	 Texture* emissiveTexture,
+																	 Texture* metallicTexture, 
+																	 Texture* roughnessTexture, 
+																	 Texture* alphaTexture,
+																	 ColorRGB ambientColor, 
+																	 ColorRGB albedoColor, 
+																	 ColorRGB emissiveColor, 
+																	 float roughnessFactor, 
+																	 float metallicFactor, 
+																	 float alpha);
 	static Material* CreateMaterial(const std::string& assetName);
 	static Shader* CreateShader(const std::string& assetName, std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
 	static EntityGroupAsset* CreateEntityGroup(const std::string& assetName);

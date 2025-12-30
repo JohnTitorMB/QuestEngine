@@ -197,6 +197,64 @@ Material* AssetsManager::CreateBlinnPhongMaterial(const std::string& assetName, 
 	return material;
 }
 
+Material* AssetsManager::CreatePBRMaterial(
+	const std::string& assetName,
+	Texture* ambientTexture,
+	Texture* albedoTexture,
+	Texture* emissiveTexture,
+	Texture* metallicTexture,
+	Texture* roughnessTexture,
+	Texture* alphaTexture,
+	ColorRGB ambientColor,
+	ColorRGB albedoColor,
+	ColorRGB emissiveColor,
+	float roughnessFactor,
+	float metallicFactor,
+	float alpha)
+{
+	AssetsManager* assetsManager = AssetsManager::Instance();
+
+	std::string newAssetName = assetName;
+	if (assetsManager->m_assetsNameMap.find(assetName) != assetsManager->m_assetsNameMap.end())
+		newAssetName = assetsManager->GenerateUniqueAssetName(assetName);
+
+	Material* material = new Material();
+	material->m_name = newAssetName;
+
+	material->SetColor("material.ambientColor", ambientColor);
+	material->SetColor("material.albedoColor", albedoColor);
+	material->SetColor("material.emissiveColor", emissiveColor);
+
+	material->SetFloat("material.roughnessFactor", roughnessFactor);
+	material->SetFloat("material.metallicFactor", metallicFactor);
+	material->SetFloat("material.alpha", alpha);
+
+	Texture* whiteTexture = AssetsManager::GetAsset<Texture>("White");
+	Texture* blackTexture = AssetsManager::GetAsset<Texture>("Black");
+
+	material->SetTexture("material.ambiantTexture", ambientTexture ? ambientTexture : whiteTexture);
+	material->SetTexture("material.albedoTexture", albedoTexture ? albedoTexture : whiteTexture);
+	material->SetTexture("material.emissiveTexture", emissiveTexture ? emissiveTexture : blackTexture);
+	material->SetTexture("material.metallicTexture", metallicTexture ? metallicTexture : whiteTexture);
+	material->SetTexture("material.roughnessTexture", roughnessTexture ? roughnessTexture : whiteTexture);
+	material->SetTexture("material.alphaTexture", alphaTexture ? alphaTexture : whiteTexture);
+
+	Vector4D defaultST(0.0f, 0.0f, 1.0f, 1.0f);
+
+	material->SetVector4D("material.ambiantTextureST", defaultST);
+	material->SetVector4D("material.albedoTextureST", defaultST);
+	material->SetVector4D("material.emissiveTextureST", defaultST);
+	material->SetVector4D("material.metallicTextureST", defaultST);
+	material->SetVector4D("material.roughnessTextureST", defaultST);
+	material->SetVector4D("material.alphaTextureST", defaultST);
+
+	assetsManager->m_assetsNameMap.emplace(newAssetName, material);
+	assetsManager->m_assets.insert(material);
+	assetsManager->m_assetsByType[typeid(*material)].push_back(material);
+
+	return material;
+}
+
 Material* AssetsManager::CreateMaterial(const std::string& assetName)
 {
 	AssetsManager* assetsManager = AssetsManager::Instance();
