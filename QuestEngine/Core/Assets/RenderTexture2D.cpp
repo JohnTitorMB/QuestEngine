@@ -270,8 +270,7 @@ void RenderTexture2D::AttachRenderBuffer(BufferAttachment bufferAttachement, Int
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "framebuffer not properly initialized : " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-	else
-		std::cout << "framebuffer is initialized" << std::endl;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -428,8 +427,7 @@ void RenderTexture2D::AttachTextureBuffer(BufferAttachment bufferAttachement, In
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "framebuffer not properly initialized : " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-	else
-		std::cout << "framebuffer is initialized" << std::endl;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

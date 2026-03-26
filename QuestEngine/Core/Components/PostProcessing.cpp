@@ -173,7 +173,7 @@ void PostProcessing::DisplayEffects(Window* window, RenderTexture2D* source,Came
 
         if (blended[i]) {
 
-            		RenderTexture2D::Blit(source, tempRt, bCornerX, bCornerY, tCornerX, tCornerY,
+            RenderTexture2D::Blit(source, tempRt, bCornerX, bCornerY, tCornerX, tCornerY,
 			0, 0, tempRt->GetWidth(), tempRt->GetHeight(),
 			BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
 

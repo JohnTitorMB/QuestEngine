@@ -1,0 +1,14 @@
+newmtl MaterialTemplate
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ke 1.000000 1.000000 1.000000
+Pr 1.000000
+Pm 1.000000
+d 1.000000
+map_Ka Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_Kd Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_Ke Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_Pr Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_Pm Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_Nr Textures/Chair/Asset_chair1_BaseColor.tga.png
+map_d Textures/Chair/Asset_chair1_BaseColor.tga.png

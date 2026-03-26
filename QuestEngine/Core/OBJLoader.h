@@ -55,7 +55,12 @@ namespace OBJLibrary
 
     struct MaterialData
     {
-        MaterialData()
+        virtual ~MaterialData() = default;
+    };
+
+	struct BliinPhongMaterialData : MaterialData
+    {
+        BliinPhongMaterialData()
         {
             m_materialName = "";
             m_ambientMapPath = "";
@@ -81,6 +86,30 @@ namespace OBJLibrary
         std::string m_alphaMapPath;
     };
 
+    struct PBRMaterialData : MaterialData
+    {
+        std::string name;
+
+        // Scalars
+        float metallic = 0.0f;
+        float roughness = 1.0f;
+        float alpha = 1.0f;
+
+        // Colors
+		ColorRGB ambientColor = ColorRGB(1, 1, 1, 1);
+        ColorRGB albedoColor = ColorRGB(1, 1, 1, 1);
+        ColorRGB emissiveColor = ColorRGB(0, 0, 0, 1);
+
+        // Textures
+		std::string ambientMap;
+        std::string albedoMap;
+        std::string normalMap;
+        std::string metallicMap;
+        std::string roughnessMap;
+        std::string emissiveMap;
+        std::string alphaMap;
+    };
+
     struct GeometryData
     {
         int materialID = -1;
@@ -92,6 +121,11 @@ namespace OBJLibrary
 
     };
 
+    enum class MaterialPipeline
+    {
+        BlinnPhong,
+        PBR
+    };
 
     class OBJLoader
     {
@@ -99,7 +133,8 @@ namespace OBJLibrary
 
         static Entity* CreateEntity(std::string entityName, EntityGroupAsset* entityGroupAsset, Mesh*& mesh);
         static Entity* CreateSceneEntity(std::string entityName, EntityGroupAsset* entityGroupAsset);
-        static Material* CreateMaterial(std::string assetName, MaterialData materialData);
+        static Material* CreateBliinPhongMaterial(std::string assetName, BliinPhongMaterialData* materialData);
+        static Material* CreatePBRgMaterial(std::string assetName, PBRMaterialData* materialData);
         static inline float ReadFloatFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline long ReadLongFromBuffer(const std::vector<char>& buffer, size_t& pos);
         static inline void ReadVector2DFromBuffer(const std::vector<char>& buffer, size_t& pos, Vector2D& result);
@@ -110,10 +145,10 @@ namespace OBJLibrary
         static inline std::string GetFullPath(const std::filesystem::path& path, std::string subFilePath);
 
     public:
-        static void LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<MaterialData>* materialCollection, const Vector3D scaleFactor = Vector3D(1.0, 1.0f, 1.0f));
-        static std::unordered_map<std::string, MaterialData> LoadMTLData(const std::string& mtlFilePath);
-
-        static EntityGroupAsset* LoadOBJ(std::string assetsName, const std::string& filePath, const Vector3D scaleFactor = Vector3D(1.0f,1.0f,1.0f));
+        static void LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<std::unique_ptr<MaterialData>>* materialCollection, const Vector3D scaleFactor = Vector3D(1.0, 1.0f, 1.0f), bool usePBRMaterials = false);
+        static std::unordered_map<std::string, std::unique_ptr<MaterialData>> LoadMTLData(const std::string& mtlFilePath);
+        static std::unordered_map<std::string, std::unique_ptr<MaterialData>> LoadMTLPBRData(const std::string& mtlFilePath);
+        static EntityGroupAsset* LoadOBJ(std::string assetsName, const std::string& filePath, const Vector3D scaleFactor = Vector3D(1.0f,1.0f,1.0f), bool usePBRMaterials = false);
     };
 }
 

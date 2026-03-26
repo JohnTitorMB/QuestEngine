@@ -12,8 +12,6 @@ RenderTexture::RenderTexture(int width, int height)
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "framebuffer not properly initialized : " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-	else
-		std::cout << "framebuffer is initialized" << std::endl;
 }
 
 RenderTexture::~RenderTexture()

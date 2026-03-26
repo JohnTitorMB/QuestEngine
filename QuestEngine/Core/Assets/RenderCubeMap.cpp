@@ -15,8 +15,6 @@ RenderCubeMap::RenderCubeMap(int width, int height) : RenderTexture(width, heigh
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "framebuffer not properly initialized : " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-	else
-		std::cout << "framebuffer is initialized" << std::endl;
 
 	m_textureType = TextureType::CUBEMAP;
 }
@@ -312,8 +310,7 @@ void RenderCubeMap::AttachTextureBuffer(BufferAttachment bufferAttachement, Inte
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "framebuffer not properly initialized : " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
-	else
-		std::cout << "framebuffer is initialized" << std::endl;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

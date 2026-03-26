@@ -74,7 +74,7 @@ Texture2D* AssetsManager::CreateTexture2D(const std::string& assetName, std::str
 
 	if (p.empty() || !std::filesystem::exists(filePath))
 	{
-		std::cout << "the asset " << assetName << "could not be created!the following path" << filePath  << "does not exist" << std::endl;
+		std::cout << "the asset " << assetName << " could not be created!the following path " << filePath  << " does not exist" << std::endl;
 		return nullptr;
 	}
 

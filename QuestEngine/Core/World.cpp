@@ -185,7 +185,19 @@ void World::InitAssets()
 	renderMaterial->SetVector4D("material.textureST", Vector4D(0, 0, -1, 1));
 	renderMaterial->SetFloat("material.intensity", 2.0f);
 
-	Material* pbrMaterial = AssetsManager::CreatePBRMaterial("PBRMaterial", albedoTexture, albedoTexture,blackTexture, metallicTexture, roughnessTexture, whiteTexture, ColorRGB(1.0f, 1.0f, 1.0f, 1), ColorRGB(1, 1, 1, 1), ColorRGB(1, 1, 1, 1), 1.0f, 1.0f, 1.0f);
+	Material* pbrMaterial = AssetsManager::CreatePBRMaterial("PBRMaterial", 
+							albedoTexture, 
+							albedoTexture,
+							blackTexture, 
+							metallicTexture, 
+							roughnessTexture, 
+							whiteTexture, 
+							ColorRGB(1.0f, 1.0f, 1.0f, 1), 
+							ColorRGB(1, 1, 1, 1), 
+							ColorRGB(1, 1, 1, 1), 
+							1.0f, 
+							1.0f, 
+							1.0f);
 	
 	//Initialise Mesh
 	Mesh* cubeMesh = MeshUtilities::CreateCube("CubeMesh", 1.0f);
@@ -206,7 +218,7 @@ void World::InitAssets()
 	meshRenderComponent->SetMaterial(renderMaterial);
 	meshRenderComponent->SetShader(renderShader);	
 
-	entityGroupAsset = OBJLibrary::OBJLoader::LoadOBJ("Bunker", "Assets/Bunker/Bunker.obj");
+	entityGroupAsset = OBJLibrary::OBJLoader::LoadOBJ("Bunker", "Assets/Bunker/Bunker.obj", Vector3D(1.0f, 1.0f, 1.0f), true);
 	screenEntity = entityGroupAsset->GetEntityAt(56); // Get the screen entity of desk
 	meshRenderComponent = screenEntity->GetComponent<MeshRendererComponent>();
 	meshRenderComponent->SetMaterial(renderMaterial);
@@ -590,6 +602,19 @@ void World::InitWorld()
 			cameraComponent->SetProjectionMode(CameraComponent::EProjectionMode::PERSPECTIVE);
 			cameraComponent->SetFov(60);
 			cameraComponent->SetWorldPosition(Vector3D(0.0f, 6.0f, 10.0f));
+			cameraComponent->SetWorldPosition(Vector3D(
+				1.09278f,
+				4.78767f,
+				-1.51224f
+			));
+
+			cameraComponent->SetWorldRotation(Quaternion(
+				0.900429f,     // W
+				0.0503405f,    // X
+				-0.431407f,    // Y
+				0.0241188f     // Z
+			));
+
 			cameraComponent->SetRenderingPriority(1);
 			cameraComponent->m_enableMultiSampling = true;
 			cameraComponent->m_enableHDR = true;
@@ -599,6 +624,10 @@ void World::InitWorld()
 			cameraController->movementSpeed = 0.5f;
 
 			PostProcessing* postProcessing = cameraEntity->AddComponent<PostProcessing>(true);
+
+	//	Position: (X : 1.09278, Y : 4.78767, Z : -1.51224)
+
+		//	Rotation : (W : 0.900429, X : 0.0503405, Y : -0.431407, Z : 0.0241188)
 		}
 
 		// Directional light
@@ -609,7 +638,7 @@ void World::InitWorld()
 			dLightComponent->m_ambiantColor = ColorRGB(0.1f, 0.1f, 0.1f, 1.0f);
 			dLightComponent->m_diffuseColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
 			dLightComponent->m_specularColor = ColorRGB(1.0f, 1.0f, 1.0f, 1.0f);
-			dLightComponent->m_intensity = 1.0f;
+			dLightComponent->m_intensity = 3.0f;
 			dLightComponent->SetShadowBlurResolution(5);
 			dLightComponent->SetWorldRotation(Quaternion::FromEulerAngle(Vector3D(50.0f, -30.0f, 0)));
 			dLightComponent->SetShadowFar(50.0f);
@@ -760,7 +789,7 @@ void World::InitWorld()
 			meshRendererComponent->SetMaterial(AssetsManager::GetAsset<Material>("PBRMaterial"));
 		}
 	}
-	SceneManager::Instance()->LoadScene(4);
+	SceneManager::Instance()->LoadScene(3);
 
 }
 

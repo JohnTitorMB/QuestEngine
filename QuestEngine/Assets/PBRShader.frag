@@ -150,7 +150,7 @@ vec3 ComputeDirectionalLightColor(DirectionalLight dLight, float shadow)
     vec3 lightSpecular = F*G*D* 1.0F/ (4.0f * dot(normal, -dLight.direction)*dot(normal,viewDirection));
 
     vec3 lightColor = max(dot(normal, -dLight.direction),0) * vec3(dLight.color.r, dLight.color.g, dLight.color.b) *  dLight.intensity * (lightDiffuse + lightSpecular);
-    return lightColor;
+    return lightColor * shadow;
 }
 
 float ComputeDirectionalShadow(vec4 _posLightSpace, DirectionalLight dLight)
@@ -227,19 +227,4 @@ void main()
     color.rgb = ConvertColor(color.rgb, colorSpaceIn, colorSpaceOut);
 
     FdfragColor = vec4(color.r,color.g,color.b,alpha);
-
-    vec2 uv =  gl_FragCoord.xy * invViewport;
-    float refractedDepth = texture(depthTexture, uv).r;
-  
-    const float epsilon = 1e-4;
-
-    if (refractedDepth < 0.0) {
-        outBehind = vec4(0.0);
-    } else {
-        float fragDepth = gl_FragCoord.z; 
-        bool behind = (fragDepth - refractedDepth) > -epsilon;
-        outBehind = behind ? FdfragColor : vec4(0.0);
-    }
-
-    //outBehind = vec4(1.0f);
 };

@@ -1,4 +1,4 @@
-#include "OBJLoader.h"
+﻿#include "OBJLoader.h"
 #include <string>
 #include "AssetsManager.h"
 #include <filesystem>
@@ -39,57 +39,136 @@ Entity* OBJLoader::CreateSceneEntity(std::string entityName, EntityGroupAsset* e
 	return entity;
 }
 
-Material* OBJLibrary::OBJLoader::CreateMaterial(std::string assetName,MaterialData materialData)
+Material* OBJLibrary::OBJLoader::CreateBliinPhongMaterial(std::string assetName, BliinPhongMaterialData* materialData)
 {
 	Texture* defaultTexture = AssetsManager::GetAsset<Texture>("White");
 	Texture* blackTexture = AssetsManager::GetAsset<Texture>("Black");
 	ColorRGB whiteColor = ColorRGB(1.0f,1.0f,1.0f,1.0f);
 	ColorRGB blackColor = ColorRGB(0.0f,0.0f,0.0f,1.0f);
 	Material* material = AssetsManager::CreateBlinnPhongMaterial(assetName, defaultTexture, defaultTexture, defaultTexture, blackTexture, whiteColor, whiteColor, whiteColor, blackColor, 32);
-	material->SetColor("material.ambientColor", materialData.m_ambientColor);
-	material->SetColor("material.diffuseColor", materialData.m_diffuseColor);
-	material->SetColor("material.specularColor", materialData.m_specularColor);
-	material->SetColor("material.emissiveColor", materialData.m_emissiveColor);
-	material->SetFloat("material.shininess", materialData.m_shininess);
+	material->SetColor("material.ambientColor", materialData->m_ambientColor);
+	material->SetColor("material.diffuseColor", materialData->m_diffuseColor);
+	material->SetColor("material.specularColor", materialData->m_specularColor);
+	material->SetColor("material.emissiveColor", materialData->m_emissiveColor);
+	material->SetFloat("material.shininess", materialData->m_shininess);
 
-	if (!materialData.m_ambientMapPath.empty())
+	if (!materialData->m_ambientMapPath.empty())
 	{
-		Texture* ambiantTexture = AssetsManager::CreateTexture2D(assetName + "ambientTexture", materialData.m_ambientMapPath, true);
+		Texture* ambiantTexture = AssetsManager::CreateTexture2D(assetName + "ambientTexture", materialData->m_ambientMapPath, true);
 		if (ambiantTexture)
 			material->SetTexture("material.ambiantTexture", ambiantTexture);
 	}
 
-	if (!materialData.m_diffuseMapPath.empty())
+	if (!materialData->m_diffuseMapPath.empty())
 	{
-		Texture* diffuseTexture = AssetsManager::CreateTexture2D(assetName + "diffuseTexture", materialData.m_diffuseMapPath, true);
+		Texture* diffuseTexture = AssetsManager::CreateTexture2D(assetName + "diffuseTexture", materialData->m_diffuseMapPath, true);
 		if (diffuseTexture)
 			material->SetTexture("material.diffuseTexture", diffuseTexture);
 	}
 
-	if (!materialData.m_specularMapPath.empty())
+	if (!materialData->m_specularMapPath.empty())
 	{
-		Texture* specularTexture = AssetsManager::CreateTexture2D(assetName + "specularTexture", materialData.m_specularMapPath, true);
+		Texture* specularTexture = AssetsManager::CreateTexture2D(assetName + "specularTexture", materialData->m_specularMapPath, true);
 		if (specularTexture)
 			material->SetTexture("material.specularTexture", specularTexture);
 	}
 
-	if (!materialData.m_emissiveMapPath.empty())
+	if (!materialData->m_emissiveMapPath.empty())
 	{
-		Texture* emissiveTexture = AssetsManager::CreateTexture2D(assetName + "emissiveTexture", materialData.m_emissiveMapPath, true);
+		Texture* emissiveTexture = AssetsManager::CreateTexture2D(assetName + "emissiveTexture", materialData->m_emissiveMapPath, true);
 		if (emissiveTexture)
 			material->SetTexture("material.emissiveTexture", emissiveTexture);
 	}
 
-	if (!materialData.m_alphaMapPath.empty())
+	if (!materialData->m_alphaMapPath.empty())
 	{
-		Texture* alphaTexture = AssetsManager::CreateTexture2D(assetName + "alphaTexture", materialData.m_alphaMapPath, true);
+		Texture* alphaTexture = AssetsManager::CreateTexture2D(assetName + "alphaTexture", materialData->m_alphaMapPath, true);
 		if (alphaTexture)
 			material->SetTexture("material.alphaTexture", alphaTexture);
 	}
 
 	material->SetTexture("material.ambiantTexture", material->GetTexture("material.diffuseTexture"));
 	material->SetColor("material.ambientColor", material->GetColor("material.diffuseColor"));
-	material->SetFloat("material.alpha", materialData.m_alpha);
+	material->SetFloat("material.alpha", materialData->m_alpha);
+	return material;
+}
+
+Material* OBJLibrary::OBJLoader::CreatePBRgMaterial(std::string assetName, PBRMaterialData* materialData)
+{
+	Texture* whiteTexture = AssetsManager::GetAsset<Texture>("White");
+	Texture* blackTexture = AssetsManager::GetAsset<Texture>("Black");
+
+	ColorRGB whiteColor(1, 1, 1, 1);
+
+	Material* material = AssetsManager::CreatePBRMaterial(
+		assetName,
+		blackTexture, // ambient
+		whiteTexture, // albedo
+		blackTexture, // emissive
+		whiteTexture, // metallic
+		whiteTexture, // roughness
+		whiteTexture, // alpha
+		materialData->albedoColor,
+		materialData->albedoColor,
+		materialData->emissiveColor,
+		materialData->roughness,
+		materialData->metallic,
+		materialData->alpha
+	);
+
+	// -----------------------
+	// Textures
+	// -----------------------
+
+	if (!materialData->ambientMap.empty())
+	{
+		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_ambient", materialData->ambientMap, true);
+		if (tex)
+			material->SetTexture("material.ambiantTexture", tex);
+
+	}
+	if (!materialData->albedoMap.empty())
+	{
+		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_albedo", materialData->albedoMap, true);
+		if (tex)
+			material->SetTexture("material.albedoTexture", tex);
+	}
+
+	if (!materialData->normalMap.empty())
+	{
+		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_normal", materialData->normalMap, true);
+		if (tex)
+			material->SetTexture("material.normalTexture", tex);
+	}
+
+	if (!materialData->metallicMap.empty())
+	{
+		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_metallic", materialData->metallicMap, true);
+		if (tex)
+			material->SetTexture("material.metallicTexture", tex);
+	}
+
+	if (!materialData->roughnessMap.empty())
+	{
+		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_roughness", materialData->roughnessMap, true);
+		if (tex)
+			material->SetTexture("material.roughnessTexture", tex);
+	}
+
+	if (!materialData->emissiveMap.empty())
+	{
+		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_emissive", materialData->emissiveMap, true);
+		if (tex)
+			material->SetTexture("material.emissiveTexture", tex);
+	}
+
+	if (!materialData->alphaMap.empty())
+	{
+		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_alpha", materialData->alphaMap, true);
+		if (tex)
+			material->SetTexture("material.alphaTexture", tex);
+	}
+
 	return material;
 }
 
@@ -213,7 +292,7 @@ inline std::string OBJLibrary::OBJLoader::GetFullPath(const std::filesystem::pat
 	return subFilePath;
 }
 
-void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<MaterialData>* materialCollection, const Vector3D scaleFactor)
+void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* objObjectCollection, std::vector<GeometryData>* geometryDataCollection, std::vector<std::unique_ptr<MaterialData>>* materialCollection, const Vector3D scaleFactor, bool usePBRMaterials)
 {
 	std::filesystem::path p(objFilePath);
 
@@ -364,12 +443,17 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 			mtlPath = ReadRemainStringFromBuffer(buffer, current_position);
 				if (materialsID.find(mtlPath) == materialsID.end())
 			{
-				std::unordered_map<std::string, MaterialData> mtlData = LoadMTLData(GetFullPath(p, mtlPath));
-				for (auto dataPair : mtlData)
+				std::unordered_map<std::string, std::unique_ptr<MaterialData>> mtlData = std::unordered_map<std::string, std::unique_ptr<MaterialData>>();
+				if(usePBRMaterials)
+					mtlData = LoadMTLPBRData(GetFullPath(p, mtlPath));
+				else
+					mtlData = LoadMTLData(GetFullPath(p, mtlPath));
+
+				for (auto& dataPair : mtlData)
 				{
-					materialCollection->push_back(dataPair.second);
+					materialCollection->push_back(std::move(dataPair.second));
 					materialsID[mtlPath][dataPair.first] = materialCollection->size() - 1;
-				}	
+				}
 			}
 
 			currentMTLPath = mtlPath;
@@ -508,7 +592,7 @@ void OBJLoader::LoadOBJData(std::string objFilePath, std::vector<OBJObject>* obj
 }
 
 
-EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& filePath, const Vector3D scaleFactor)
+EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& filePath, const Vector3D scaleFactor, bool usePBRMaterials)
 {
 	using std::chrono::high_resolution_clock;
 	using std::chrono::duration_cast;
@@ -519,9 +603,9 @@ EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& 
 
 	std::vector<OBJObject> objObjectCollection;
 	std::vector<GeometryData> geometryDataCollection;
-	std::vector<MaterialData> materialCollection;
+	std::vector<std::unique_ptr<MaterialData>> materialCollection;
 
-	LoadOBJData(filePath, &objObjectCollection, &geometryDataCollection, &materialCollection, scaleFactor);
+	LoadOBJData(filePath, &objObjectCollection, &geometryDataCollection, &materialCollection, scaleFactor, usePBRMaterials);
 
 	auto t2 = high_resolution_clock::now();
 
@@ -561,26 +645,61 @@ EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& 
 
 				MeshRendererComponent* meshRendererComponent = groupEntity->AddComponent<MeshRendererComponent>(true);
 				meshRendererComponent->SetMesh(mesh);
-				meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
-				int materialID = geometryData.materialID;
-				MaterialData defaultMaterialData = MaterialData();
-
-
-
-				MaterialData& materialData = materialID != -1 ? materialCollection.at(materialID) : defaultMaterialData;
-				float epsilon = Mathf::Epsilon7;
-				if (materialData.m_alpha <= 1.0f - epsilon)
+				if (!usePBRMaterials)
 				{
-					std::cout << "Name : " << (objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k)) << " : " << materialData.m_alpha << std::endl;
-					meshRendererComponent->EnableBlend(true);
-					meshRendererComponent->EnableDepthMask(false);
+					meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("BlinnPhongShader"));
+					int materialID = geometryData.materialID;
+					std::unique_ptr<BliinPhongMaterialData> defaultMaterialData = std::make_unique<BliinPhongMaterialData>();
+					BliinPhongMaterialData* materialData = nullptr;
+
+					if (materialID != -1)
+						materialData = dynamic_cast<BliinPhongMaterialData*>(materialCollection.at(materialID).get());
+
+					if (!materialData)
+						materialData = defaultMaterialData.get();
+
+					float epsilon = Mathf::Epsilon7;
+					if (materialData->m_alpha <= 1.0f - epsilon)
+					{
+						std::cout << "Name : " << (objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k)) << " : " << materialData->m_alpha << std::endl;
+						meshRendererComponent->EnableBlend(true);
+						meshRendererComponent->EnableDepthMask(false);
+					}
+
+
+
+					Material* material = CreateBliinPhongMaterial(filePath + "_" + objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k) + "_Material", materialData);
+					meshRendererComponent->SetMaterial(material);
+					material->name = materialData->m_materialName;
+				}
+				else
+				{
+					meshRendererComponent->SetShader(AssetsManager::GetAsset<Shader>("PBRShader"));
+					int materialID = geometryData.materialID;
+					std::unique_ptr<PBRMaterialData> defaultMaterialData = std::make_unique<PBRMaterialData>();
+					PBRMaterialData* materialData = nullptr;
+
+					if (materialID != -1)
+						materialData = dynamic_cast<PBRMaterialData*>(materialCollection.at(materialID).get());
+
+					if (!materialData)
+						materialData = defaultMaterialData.get();
+
+					float epsilon = Mathf::Epsilon7;
+					if (materialData->alpha <= 1.0f - epsilon)
+					{
+						std::cout << "Name : " << (objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k)) << " : " << materialData->alpha << std::endl;
+						meshRendererComponent->EnableBlend(true);
+						meshRendererComponent->EnableDepthMask(false);
+					}
+
+
+
+					Material* material = CreatePBRgMaterial(filePath + "_" + objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k) + "_Material", materialData);
+					meshRendererComponent->SetMaterial(material);
+					material->name = materialData->name;
 				}
 
-
-				
-				Material* material = CreateMaterial(filePath + "_" + objObject.m_name + "_" + group.m_name + "_" + std::to_string(group.m_geometryBlockStartIndex + k) + "_Material", materialData);
-				meshRendererComponent->SetMaterial(material);
-				material->name = materialData.m_materialName;
 
 				if (k == 0)
 				{
@@ -602,9 +721,9 @@ EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& 
 	return entityGroupAsset;
 }
 
-std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::string& filePath)
+std::unordered_map<std::string, std::unique_ptr<MaterialData>> OBJLoader::LoadMTLData(const std::string& filePath)
 {
-	std::unordered_map<std::string, MaterialData> materialsData = std::unordered_map<std::string, MaterialData>();
+	std::unordered_map<std::string, std::unique_ptr<MaterialData>> materialsData = std::unordered_map<std::string, std::unique_ptr<MaterialData>>();
 
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open()) {
@@ -622,8 +741,8 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 
 	size_t current_position = 0;
 	char character = buffer[current_position];
-	bool isFirstMaterialInitialise = false;
-	MaterialData currentMaterialData = MaterialData();
+	bool isFirstMaterialInitialise = false; 
+	std::unique_ptr<BliinPhongMaterialData> currentMaterialData = std::make_unique<BliinPhongMaterialData>();
 	while (current_position < buffer.size())
 	{
 		if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'a')
@@ -631,7 +750,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			current_position += 3;
 			ColorRGB color = ColorRGB();
 			ReadColorFromBuffer(buffer, current_position, color);
-			currentMaterialData.m_ambientColor = color;
+			currentMaterialData->m_ambientColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'd')
@@ -639,7 +758,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			current_position += 3;
 			ColorRGB color = ColorRGB();
 			ReadColorFromBuffer(buffer, current_position, color);
-			currentMaterialData.m_diffuseColor = color;
+			currentMaterialData->m_diffuseColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 's')
@@ -647,7 +766,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			current_position += 3;
 			ColorRGB color = ColorRGB();
 			ReadColorFromBuffer(buffer, current_position, color);
-			currentMaterialData.m_specularColor = color;
+			currentMaterialData->m_specularColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'K' && buffer[current_position + 1] == 'e')
@@ -655,19 +774,19 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			current_position += 3;
 			ColorRGB color = ColorRGB();
 			ReadColorFromBuffer(buffer, current_position, color);
-			currentMaterialData.m_emissiveColor = color;
+			currentMaterialData->m_emissiveColor = color;
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 1 < buffer.size() && buffer[current_position] == 'N' && buffer[current_position + 1] == 's')
 		{
 			current_position += 3;
-			currentMaterialData.m_shininess = ReadFloatFromBuffer(buffer, current_position);
+			currentMaterialData->m_shininess = ReadFloatFromBuffer(buffer, current_position);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position < buffer.size() && buffer[current_position] == 'd')
 		{
 			current_position += 2;
-			currentMaterialData.m_alpha = ReadFloatFromBuffer(buffer, current_position);
+			currentMaterialData->m_alpha = ReadFloatFromBuffer(buffer, current_position);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'm' &&
@@ -679,7 +798,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 		{
 			current_position += 7;
 			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
-			currentMaterialData.m_ambientMapPath = GetFullPath(p, texturePath);
+			currentMaterialData->m_ambientMapPath = GetFullPath(p, texturePath);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'm' &&
@@ -691,7 +810,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 		{
 			current_position += 7;
 			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
-			currentMaterialData.m_diffuseMapPath = GetFullPath(p, texturePath);
+			currentMaterialData->m_diffuseMapPath = GetFullPath(p, texturePath);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'm' &&
@@ -703,7 +822,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 		{
 			current_position += 7;
 			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
-			currentMaterialData.m_specularMapPath = GetFullPath(p, texturePath);
+			currentMaterialData->m_specularMapPath = GetFullPath(p, texturePath);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 4 < buffer.size() && buffer[current_position] == 'm' &&
@@ -714,7 +833,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 		{
 			current_position += 6;
 			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
-			currentMaterialData.m_alphaMapPath = GetFullPath(p, texturePath);
+			currentMaterialData->m_alphaMapPath = GetFullPath(p, texturePath);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'm' &&
@@ -726,7 +845,7 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 		{
 			current_position += 7;
 			std::string texturePath = ReadRemainStringFromBuffer(buffer, current_position);
-			currentMaterialData.m_emissiveMapPath = GetFullPath(p, texturePath);
+			currentMaterialData->m_emissiveMapPath = GetFullPath(p, texturePath);
 			SkipLine(buffer, current_position);
 		}
 		else if (current_position + 5 < buffer.size() && buffer[current_position] == 'n' &&
@@ -740,17 +859,13 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 			std::string materialName = ReadRemainStringFromBuffer(buffer, current_position);
 
 			if (isFirstMaterialInitialise)
-				materialsData[currentMaterialData.m_materialName] = currentMaterialData;
+				materialsData[currentMaterialData->m_materialName] = std::move(currentMaterialData);
 			else
 				isFirstMaterialInitialise = true;
 
-			if (materialsData.find(materialName) == materialsData.end())
-			{
-				currentMaterialData = MaterialData();
-				currentMaterialData.m_materialName = materialName;
-			}
-			else
-				currentMaterialData = materialsData[materialName];
+			// nouveau material
+			currentMaterialData = std::make_unique<BliinPhongMaterialData>();
+			currentMaterialData->m_materialName = materialName;
 
 			SkipLine(buffer, current_position);
 		}
@@ -763,10 +878,200 @@ std::unordered_map<std::string, MaterialData> OBJLoader::LoadMTLData(const std::
 	}
 
 	if (isFirstMaterialInitialise)
-		materialsData[currentMaterialData.m_materialName] = currentMaterialData;
+		materialsData[currentMaterialData->m_materialName] = std::move(currentMaterialData);
 
 	file.close();
 	return materialsData;
 }
+
+std::unordered_map<std::string, std::unique_ptr<MaterialData>> OBJLoader::LoadMTLPBRData(const std::string& filePath)
+{
+	std::unordered_map<std::string, std::unique_ptr<MaterialData>> materials;
+
+	std::ifstream file(filePath, std::ios::binary);
+	if (!file.is_open())
+		return materials;
+
+	std::filesystem::path basePath(filePath);
+
+	file.seekg(0, file.end);
+	size_t size = file.tellg();
+	file.seekg(0);
+
+	std::vector<char> buffer(size);
+	file.read(buffer.data(), size);
+
+	size_t pos = 0;
+	bool hasMaterial = false;
+	std::unique_ptr<PBRMaterialData> current;
+
+	while (pos < buffer.size())
+	{
+		if (buffer[pos] == '#')
+		{
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		if (pos + 5 < buffer.size() &&
+			buffer[pos] == 'n' && buffer[pos + 1] == 'e' &&
+			buffer[pos + 2] == 'w' && buffer[pos + 3] == 'm' &&
+			buffer[pos + 4] == 't' && buffer[pos + 5] == 'l')
+		{
+			pos += 7;
+			if (hasMaterial)
+				materials[current->name] = std::move(current);
+
+			current = std::make_unique<PBRMaterialData>();
+			current->name = ReadRemainStringFromBuffer(buffer, pos);
+			hasMaterial = true;
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// Ka → Ambient color
+		if (pos + 1 < buffer.size() && buffer[pos] == 'K' && buffer[pos + 1] == 'a')
+		{
+			pos += 3;
+			ReadColorFromBuffer(buffer, pos, current->ambientColor);
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// Kd → Albedo color
+		if (pos + 1 < buffer.size() && buffer[pos] == 'K' && buffer[pos + 1] == 'd')
+		{
+			pos += 3;
+			ReadColorFromBuffer(buffer, pos, current->albedoColor);
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// Ke → Emissive color
+		if (pos + 1 < buffer.size() && buffer[pos] == 'K' && buffer[pos + 1] == 'e')
+		{
+			pos += 3;
+			ReadColorFromBuffer(buffer, pos, current->emissiveColor);
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// Pr → Roughness
+		if (pos + 1 < buffer.size() && buffer[pos] == 'P' && buffer[pos + 1] == 'r')
+		{
+			pos += 3;
+			current->roughness = ReadFloatFromBuffer(buffer, pos);
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// Pm → Metallic
+		if (pos + 1 < buffer.size() && buffer[pos] == 'P' && buffer[pos + 1] == 'm')
+		{
+			pos += 3;
+			current->metallic = ReadFloatFromBuffer(buffer, pos);
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// d → Alpha
+		if (buffer[pos] == 'd')
+		{
+			pos += 2;
+			current->alpha = ReadFloatFromBuffer(buffer, pos);
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Ka → Ambient map
+		if (strncmp(&buffer[pos], "map_Ka", 6) == 0)
+		{
+			pos += 7;
+			current->ambientMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Kd → Albedo map
+		if (strncmp(&buffer[pos], "map_Kd", 6) == 0)
+		{
+			pos += 7;
+			current->albedoMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Pr → Roughness map
+		if (strncmp(&buffer[pos], "map_Pr", 6) == 0)
+		{
+			pos += 7;
+			current->roughnessMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Pm → Metallic map
+		if (strncmp(&buffer[pos], "map_Pm", 6) == 0)
+		{
+			pos += 7;
+			current->metallicMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Ke → Emissive map
+		if (strncmp(&buffer[pos], "map_Ke", 6) == 0)
+		{
+			pos += 7;
+			current->emissiveMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_d → alpha map
+		if (strncmp(&buffer[pos], "map_d", 5) == 0)
+		{
+			pos += 7;
+			current->alphaMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Nr → Normal map
+		if (strncmp(&buffer[pos], "map_Nr", 6) == 0)
+		{
+			pos += 7;
+			current->normalMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Bump
+		if (strncmp(&buffer[pos], "map_Bump", 8) == 0)
+		{
+			pos += 9;
+			current->normalMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		// map_Normal
+		if (strncmp(&buffer[pos], "map_Normal", 10) == 0)
+		{
+			pos += 11;
+			current->normalMap = GetFullPath(basePath, ReadRemainStringFromBuffer(buffer, pos));
+			SkipLine(buffer, pos);
+			continue;
+		}
+
+		pos++;
+	}
+
+	if (hasMaterial)
+		materials[current->name] = std::move(current);
+
+	return materials;
+}
+
 
 

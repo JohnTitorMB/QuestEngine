@@ -60,71 +60,159 @@ void Bloom3Effect::Init()
 
 void Bloom3Effect::Render(const RenderContext& ctx, std::shared_ptr<Bloom3Settings> settings)
 {
-    //HDR Filter Pass
-    m_hdrFilterMaterial->SetTexture("texture2D", ctx.source);
-    m_hdrRenderTextureA->Resize(ctx.source->GetWidth(), ctx.source->GetHeight());
+    GL_SCOPE("Bloom3Effect::Render");
 
-    m_hdrFilterMaterial->SetFloat("threshold", settings->threshold);
-    float knee = settings->knee;
-    float threshold = settings->threshold;
-    m_hdrFilterMaterial->SetVector3D("curve", Vector3D(threshold - knee, knee * 2.0f, 0.25f / (knee + Mathf::Epsilon8)));
+    // HDR Filter Pass
+    {
+        GL_SCOPE("HDR Filter Pass");
 
-    Graphics::GetInstance()->RenderImage(ctx.window, m_hdrRenderTextureA, m_hdrFilterShader, m_hdrFilterMaterial);
+        m_hdrFilterMaterial->SetTexture("texture2D", ctx.source);
+        m_hdrRenderTextureA->Resize(ctx.source->GetWidth(), ctx.source->GetHeight());
 
-    //DownSampling
+        m_hdrFilterMaterial->SetFloat("threshold", settings->threshold);
+        float knee = settings->knee;
+        float threshold = settings->threshold;
+        m_hdrFilterMaterial->SetVector3D(
+            "curve",
+            Vector3D(
+                threshold - knee,
+                knee * 2.0f,
+                0.25f / (knee + Mathf::Epsilon8)
+            )
+        );
+
+        Graphics::GetInstance()->RenderImage(
+            ctx.window,
+            m_hdrRenderTextureA,
+            m_hdrFilterShader,
+            m_hdrFilterMaterial
+        );
+    }
+
+    // DownSampling
     int maxStep = settings->additiveBlurCount;
-    for (int i = 0; i < settings->additiveBlurCount; i++)
     {
-        RenderTexture2D* lastRt = i == 0 ? m_hdrRenderTextureA : m_additiveBlurRt[i-1];
-        int width = lastRt->GetWidth() / 2.0f;
-        int height = lastRt->GetHeight() / 2.0f;
+        GL_SCOPE("DownSampling");
 
-        m_boxBlurMaterial->SetTexture("texture2D", lastRt);
-        m_boxBlurMaterial->SetVector2D("pixelSpacement", Vector2D(1.0f / lastRt->GetWidth(), 1.0f / lastRt->GetHeight()));
-
-        if (width < 2 || height < 2)
+        for (int i = 0; i < settings->additiveBlurCount; i++)
         {
-            maxStep = i;
-            break;
+            GL_SCOPE("DownSampling Step");
+
+            RenderTexture2D* lastRt = (i == 0) ? m_hdrRenderTextureA : m_additiveBlurRt[i - 1];
+            int width = lastRt->GetWidth() / 2.0f;
+            int height = lastRt->GetHeight() / 2.0f;
+
+            m_boxBlurMaterial->SetTexture("texture2D", lastRt);
+            m_boxBlurMaterial->SetVector2D(
+                "pixelSpacement",
+                Vector2D(1.0f / lastRt->GetWidth(), 1.0f / lastRt->GetHeight())
+            );
+
+            if (width < 2 || height < 2)
+            {
+                GL_SCOPE("DownSampling Break Too Small");
+                maxStep = i;
+                break;
+            }
+
+            m_additiveBlurRt[i]->Resize(width, height);
+
+            Graphics::GetInstance()->RenderImage(
+                ctx.window,
+                m_additiveBlurRt[i],
+                m_boxBlurShader,
+                m_boxBlurMaterial
+            );
         }
-        m_additiveBlurRt[i]->Resize(width, height);
-        Graphics::GetInstance()->RenderImage(ctx.window, m_additiveBlurRt[i], m_boxBlurShader, m_boxBlurMaterial);
     }
-    
-    //UpSampling
-    for (int i = maxStep - 1; i > -1; --i)
+
+    // UpSampling
     {
-        RenderTexture2D* low = m_additiveBlurRt[i];
-        RenderTexture2D* high = i == 0 ? m_hdrRenderTextureA : m_additiveBlurRt[i - 1];
-        m_hdrRenderTextureB->Resize(high->GetWidth(), high->GetHeight());
-        m_upScaleMaterial->SetTexture("lowTexture", low);
+        GL_SCOPE("UpSampling");
 
-        RenderTexture2D::Blit(high, m_hdrRenderTextureB, 0, 0, high->GetWidth(), high->GetHeight(), 0, 0, high->GetWidth(), high->GetHeight(), BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
-        m_upScaleMaterial->SetTexture("highTexture", m_hdrRenderTextureB);
-        m_upScaleMaterial->SetVector2D("pixelSpacement", Vector2D(1.0f / low->GetWidth(), 1.0f / low->GetHeight()));
+        for (int i = maxStep - 1; i > -1; --i)
+        {
+            GL_SCOPE("UpSampling Step");
 
-        Graphics::GetInstance()->RenderImage(ctx.window, high, m_upScaleShader, m_upScaleMaterial);
+            RenderTexture2D* low = m_additiveBlurRt[i];
+            RenderTexture2D* high = (i == 0) ? m_hdrRenderTextureA : m_additiveBlurRt[i - 1];
+
+            m_hdrRenderTextureB->Resize(high->GetWidth(), high->GetHeight());
+            m_upScaleMaterial->SetTexture("lowTexture", low);
+
+            {
+                GL_SCOPE("UpSampling Copy High To Temp");
+
+                RenderTexture2D::Blit(
+                    high,
+                    m_hdrRenderTextureB,
+                    0, 0, high->GetWidth(), high->GetHeight(),
+                    0, 0, high->GetWidth(), high->GetHeight(),
+                    BlitBitField::COLOR_BIT,
+                    BlitFilter::NEAREST
+                );
+            }
+
+            m_upScaleMaterial->SetTexture("highTexture", m_hdrRenderTextureB);
+            m_upScaleMaterial->SetVector2D(
+                "pixelSpacement",
+                Vector2D(1.0f / low->GetWidth(), 1.0f / low->GetHeight())
+            );
+
+            {
+                GL_SCOPE("UpSampling Combine High Low");
+
+                Graphics::GetInstance()->RenderImage(
+                    ctx.window,
+                    high,
+                    m_upScaleShader,
+                    m_upScaleMaterial
+                );
+            }
+        }
     }
 
-    //Blending Pass (Source + Blurred HDR)
-    m_blendMaterial->SetTexture("source", ctx.source);
-    m_blendMaterial->SetTexture("HDR", m_hdrRenderTextureA);
-    m_blendMaterial->SetFloat("intensity", settings->intensity);
-    Graphics::GetInstance()->RenderImage(ctx.window, m_hdrRenderTextureB, m_blendShader, m_blendMaterial);
+    // Blending Pass (Source + Blurred HDR)
+    {
+        GL_SCOPE("Blend Pass");
 
-    //Blit Final result to target
-    int viewportWidth = ctx.target ? ctx.target->GetWidth() : ctx.window->GetWidth();
-    int viewportHeight = ctx.target ? ctx.target->GetHeight() : ctx.window->GetHeight();
+        m_blendMaterial->SetTexture("source", ctx.source);
+        m_blendMaterial->SetTexture("HDR", m_hdrRenderTextureA);
+        m_blendMaterial->SetFloat("intensity", settings->intensity);
 
-    float bCornerX = ctx.camera->m_viewportBottomCornerX * viewportWidth;
-    float bCornerY = ctx.camera->m_viewportBottomCornerY * viewportHeight;
+        Graphics::GetInstance()->RenderImage(
+            ctx.window,
+            m_hdrRenderTextureB,
+            m_blendShader,
+            m_blendMaterial
+        );
+    }
 
-    float tCornerX = ctx.camera->m_viewportTopCornerX * viewportWidth;
-    float tCornerY = ctx.camera->m_viewportTopCornerY * viewportHeight;
+    // Blit Final result to target
+    {
+        GL_SCOPE("Final Blit To Target");
 
-    RenderTexture2D::Blit(m_hdrRenderTextureB, ctx.target, 0, 0, m_hdrRenderTextureB->GetWidth(), m_hdrRenderTextureB->GetHeight(),
-        bCornerX, bCornerY, tCornerX, tCornerY,
-        BlitBitField::COLOR_BIT, BlitFilter::NEAREST);
+        int viewportWidth = ctx.target ? ctx.target->GetWidth() : ctx.window->GetWidth();
+        int viewportHeight = ctx.target ? ctx.target->GetHeight() : ctx.window->GetHeight();
+
+        float bCornerX = ctx.camera->m_viewportBottomCornerX * viewportWidth;
+        float bCornerY = ctx.camera->m_viewportBottomCornerY * viewportHeight;
+
+        float tCornerX = ctx.camera->m_viewportTopCornerX * viewportWidth;
+        float tCornerY = ctx.camera->m_viewportTopCornerY * viewportHeight;
+
+        RenderTexture2D::Blit(
+            m_hdrRenderTextureB,
+            ctx.target,
+            0, 0,
+            m_hdrRenderTextureB->GetWidth(),
+            m_hdrRenderTextureB->GetHeight(),
+            bCornerX, bCornerY,
+            tCornerX, tCornerY,
+            BlitBitField::COLOR_BIT,
+            BlitFilter::NEAREST
+        );
+    }
 }
 
 RenderTexture2D* Bloom3Effect::CreateHDRPostProcessRenderTexture()
