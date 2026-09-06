@@ -151,7 +151,6 @@ vec3 ComputeDirectionalLightColor(DirectionalLight dLight, vec3 _normal, float s
     // -------------------------
     vec3 f0 = vec3(0.04);
     vec3 F0 = mix(f0, albedo, metallic);
-    vec3 diffuseColor = albedo * (1.0 - metallic);
 
     // -------------------------
     // Directions
