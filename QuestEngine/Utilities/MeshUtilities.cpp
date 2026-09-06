@@ -98,6 +98,7 @@ Mesh* MeshUtilities::CreateCube(const std::string& assetName,float size)
 	mesh->SetUvs(uvs);
 
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 	return mesh;
 }
 
@@ -171,6 +172,8 @@ Mesh* MeshUtilities::CreateUVSphere(const std::string& assetName, float radius, 
 	mesh->SetIndices(indices);
 
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
+
 	return mesh;
 }
 
@@ -205,8 +208,9 @@ Mesh* MeshUtilities::CreatePlane(const std::string& assetName, float size)
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
 
-	std::cout << "Genere plane Normal : " << std::endl;
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
+
 	return mesh;
 }
 
@@ -242,6 +246,8 @@ Mesh* MeshUtilities::CreateQuad(const std::string& assetName, float size)
 	mesh->SetIndices(indices);
 
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
+
 	return mesh;
 }
 
@@ -340,8 +346,8 @@ Mesh* MeshUtilities::CreateCylinder(const std::string& assetName, float radius, 
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
 
-	std::cout << "Genere cylindre Normal : " << std::endl;
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 
 	return mesh;
 }
@@ -440,8 +446,8 @@ Mesh* MeshUtilities::CreateCone(const std::string& assetName, float radius1, flo
 	mesh->SetUvs(uvs);
 	mesh->SetIndices(indices);
 
-	std::cout << "Genere cone Normal : " << std::endl;
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 
 	return mesh;
 }
@@ -537,8 +543,8 @@ Mesh* MeshUtilities::CreateCustomUVCylinder(const std::string& assetName, float 
 
 	mesh->SetUvs(uvs);
 
-	std::cout << "Genere CustomUVCylinder Normal : " << std::endl;
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 
 	return mesh;
 
@@ -589,8 +595,9 @@ Mesh* MeshUtilities::CreateCustomConeUV(const std::string& assetName, float radi
 
 	mesh->SetUvs(uvs);
 
-	std::cout << "Genere CustomConeUV Normal : " << std::endl;
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
+
 	return mesh;
 }
 
@@ -617,8 +624,8 @@ Mesh* MeshUtilities::CreateRectangle(const std::string& assetName, float width, 
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
 
-	std::cout << "Genere Rectangle Normal : " << std::endl;
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 
 	return mesh;
 }
@@ -646,8 +653,8 @@ Mesh* MeshUtilities::CreateRegularConvexPolygon(const std::string& assetName, in
 
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
-	std::cout << "Genere RegularConvexPolygon Normal : " << std::endl;
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 
 	return mesh;
 }
@@ -715,6 +722,7 @@ Mesh* MeshUtilities::CreateConvexPolygonFanMethod(const std::string& assetName, 
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 }
 
 Mesh* MeshUtilities::CreatePolygonWithEarMethod(const std::string& assetName, const std::vector<Vector2D>& polygon)
@@ -737,4 +745,5 @@ Mesh* MeshUtilities::CreatePolygonWithEarMethod(const std::string& assetName, co
 	mesh->SetVertices(vertices);
 	mesh->SetIndices(indices);
 	mesh->ComputeNormals();
+	mesh->ComputeTangents();
 }

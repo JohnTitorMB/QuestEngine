@@ -169,12 +169,14 @@ void Graphics::SetupVAOContext(GLFWwindow* glfwContext, VAOData& vaoData)
 		SetupVertexAttribs(0, mesh->m_vbos[0], 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttribute), (void*)0);
 		SetupVertexAttribs(1, mesh->m_vbos[0], 2, GL_FLOAT, GL_FALSE, sizeof(VertexAttribute), (void*)offsetof(VertexAttribute, m_uv));
 		SetupVertexAttribs(2, mesh->m_vbos[0], 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttribute), (void*)offsetof(VertexAttribute, m_normal));
+		SetupVertexAttribs(3, mesh->m_vbos[0], 4, GL_FLOAT, GL_FALSE, sizeof(VertexAttribute), (void*)offsetof(VertexAttribute, m_tangent));
 	}
 	else
 	{
 		SetupVertexAttribs(0, mesh->m_vbos[0], 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		SetupVertexAttribs(1, mesh->m_vbos[1], 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		SetupVertexAttribs(2, mesh->m_vbos[2], 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		SetupVertexAttribs(3, mesh->m_vbos[3], 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	}
 
 	// Configurer l'EBO

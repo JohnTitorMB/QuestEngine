@@ -102,6 +102,10 @@ struct Material
     vec4  metallicTextureST;
     int  metallicTextureColorSpace;
 
+    sampler2D normalTexture;
+    vec4  normalTextureST;
+    int  normalTextureColorSpace;
+
     sampler2D alphaTexture;
     vec4 alphaTextureST;
     int  alphaTextureColorSpace;
@@ -111,49 +115,115 @@ uniform Material material;
 uniform sampler2D depthTexture;
 uniform vec2 invViewport;
 
+in vec3 TangentSpotLightDir[SPOT_LIGHT_COUNT];
+in vec3 TangentPointLightDir[POINT_LIGHT_COUNT];
+in vec3 TangentDirectionalLightDir;
 
-vec3 ComputeDirectionalLightColor(DirectionalLight dLight, float shadow)
+in vec3 TangentViewPos;
+in vec3 TangentFragPos;
+
+
+vec3 ComputeDirectionalLightColor(DirectionalLight dLight, vec3 _normal, float shadow)
 {
-    vec4 albedoColor = material.albedoColor * textureCs(material.albedoTexture, uv * material.albedoTextureST.zw + material.albedoTextureST.xy, material.albedoTextureColorSpace);
-    float metallicFactor = material.metallicFactor * texture2D(material.metallicTexture, uv * material.metallicTextureST.zw + material.metallicTextureST.xy, material.metallicTextureColorSpace).r;
-    vec3 baseDiffuseColor = mix(albedoColor.rgb, vec3(0.0f), metallicFactor);
+    // -------------------------
+    // Textures & material
+    // -------------------------
+    vec4 albedoSample = textureCs(material.albedoTexture,
+        uv * material.albedoTextureST.zw + material.albedoTextureST.xy,
+        material.albedoTextureColorSpace);
 
-    vec3 f0 = vec3(0.04f);
-    vec3 baseSpecularColor = mix(f0, albedoColor.rgb, metallicFactor);
+    vec3 albedo = albedoSample.rgb * material.albedoColor.rgb;
 
-    float roughnessFactor = material.roughnessFactor * texture2D(material.roughnessTexture, uv * material.roughnessTextureST.zw + material.roughnessTextureST.xy, material.roughnessTextureColorSpace).r;
-    float minRoughness = 0.04f;
-    float roughness = pow(clamp(roughnessFactor,minRoughness, 1.0f),2.0f);
+    float metallic = material.metallicFactor *
+        texture2D(material.metallicTexture,
+        uv * material.metallicTextureST.zw + material.metallicTextureST.xy).r;
 
-    float reflectance = max(max(baseSpecularColor.r, baseSpecularColor.g), baseSpecularColor.b);
-    
-    vec3 Reflectance = baseSpecularColor;
-    vec3 Refletance90 = vec3(clamp(reflectance * 25.0f, 0.0f, 1.0f));
+    float roughnessInput = material.roughnessFactor *
+        texture2D(material.roughnessTexture,
+        uv * material.roughnessTextureST.zw + material.roughnessTextureST.xy).r;
 
+    // Clamp safe
+    float roughness = clamp(roughnessInput, 0.04, 1.0);
+    float alpha = roughness * roughness;
 
-    vec3 viewDirection = normalize(viewPos - pos);
-    vec3 halfwayDirection = normalize(-dLight.direction + viewDirection);
+    // -------------------------
+    // Base colors
+    // -------------------------
+    vec3 f0 = vec3(0.04);
+    vec3 F0 = mix(f0, albedo, metallic);
+    vec3 diffuseColor = albedo * (1.0 - metallic);
 
-    vec3 F = Reflectance + (Refletance90 - Reflectance) * pow(clamp(1.0-(dot(viewDirection, -dLight.direction+ viewDirection)),0.0f,1.0f),5.0f);
-    
-    float F90 = 2.0f * pow(dot(-dLight.direction, halfwayDirection),2.0f)*pow(roughness,2)-0.5f;
-    vec3 diffuseBurley = baseDiffuseColor * (1.0f / PI) * (1.0f + F90 * pow(1.0f - dot(normal, -dLight.direction),5.0f))*
-                                                          (1.0f + F90 * pow(1.0f - dot(normal, viewDirection),5.0f));
-    vec3 lightDiffuse = (1.0f - F)*diffuseBurley;
+    // -------------------------
+    // Directions
+    // -------------------------
+    vec3 N = normalize(_normal);
+    vec3 V = normalize(TangentViewPos - TangentFragPos);
+    vec3 L = normalize(-TangentDirectionalLightDir);
+    vec3 H = normalize(V + L);
 
-    float attenuationL = 2.0f * dot(normal,-dLight.direction) / (dot(normal, -dLight.direction) + sqrt(pow(roughness,2.0f) + (1.0 - pow(roughness,2.0f)) * pow(dot(normal, -dLight.direction),2.0f)));
-    float attenuationV = 2.0f * dot(normal,viewDirection) / (dot(normal, viewDirection) + sqrt(pow(roughness,2.0f) + (1.0 - pow(roughness,2.0f)) * pow(dot(normal, viewDirection),2.0f)));
-    
-    float G = attenuationL * attenuationV; 
-    float NdotH = dot(normal, halfwayDirection);
-    float D = pow(roughness,2.0f) * 1.0f/(PI * pow((NdotH * pow(roughness,2.0f)  - NdotH) * NdotH + 1.0f,2.0f));
-    vec3 lightSpecular = F*G*D* 1.0F/ (4.0f * dot(normal, -dLight.direction)*dot(normal,viewDirection));
+    // -------------------------
+    // Dot products (SAFE)
+    // -------------------------
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotH = max(dot(N, H), 0.0);
+    float VdotH = max(dot(V, H), 0.0);
 
-    vec3 lightColor = max(dot(normal, -dLight.direction),0) * vec3(dLight.color.r, dLight.color.g, dLight.color.b) *  dLight.intensity * (lightDiffuse + lightSpecular);
-    return lightColor * shadow;
+    // Early out
+    if (NdotL <= 0.0 || NdotV <= 0.0)
+        return vec3(0.0);
+
+    // -------------------------
+    // Fresnel (Schlick)
+    // -------------------------
+    vec3 F = F0 + (1.0 - F0) * pow(1.0 - VdotH, 5.0);
+
+    // -------------------------
+    // GGX Distribution
+    // -------------------------
+    float a2 = alpha * alpha;
+    float denomD = (NdotH * NdotH * (a2 - 1.0) + 1.0);
+    float D = a2 / max(PI * denomD * denomD, 0.001);
+
+    // -------------------------
+    // Geometry (Smith GGX)
+    // -------------------------
+    float k = (roughness + 1.0);
+    k = (k * k) / 8.0;
+
+    float G_L = NdotL / (NdotL * (1.0 - k) + k);
+    float G_V = NdotV / (NdotV * (1.0 - k) + k);
+    float G = G_L * G_V;
+
+    // -------------------------
+    // Specular
+    // -------------------------
+    float denomSpec = max(4.0 * NdotL * NdotV, 0.001);
+    vec3 specular = (D * G * F) / denomSpec;
+
+    // -------------------------
+    // Diffuse
+    // -------------------------
+
+    vec3 kS = F;
+    vec3 kD = (1.0 - kS) * (1.0 - metallic);
+
+    vec3 diffuse = kD * albedo * (1.0 / PI);
+
+    // -------------------------
+    // Final lighting
+    // -------------------------
+    vec3 lightColor = vec3(dLight.color.r, dLight.color.g, dLight.color.b) * dLight.intensity;
+
+    vec3 result = (diffuse + specular) * lightColor * NdotL;
+
+    // Safety anti-NaN
+    result = max(result, vec3(0.0));
+
+    return result * shadow;
 }
 
-float ComputeDirectionalShadow(vec4 _posLightSpace, DirectionalLight dLight)
+float ComputeDirectionalShadow(vec4 _posLightSpace, vec3 _normal, DirectionalLight dLight)
 {   
 
     int blurResolution = dLight.blurResolution;
@@ -173,7 +243,7 @@ float ComputeDirectionalShadow(vec4 _posLightSpace, DirectionalLight dLight)
     projCoords = projCoords * 0.5 + 0.5; 
     vec2 depthUv = projCoords.xy;
     float currentDepth = projCoords.z * (far - near) + near;
-    float bias = max(maxBias * (1.0 - dot(normal, -lightDir)), minBias);  
+    float bias = max(maxBias * (1.0 - dot(_normal, -lightDir)), minBias);  
     if(blurResolution == 0)
     {
         float depthN = texture(dLight.lightDepthMap, depthUv).r;
@@ -213,11 +283,15 @@ void main()
     vec4 ambientColor = globalAmbiantColor * mAmbiant;
 
     vec3 color = vec3(ambientColor.r, ambientColor.g, ambientColor.b);
+   // vec3 normalFrag = texture(material.normalTexture, uv).rgb;
+
+    vec3 normalFrag = textureCs(material.normalTexture, uv * material.normalTextureST.zw + material.normalTextureST.xy,material.normalTextureColorSpace).rgb;
+    normalFrag = normalize(normalFrag * 2.0 - 1.0);   
 
     if(directionalLightCount > 0)
     {
-        float shadow = ComputeDirectionalShadow(posLightSpaceArray[0], directionalLight);    
-        color += ComputeDirectionalLightColor(directionalLight, shadow);
+        float shadow = ComputeDirectionalShadow(posLightSpaceArray[0], normal, directionalLight);    
+        color += ComputeDirectionalLightColor(directionalLight, normalFrag, shadow);
     }
     
     float alpha = material.alpha * texture(material.alphaTexture, uv * material.alphaTextureST.zw + material.alphaTextureST.xy).r;
@@ -227,4 +301,6 @@ void main()
     color.rgb = ConvertColor(color.rgb, colorSpaceIn, colorSpaceOut);
 
     FdfragColor = vec4(color.r,color.g,color.b,alpha);
+
+  //  FdfragColor = vec4(normalFrag,1.0);
 };

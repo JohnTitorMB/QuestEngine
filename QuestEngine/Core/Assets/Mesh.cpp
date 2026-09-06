@@ -6,7 +6,7 @@ Mesh::Mesh(bool useOneVbo)
 {
 	GenerateVAO();
 	m_useOneVbo = useOneVbo;
-	GenerateVBOs(m_useOneVbo == true ? 1 : 3);
+	GenerateVBOs(m_useOneVbo == true ? 1 : 4);
 	GenerateEBO();
 	
 	if (m_useOneVbo)
@@ -16,6 +16,7 @@ Mesh::Mesh(bool useOneVbo)
 		ConfigureVerticesBuffer();
 		ConfigureUvsBuffer();
 		ConfigureNormalsBuffer();
+		ConfigureTangentsBuffer();
 	}
 
 	Graphics::GetInstance()->SetupVAO(m_sharedVao);
@@ -71,11 +72,23 @@ void Mesh::SetNormals(std::vector<Vector3D> normals)
 	Graphics::GetInstance()->SetupVAO(m_sharedVao);
 }
 
+void Mesh::SetTangents(std::vector<Vector4D> tangents)
+{
+	m_tangents = tangents;
+	if(m_useOneVbo)
+		ConfigureVertexAttributesBuffer();
+	else
+		ConfigureTangentsBuffer();
+
+	Graphics::GetInstance()->SetupVAO(m_sharedVao);
+}
+
 void Mesh::SetIndices(std::vector<unsigned int> indices)
 {
 	m_indices = indices;
 	ConfigureEBO();
 }
+
 
 std::vector<Vector3D> Mesh::GetVertices()const
 {
@@ -92,6 +105,10 @@ std::vector<Vector3D> Mesh::GetNormals()const
 	return m_normals;
 }
 
+std::vector<Vector4D> Mesh::GetTangents() const
+{
+	return m_tangents;
+}
 
 std::vector<unsigned int> Mesh::GetIndices()const
 {
@@ -138,6 +155,12 @@ std::vector<VertexAttribute> Mesh::CombineVertexBuffer()
 			vertexAttribute.m_normal = m_normals[i];
 		else
 			vertexAttribute.m_normal = Vector3D(0, 0,0);
+
+		if(i < m_tangents.size())
+			vertexAttribute.m_tangent = m_tangents[i];
+		else
+			vertexAttribute.m_tangent = Vector4D(0, 0, 0, 0);
+
 		vertexAttributes.push_back(vertexAttribute);
 	}
 	return vertexAttributes;
@@ -159,6 +182,12 @@ void Mesh::ConfigureNormalsBuffer()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[2]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3D) * m_normals.size(), m_normals.data(), (int)m_glDrawType);
+}
+
+void Mesh::ConfigureTangentsBuffer()
+{
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[3]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector4D) * m_tangents.size(), m_tangents.data(), (int)m_glDrawType);
 }
 
 void Mesh::ConfigureVertexAttributesBuffer()
@@ -219,4 +248,102 @@ void Mesh::ComputeNormals()
 
 		SetNormals(m_normals);
 	}
+}
+
+void Mesh::ComputeTangents()
+{
+	if (m_shapeType != ShapeType::TRIANGLE)
+		return;
+
+	if (m_vertices.empty() || m_uvs.empty() || m_normals.empty())
+		return;
+
+	// Accumulate tangent and bitangent contributions for each vertex.
+	std::vector<Vector3D> tangents(m_vertices.size(), Vector3D(0.0f, 0.0f, 0.0f));
+	std::vector<Vector3D> bitangents(m_vertices.size(), Vector3D(0.0f, 0.0f, 0.0f));
+
+	for (int i = 0; i + 2 < m_indices.size(); i += 3)
+	{
+		int vertexIndice0 = m_indices[i];
+		int vertexIndice1 = m_indices[i + 1];
+		int vertexIndice2 = m_indices[i + 2];
+
+		const Vector3D& vertex0 = m_vertices[vertexIndice0];
+		const Vector3D& vertex1 = m_vertices[vertexIndice1];
+		const Vector3D& vertex2 = m_vertices[vertexIndice2];
+
+		const Vector2D& uv0 = m_uvs[vertexIndice0];
+		const Vector2D& uv1 = m_uvs[vertexIndice1];
+		const Vector2D& uv2 = m_uvs[vertexIndice2];
+
+		Vector3D edge1 = vertex1 - vertex0;
+		Vector3D edge2 = vertex2 - vertex0;
+
+		Vector2D deltaUV1 = uv1 - uv0;
+		Vector2D deltaUV2 = uv2 - uv0;
+
+		float determinant =
+			deltaUV1.m_x * deltaUV2.m_y -
+			deltaUV2.m_x * deltaUV1.m_y;
+
+		// Degenerate UV triangle: no valid tangent basis can be computed.
+		if (std::abs(determinant) < 0.000001f)
+			continue;
+
+		float f = 1.0f / determinant;
+
+		Vector3D tangent =
+		{
+			f * (deltaUV2.m_y * edge1.m_x - deltaUV1.m_y * edge2.m_x),
+			f * (deltaUV2.m_y * edge1.m_y - deltaUV1.m_y * edge2.m_y),
+			f * (deltaUV2.m_y * edge1.m_z - deltaUV1.m_y * edge2.m_z)
+		};
+
+		Vector3D bitangent =
+		{
+			f * (-deltaUV2.m_x * edge1.m_x + deltaUV1.m_x * edge2.m_x),
+			f * (-deltaUV2.m_x * edge1.m_y + deltaUV1.m_x * edge2.m_y),
+			f * (-deltaUV2.m_x * edge1.m_z + deltaUV1.m_x * edge2.m_z)
+		};
+
+		tangents[vertexIndice0] += tangent;
+		tangents[vertexIndice1] += tangent;
+		tangents[vertexIndice2] += tangent;
+
+		bitangents[vertexIndice0] += bitangent;
+		bitangents[vertexIndice1] += bitangent;
+		bitangents[vertexIndice2] += bitangent;
+	}
+
+	m_tangents.resize(m_vertices.size());
+
+	for (int i = 0; i < m_vertices.size(); ++i)
+	{
+		Vector3D normal = m_normals[i].Normalized();
+		Vector3D tangent = tangents[i];
+
+		// Gram-Schmidt: make tangent orthogonal to the normal.
+		tangent = tangent -
+			normal * Vector3D::DotProduct(normal, tangent);
+
+		tangent = tangent.Normalized();
+
+		float handedness =
+			Vector3D::DotProduct(
+				Vector3D::CrossProduct(normal, tangent),
+				bitangents[i]
+			) < 0.0f
+			? -1.0f
+			: 1.0f;
+
+		m_tangents[i] =
+			Vector4D(
+				tangent.m_x,
+				tangent.m_y,
+				tangent.m_z,
+				handedness
+			);
+	}
+
+	SetTangents(m_tangents);
 }

@@ -204,6 +204,7 @@ Material* AssetsManager::CreatePBRMaterial(
 	Texture* emissiveTexture,
 	Texture* metallicTexture,
 	Texture* roughnessTexture,
+	Texture* normalTexture,
 	Texture* alphaTexture,
 	ColorRGB ambientColor,
 	ColorRGB albedoColor,
@@ -231,12 +232,14 @@ Material* AssetsManager::CreatePBRMaterial(
 
 	Texture* whiteTexture = AssetsManager::GetAsset<Texture>("White");
 	Texture* blackTexture = AssetsManager::GetAsset<Texture>("Black");
+	Texture* defaultNormalTexture = AssetsManager::GetAsset<Texture>("DefaultNormal");
 
 	material->SetTexture("material.ambiantTexture", ambientTexture ? ambientTexture : whiteTexture);
 	material->SetTexture("material.albedoTexture", albedoTexture ? albedoTexture : whiteTexture);
 	material->SetTexture("material.emissiveTexture", emissiveTexture ? emissiveTexture : blackTexture);
 	material->SetTexture("material.metallicTexture", metallicTexture ? metallicTexture : whiteTexture);
 	material->SetTexture("material.roughnessTexture", roughnessTexture ? roughnessTexture : whiteTexture);
+	material->SetTexture("material.normalTexture", normalTexture ? normalTexture : defaultNormalTexture);
 	material->SetTexture("material.alphaTexture", alphaTexture ? alphaTexture : whiteTexture);
 
 	Vector4D defaultST(0.0f, 0.0f, 1.0f, 1.0f);
@@ -246,6 +249,7 @@ Material* AssetsManager::CreatePBRMaterial(
 	material->SetVector4D("material.emissiveTextureST", defaultST);
 	material->SetVector4D("material.metallicTextureST", defaultST);
 	material->SetVector4D("material.roughnessTextureST", defaultST);
+	material->SetVector4D("material.normalTextureST", defaultST);
 	material->SetVector4D("material.alphaTextureST", defaultST);
 
 	assetsManager->m_assetsNameMap.emplace(newAssetName, material);

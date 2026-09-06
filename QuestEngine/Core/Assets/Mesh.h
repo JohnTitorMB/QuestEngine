@@ -3,6 +3,7 @@
 #include <vector>
 #include "../../Math/Vector3D.h"
 #include "../../Math/Vector2D.h"
+#include "../../Math/Vector4D.h"
 #include <glad/glad.h>
 
 #include "Assets.h"
@@ -27,6 +28,7 @@ public:
 	Vector3D m_position;
 	Vector2D m_uv; 
 	Vector3D m_normal; 
+	Vector4D m_tangent;
 };
 class Mesh : public Assets
 {
@@ -43,17 +45,21 @@ public:
 	void SetUvs(std::vector<Vector2D> uvs);
 	void SetNormals(std::vector<Vector3D> normals);
 	void SetIndices(std::vector<unsigned int> indices);
+	void SetTangents(std::vector<Vector4D> tangents);
 	std::vector<Vector3D> GetVertices()const;
 	std::vector<Vector2D> GetUvs()const;
 	std::vector<Vector3D> GetNormals()const;
+	std::vector<Vector4D> GetTangents()const;
 	std::vector<unsigned int> GetIndices()const;
 	void UseMesh();
 	void ComputeNormals();
+	void ComputeTangents();
 private:
 	std::vector<Vector3D> m_vertices;
 	std::vector<unsigned int> m_indices;
 	std::vector<Vector2D> m_uvs;
 	std::vector<Vector3D> m_normals;
+	std::vector<Vector4D> m_tangents;
 	GLuint m_sharedVao;
 	
 	
@@ -67,6 +73,7 @@ private:
 	void ConfigureVerticesBuffer();
 	void ConfigureUvsBuffer();
 	void ConfigureNormalsBuffer();
+	void ConfigureTangentsBuffer();
 	void ConfigureVertexAttributesBuffer();
 	void ConfigureEBO();
 	std::vector<VertexAttribute> CombineVertexBuffer();

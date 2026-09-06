@@ -106,6 +106,7 @@ void World::InitAssets()
 	//Initialise Textures
 	Texture* whiteTexture = AssetsManager::CreateTexture2D("White","Assets/WhiteTexture.png");	
 	Texture* blackTexture = AssetsManager::CreateTexture2D("Black","Assets/BlackTexture.png");	
+	Texture* defaultNormalTexture = AssetsManager::CreateTexture2D("DefaultNormal","Assets/DefaultNormal.png");	
 	Texture* skyboxTexture = AssetsManager::CreateCubeMap("SkyboxTexture", "Assets/Skybox.png");
 	Texture* tileTexture = AssetsManager::CreateTexture2D("TileTexture", "Assets/Texture.png");
 	Texture* boxDiffuseTexture = AssetsManager::CreateTexture2D("BoxDiffuseTexture","Assets/Box/BoxDiffuse.png");
@@ -191,6 +192,7 @@ void World::InitAssets()
 							blackTexture, 
 							metallicTexture, 
 							roughnessTexture, 
+							defaultNormalTexture,
 							whiteTexture, 
 							ColorRGB(1.0f, 1.0f, 1.0f, 1), 
 							ColorRGB(1, 1, 1, 1), 

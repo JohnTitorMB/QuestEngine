@@ -97,6 +97,7 @@ Material* OBJLibrary::OBJLoader::CreatePBRgMaterial(std::string assetName, PBRMa
 {
 	Texture* whiteTexture = AssetsManager::GetAsset<Texture>("White");
 	Texture* blackTexture = AssetsManager::GetAsset<Texture>("Black");
+	Texture* defaultNormalTexture = AssetsManager::GetAsset<Texture>("DefaultNormal");
 
 	ColorRGB whiteColor(1, 1, 1, 1);
 
@@ -107,6 +108,7 @@ Material* OBJLibrary::OBJLoader::CreatePBRgMaterial(std::string assetName, PBRMa
 		blackTexture, // emissive
 		whiteTexture, // metallic
 		whiteTexture, // roughness
+		defaultNormalTexture, // normal
 		whiteTexture, // alpha
 		materialData->albedoColor,
 		materialData->albedoColor,
@@ -137,6 +139,7 @@ Material* OBJLibrary::OBJLoader::CreatePBRgMaterial(std::string assetName, PBRMa
 	if (!materialData->normalMap.empty())
 	{
 		Texture* tex = AssetsManager::CreateTexture2D(assetName + "_normal", materialData->normalMap, true);
+		tex->SetTextureColorSpace(ColorManagement::RGBColorSpaceType::LinearSRGB,0);
 		if (tex)
 			material->SetTexture("material.normalTexture", tex);
 	}
@@ -642,6 +645,8 @@ EntityGroupAsset* OBJLoader::LoadOBJ(std::string assetsName, const std::string& 
 				mesh->SetUvs(geometryData.uvs);
 				mesh->SetNormals(geometryData.normals);
 				mesh->SetIndices(geometryData.indices);
+
+				mesh->ComputeTangents();
 
 				MeshRendererComponent* meshRendererComponent = groupEntity->AddComponent<MeshRendererComponent>(true);
 				meshRendererComponent->SetMesh(mesh);
