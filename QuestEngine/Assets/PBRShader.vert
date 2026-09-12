@@ -23,8 +23,8 @@ out vec4 posLightSpaceArray[SPOT_DIRECTIONNAL_LIGHT_COUNT];
 #define POINT_LIGHT_COUNT 4  
 #define SPOT_LIGHT_COUNT 4  
 
-out vec3 TangentSpotLightDir[SPOT_LIGHT_COUNT];
-out vec3 TangentPointLightDir[POINT_LIGHT_COUNT];
+out vec3 TangentSpotLightPositions[SPOT_LIGHT_COUNT];
+out vec3 TangentPointLightPositions[POINT_LIGHT_COUNT];
 out vec3 TangentDirectionalLightDir;
 
 out vec3 TangentViewPos;
@@ -77,6 +77,8 @@ struct SpotLight
 };
 uniform SpotLight spotLights[SPOT_LIGHT_COUNT];
 
+
+
 void main()
 {
     // Transform vertex from local space to NDC space
@@ -106,12 +108,12 @@ void main()
     mat3 TBN = transpose(mat3(tangent, bitangent, normal));
     for(int i = 0; i < SPOT_LIGHT_COUNT; i++)
     {
-        TangentSpotLightDir[i] = TBN * spotLights[i].position;
+        TangentSpotLightPositions[i] = TBN * spotLights[i].position;
     }
 
     for(int i = 0; i < POINT_LIGHT_COUNT; i++)
     {
-        TangentPointLightDir[i] = TBN * pointLights[i].position;
+        TangentPointLightPositions[i] = TBN * pointLights[i].position;
     }
 
     TangentDirectionalLightDir = TBN * directionalLight.direction;
